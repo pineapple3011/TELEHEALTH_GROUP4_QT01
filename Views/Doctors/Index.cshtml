@@ -1,0 +1,68 @@
+@model DoctorListVm
+@{
+    ViewData["Title"] = "Tìm bác sĩ";
+}
+
+<style>
+    .doc-card { border: 1px solid #e3e6ea; border-radius: 12px; overflow: hidden; transition: box-shadow .2s, transform .2s; }
+    .doc-card:hover { box-shadow: 0 8px 22px rgba(0,0,0,.09); transform: translateY(-2px); }
+    .doc-card .doc-meta { font-size: 14px; color: #555; }
+    .doc-badge { display: inline-block; font-size: 12px; padding: 2px 10px; border-radius: 20px; }
+    .doc-badge.on { background: #e6f6e8; color: #25803a; }
+    .doc-badge.off { background: #eceff2; color: #6c757d; }
+</style>
+
+<div class="container my-5" style="min-height:60vh">
+    <h2 class="mb-4">Tìm bác sĩ</h2>
+
+    <form method="get" asp-action="Index" class="form-row mb-4">
+        <div class="col-md-5 mb-2">
+            <input type="text" name="q" value="@Model.Q" class="form-control" placeholder="Nhập tên bác sĩ" />
+        </div>
+        <div class="col-md-4 mb-2">
+            <select name="specId" class="form-control" asp-items="Model.Specs">
+                <option value="">Tất cả chuyên khoa</option>
+            </select>
+        </div>
+        <div class="col-md-3 mb-2">
+            <button type="submit" class="btn btn-success btn-block">Tìm kiếm</button>
+        </div>
+    </form>
+
+    @if (!Model.Doctors.Any())
+    {
+        <div class="alert alert-info">Không tìm thấy bác sĩ phù hợp. Hãy thử đổi từ khóa hoặc chuyên khoa.</div>
+    }
+
+    <div class="row">
+        @foreach (var d in Model.Doctors)
+        {
+            <div class="col-sm-6 col-lg-4 mb-4">
+                <div class="card doc-card h-100">
+                    <a asp-action="Details" asp-route-id="@d.DoctorId">
+                        @await Html.PartialAsync("_DoctorAvatar", new AvatarVm
+                        {
+                            Name = d.HoTen,
+                            Url = d.AvatarUrl,
+                            Width = "100%",
+                            Height = "300px",
+                            Radius = "0",
+                            FontSize = "3.5rem",
+                            Fit = "contain"
+                        })
+                    </a>
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title mb-2">@d.HoTen</h5>
+                        <p class="mb-1 doc-meta"><b>Chuyên khoa:</b> @d.TenKhoa</p>
+                        <p class="mb-1 doc-meta"><b>Kinh nghiệm:</b> @Cv.Years(d.KinhNghiem)</p>
+                        <p class="mb-2 doc-meta"><b>Phí khám:</b> @Cv.Money(d.Fee)</p>
+                        <p class="mb-3">
+                            <span class="doc-badge @(Cv.IsAvailable(d.TrangThai) ? "on" : "off")">@Cv.DoctorStatus(d.TrangThai)</span>
+                        </p>
+                        <a asp-action="Details" asp-route-id="@d.DoctorId" class="btn btn-success btn-sm mt-auto">Xem lịch và đặt khám</a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>

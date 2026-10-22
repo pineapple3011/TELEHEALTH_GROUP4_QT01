@@ -1,0 +1,19 @@
+@model AvatarVm
+@{
+    // Ảnh bác sĩ; nếu chưa có ảnh thì hiện khung chữ cái viết tắt (vd. "Lê Thị Hồng" -> "TH")
+    var words = (Model.Name ?? "").Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+    var initials = words.Length == 0
+        ? "BS"
+        : string.Concat(words.Skip(Math.Max(0, words.Length - 2)).Select(w => char.ToUpperInvariant(w[0])));
+    var box = $"width:{Model.Width};height:{Model.Height};border-radius:{Model.Radius};";
+}
+@if (!string.IsNullOrWhiteSpace(Model.Url))
+{
+    <img src="@Url.Content(Model.Url)" alt="@Model.Name" loading="lazy"
+         style="@box display:block;object-fit:@Model.Fit;object-position:center top;" />
+}
+else
+{
+    <div style="@box display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;letter-spacing:1px;font-size:@Model.FontSize;background:linear-gradient(135deg,#6fc66b,#2c9d8f);"
+         role="img" aria-label="@Model.Name">@initials</div>
+}

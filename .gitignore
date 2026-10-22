@@ -1,0 +1,8 @@
+﻿# Visual Studio generated files
+.vs/
+[Oo]bj/
+[Bb]in/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates

@@ -1,0 +1,117 @@
+@model AppointmentDetailsVm
+@{
+    ViewData["Title"] = "Chi tiết lịch khám";
+}
+
+<div class="container my-5" style="min-height:60vh">
+    @if (TempData["Msg"] != null)
+    {
+        <div class="alert alert-success">@TempData["Msg"]</div>
+    }
+
+    <a asp-action="Index" class="btn btn-link pl-0 mb-3">&larr; Lịch khám của tôi</a>
+    <h2 class="mb-4">Chi tiết lịch khám #@Model.AppointId</h2>
+
+    <div class="row">
+        <div class="col-lg-6 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="mb-3">Thông tin ca khám</h5>
+                    <table class="table table-sm mb-0">
+                        <tr><th style="width:40%">Bác sĩ</th><td>@Model.DoctorName</td></tr>
+                        <tr><th>Chuyên khoa</th><td>@Model.SpecName</td></tr>
+                        <tr><th>Ngày giờ</th><td>@Model.DateText lúc @Model.TimeText</td></tr>
+                        <tr><th>Hình thức</th><td>@Model.HinhThuc</td></tr>
+                        <tr><th>Trạng thái</th><td>@Model.TrangThai</td></tr>
+                        @if (!string.IsNullOrEmpty(Model.MucDoKhanCap))
+                        {
+                            <tr><th>Mức độ cấp cứu</th><td>Mức @Model.MucDoKhanCap</td></tr>
+                            <tr><th>Vị trí</th><td>@Model.ViTriKhanCap</td></tr>
+                        }
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="mb-3">Thanh toán</h5>
+                    @if (Model.HasPayment)
+                    {
+                        <p class="mb-1"><b>@Model.LoaiGiaoDich:</b> @Cv.Money(Model.Amount)</p>
+                        <p class="mb-3"><b>Trạng thái:</b> @Model.TrangThaiGiaoDich</p>
+                        @if (Model.CanPay)
+                        {
+                            <a asp-action="Pay" asp-route-id="@Model.AppointId" class="btn btn-success btn-sm">Thanh toán ngay</a>
+                        }
+                    }
+                    else
+                    {
+                        <p class="text-muted mb-0">Ca khám này không có khoản thanh toán.</p>
+                    }
+
+                    <hr />
+                    <h5 class="mb-3">File đính kèm</h5>
+                    @if (!Model.Files.Any())
+                    {
+                        <p class="text-muted mb-0">Chưa có file nào.</p>
+                    }
+                    else
+                    {
+                        <ul class="mb-0">
+                            @foreach (var f in Model.Files)
+                            {
+                                <li><a href="@f.Url" target="_blank">@f.Loai</a> <span class="text-muted">(@f.Ngay)</span></li>
+                            }
+                        </ul>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <h5 class="mb-3">Kết quả khám và đơn thuốc</h5>
+            @if (!Model.HasRecord)
+            {
+                <p class="text-muted mb-0">Bác sĩ chưa cập nhật kết quả khám cho ca này.</p>
+            }
+            else
+            {
+                <p class="mb-1"><b>Chẩn đoán:</b> @Model.ChanDoan</p>
+                @if (!string.IsNullOrEmpty(Model.NgayTaiKham))
+                {
+                    <p class="mb-3"><b>Ngày tái khám:</b> @Model.NgayTaiKham</p>
+                }
+
+                @if (!Model.Prescriptions.Any())
+                {
+                    <p class="text-muted mb-0">Không có thuốc được kê.</p>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr><th>Thuốc</th><th>Số lượng</th><th>Liều dùng</th><th>Cách dùng</th></tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var p in Model.Prescriptions)
+                                {
+                                    <tr>
+                                        <td>@p.TenThuoc</td>
+                                        <td>@p.SoLuong</td>
+                                        <td>@p.LieuDung</td>
+                                        <td>@p.CachDung</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+</div>

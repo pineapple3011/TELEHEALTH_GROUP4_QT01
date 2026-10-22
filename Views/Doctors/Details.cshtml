@@ -1,0 +1,216 @@
+@model DoctorDetailsVm
+@using System.Text.Json
+@{
+    ViewData["Title"] = Model.HoTen;
+
+    // Gom các ca theo ngày để lịch hiển thị (1 ngày có thể có nhiều ca: sáng/chiều)
+    var calData = Model.Days
+        .GroupBy(d => d.DateIso)
+        .Select(g => new
+        {
+            date = g.Key,
+            shifts = g.Select(s => new { scheduleId = s.ScheduleId, range = s.RangeText, slots = s.FreeSlots }).ToList()
+        })
+        .ToList();
+    var calJson = JsonSerializer.Serialize(calData);
+    var createUrl = JsonSerializer.Serialize(Url.Action("Create", "Appointments") ?? "/Appointments/Create");
+}
+
+<style>
+    .dd-card { border: 1px solid #e3e6ea; border-radius: 12px; background: #fff; }
+    .dd-profile { display: flex; gap: 28px; padding: 28px; flex-wrap: wrap; }
+    .dd-profile .dd-info { flex: 1; min-width: 240px; }
+
+    .cal-wrap { border: 1px solid #cfd4da; border-radius: 22px; padding: 12px 16px 16px; max-width: 560px; background: #fff; }
+    .cal-head { display: flex; align-items: center; justify-content: space-between; font-weight: 600; padding: 4px 4px 10px; }
+    .cal-nav { border: 0; background: transparent; font-size: 22px; line-height: 1; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; }
+    .cal-nav:hover:not(:disabled) { background: #eef1f4; }
+    .cal-nav:disabled { color: #c3c8ce; cursor: default; }
+    .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; }
+    .cal-dow { font-size: 12px; color: #6c757d; padding: 6px 0; border-bottom: 1px solid #eceff2; margin-bottom: 4px; }
+    .cal-cell { position: relative; height: 46px; border: 2px solid transparent; border-radius: 8px; background: transparent; font-size: 14px; padding: 0; }
+    .cal-empty { visibility: hidden; }
+    .cal-off, .cal-full { color: #b5bbc2; cursor: not-allowed; }
+    .cal-full { text-decoration: line-through; }
+    .cal-on { color: #212529; font-weight: 600; cursor: pointer; }
+    .cal-on:hover { background: #eef7ec; }
+    .cal-on i { position: absolute; left: 50%; bottom: 6px; width: 5px; height: 5px; margin-left: -2.5px; border-radius: 50%; background: #3fae49; }
+    .cal-today { box-shadow: inset 0 0 0 1px #9aa3ab; }
+    .cal-sel, .cal-sel:hover { border-color: #212529; background: #f4f5f6; }
+
+    .cal-legend { font-size: 12px; color: #6c757d; margin-top: 10px; }
+    .cal-legend span { display: inline-flex; align-items: center; margin-right: 14px; }
+    .cal-legend b { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 5px; }
+
+    .slot-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: 10px; max-width: 560px; }
+    .slot-grid .btn { margin: 0; }
+    .shift-title { font-size: 13px; color: #6c757d; margin: 14px 0 8px; }
+</style>
+
+<div class="container my-5" style="min-height:60vh">
+    <a asp-action="Index" class="btn btn-link pl-0 mb-3">&larr; Quay lại danh sách</a>
+
+    <div class="dd-card dd-profile mb-4">
+        <div>
+            @await Html.PartialAsync("_DoctorAvatar", new AvatarVm
+            {
+                Name = Model.HoTen, Url = Model.AvatarUrl,
+                Width = "180px", Height = "220px", Radius = "12px", FontSize = "3.2rem"
+            })
+        </div>
+        <div class="dd-info">
+            <h2 class="mb-3">@Model.HoTen</h2>
+            <p class="mb-1"><b>Chuyên khoa:</b> @Model.TenKhoa</p>
+            @if (!string.IsNullOrEmpty(Model.MoTa))
+            {
+                <p class="mb-1">@Model.MoTa</p>
+            }
+            <p class="mb-1"><b>Kinh nghiệm:</b> @Cv.Years(Model.KinhNghiem)</p>
+            <p class="mb-1"><b>Trạng thái:</b> @Cv.DoctorStatus(Model.TrangThai)</p>
+            <p class="mb-0"><b>Phí khám cơ bản:</b> @Cv.Money(Model.Fee)</p>
+        </div>
+    </div>
+
+    @if (!Model.Days.Any())
+    {
+        <h4 class="mb-3">Chọn ngày khám</h4>
+        <div class="alert alert-info">Bác sĩ chưa có lịch làm việc sắp tới. Vui lòng quay lại sau.</div>
+    }
+    else
+    {
+        <h4 class="mb-3">Chọn ngày khám</h4>
+
+        <div class="cal-wrap" id="cal">
+            <div class="cal-head">
+                <button type="button" class="cal-nav" id="calPrev" aria-label="Tháng trước">&#8249;</button>
+                <span id="calTitle"></span>
+                <button type="button" class="cal-nav" id="calNext" aria-label="Tháng sau">&#8250;</button>
+            </div>
+            <div class="cal-grid" id="calDow">
+                <div class="cal-dow">T2</div><div class="cal-dow">T3</div><div class="cal-dow">T4</div>
+                <div class="cal-dow">T5</div><div class="cal-dow">T6</div><div class="cal-dow">T7</div>
+                <div class="cal-dow">CN</div>
+            </div>
+            <div class="cal-grid" id="calGrid"></div>
+            <div class="cal-legend">
+                <span><b style="background:#3fae49"></b>Còn lịch</span>
+                <span><b style="background:#b5bbc2"></b>Không có lịch / đã kín</span>
+            </div>
+        </div>
+
+        <h5 class="mt-4 mb-1">Khung giờ khám</h5>
+        <div id="slotLabel" class="text-muted mb-2" style="font-size:14px"></div>
+        <div id="slotBox"></div>
+    }
+</div>
+
+@if (Model.Days.Any())
+{
+    <script>
+    (function () {
+        var DAYS = @Html.Raw(calJson);
+        var CREATE_URL = @Html.Raw(createUrl);
+        var DOCTOR_ID = @Model.DoctorId;
+        var WD = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
+
+        var byDate = {};
+        DAYS.forEach(function (d) { byDate[d.date] = d; });
+        var dates = DAYS.map(function (d) { return d.date; }).sort();
+
+        function pad(n) { return n < 10 ? '0' + n : '' + n; }
+        function iso(y, m, d) { return y + '-' + pad(m + 1) + '-' + pad(d); }
+        function freeCount(info) {
+            if (!info) return 0;
+            return info.shifts.reduce(function (n, s) { return n + s.slots.length; }, 0);
+        }
+        function parse(s) { var p = s.split('-'); return { y: +p[0], m: +p[1] - 1, d: +p[2] }; }
+
+        var now = new Date();
+        var todayIso = iso(now.getFullYear(), now.getMonth(), now.getDate());
+        var minView = { y: now.getFullYear(), m: now.getMonth() };
+
+        // Ngày còn chỗ đầu tiên -> chọn sẵn
+        var firstFree = dates.filter(function (d) { return freeCount(byDate[d]) > 0; })[0] || null;
+        var selected = firstFree;
+        var startRef = parse(firstFree || dates[0]);
+        var view = { y: startRef.y, m: startRef.m };
+
+        var lastRef = parse(dates[dates.length - 1]);
+        var maxView = { y: lastRef.y, m: lastRef.m };
+        if (maxView.y * 12 + maxView.m < minView.y * 12 + minView.m) maxView = minView;
+
+        var elTitle = document.getElementById('calTitle');
+        var elGrid = document.getElementById('calGrid');
+        var elPrev = document.getElementById('calPrev');
+        var elNext = document.getElementById('calNext');
+        var elSlots = document.getElementById('slotBox');
+        var elLabel = document.getElementById('slotLabel');
+
+        function renderCal() {
+            elTitle.textContent = 'Tháng ' + (view.m + 1) + ', ' + view.y;
+            var offset = (new Date(view.y, view.m, 1).getDay() + 6) % 7;     // tuần bắt đầu từ T2
+            var dim = new Date(view.y, view.m + 1, 0).getDate();
+            var html = '';
+            for (var i = 0; i < offset; i++) html += '<div class="cal-cell cal-empty"></div>';
+            for (var d = 1; d <= dim; d++) {
+                var key = iso(view.y, view.m, d);
+                var info = byDate[key];
+                var free = freeCount(info);
+                var cls = 'cal-cell ' + (!info ? 'cal-off' : (free === 0 ? 'cal-full' : 'cal-on'));
+                if (key === todayIso) cls += ' cal-today';
+                if (key === selected) cls += ' cal-sel';
+                html += '<button type="button" class="' + cls + '" data-d="' + key + '"' +
+                        (free > 0 ? '' : ' disabled') + '>' + d + (free > 0 ? '<i></i>' : '') + '</button>';
+            }
+            elGrid.innerHTML = html;
+            elPrev.disabled = (view.y * 12 + view.m) <= (minView.y * 12 + minView.m);
+            elNext.disabled = (view.y * 12 + view.m) >= (maxView.y * 12 + maxView.m);
+        }
+
+        function renderSlots() {
+            if (!selected) {
+                elLabel.textContent = '';
+                elSlots.innerHTML = '<div class="alert alert-info">Các ngày sắp tới đã kín lịch. Vui lòng quay lại sau.</div>';
+                return;
+            }
+            var p = parse(selected);
+            var wd = WD[new Date(p.y, p.m, p.d).getDay()];
+            elLabel.textContent = wd + ', ' + pad(p.d) + '/' + pad(p.m + 1) + '/' + p.y;
+
+            var info = byDate[selected];
+            var html = '';
+            info.shifts.forEach(function (sh) {
+                if (info.shifts.length > 1) html += '<div class="shift-title">Ca ' + sh.range + '</div>';
+                if (sh.slots.length === 0) { html += '<span class="text-muted">Ca này đã kín lịch</span>'; return; }
+                html += '<div class="slot-grid">';
+                sh.slots.forEach(function (t) {
+                    var href = CREATE_URL + '?doctorId=' + DOCTOR_ID + '&scheduleId=' + sh.scheduleId +
+                               '&time=' + encodeURIComponent(t);
+                    html += '<a class="btn btn-outline-success btn-sm" href="' + href + '">' + t + '</a>';
+                });
+                html += '</div>';
+            });
+            elSlots.innerHTML = html;
+        }
+
+        elGrid.addEventListener('click', function (e) {
+            var btn = e.target.closest ? e.target.closest('button[data-d]') : null;
+            if (!btn || btn.disabled) return;
+            selected = btn.getAttribute('data-d');
+            renderCal();
+            renderSlots();
+        });
+        elPrev.addEventListener('click', function () {
+            view.m--; if (view.m < 0) { view.m = 11; view.y--; }
+            renderCal();
+        });
+        elNext.addEventListener('click', function () {
+            view.m++; if (view.m > 11) { view.m = 0; view.y++; }
+            renderCal();
+        });
+
+        renderCal();
+        renderSlots();
+    })();
+    </script>
+}

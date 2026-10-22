@@ -1,0 +1,119 @@
+﻿@model HomeVm
+@{
+    ViewData["Title"] = "Home Page";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .hm-doc { border: 1px solid #e3e6ea; border-radius: 12px; overflow: hidden; background: #fff; height: 100%; transition: box-shadow .2s, transform .2s; }
+    .hm-doc:hover { box-shadow: 0 8px 22px rgba(0,0,0,.09); transform: translateY(-2px); }
+    .hm-doc .hm-body { padding: 16px; text-align: center; }
+    .hm-doc h5 { margin-bottom: 4px; font-size: 17px; }
+    .hm-chip { display: inline-block; margin: 0 6px 10px 0; padding: 6px 16px; border: 1px solid #d5dae0; border-radius: 22px; font-size: 14px; color: #333; background: #fff; }
+    .hm-chip:hover { border-color: #3fae49; color: #25803a; text-decoration: none; }
+    .hm-chip small { color: #8a929a; margin-left: 4px; }
+    .hm-step { text-align: center; padding: 0 12px; margin-bottom: 30px; }
+    .hm-step .hm-num { width: 54px; height: 54px; border-radius: 50%; margin: 0 auto 14px; display: flex; align-items: center;
+                       justify-content: center; font-size: 22px; font-weight: 700; color: #fff; background: linear-gradient(135deg,#6fc66b,#2c9d8f); }
+    .hm-step h6 { font-weight: 700; margin-bottom: 6px; }
+    .hm-step p { font-size: 14px; color: #666; margin: 0; }
+    .hm-note { border: 1px solid #e3e6ea; border-radius: 12px; padding: 20px 24px; background: #fff; height: 100%; }
+    .hm-note h6 { font-weight: 700; margin-bottom: 8px; }
+    .hm-note p { font-size: 14px; color: #555; margin-bottom: 4px; }
+</style>
+
+<!-- ##### Doctors Area Start ##### -->
+<section class="section-padding-100-0">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="section-heading text-center">
+                    <h2>ĐỘI NGŨ BÁC SĨ</h2>
+                    <p>Chọn bác sĩ phù hợp và đặt lịch ngay trên website.</p>
+                </div>
+            </div>
+        </div>
+
+        @if (Model.Specs.Any())
+        {
+            <div class="row">
+                <div class="col-12 text-center mb-3">
+                    @foreach (var sp in Model.Specs)
+                    {
+                        <a class="hm-chip" asp-controller="Doctors" asp-action="Index" asp-route-specId="@sp.SpecId">@sp.Name<small>(@sp.DoctorCount)</small></a>
+                    }
+                </div>
+            </div>
+        }
+
+        @if (!Model.Doctors.Any())
+        {
+            <div class="alert alert-info text-center">Danh sách bác sĩ đang được cập nhật.</div>
+        }
+
+        <div class="row">
+            @foreach (var d in Model.Doctors)
+            {
+                <div class="col-sm-6 col-lg-3 mb-4">
+                    <div class="hm-doc">
+                        <a asp-controller="Doctors" asp-action="Details" asp-route-id="@d.DoctorId">
+                            @await Html.PartialAsync("_DoctorAvatar", new AvatarVm
+                            {
+                                Name = d.HoTen, Url = d.AvatarUrl,
+                                Width = "100%",
+                                Height = "280px",
+                                Radius = "0",
+                                FontSize = "3.2rem",
+                                Fit = "contain"
+                            })
+                        </a>
+                        <div class="hm-body">
+                            <h5>@d.HoTen</h5>
+                            <p class="mb-1 text-muted" style="font-size:14px">@d.TenKhoa</p>
+                            <p class="mb-3" style="font-size:13px;color:#777">@Cv.Years(d.KinhNghiem) kinh nghiệm &middot; @Cv.Money(d.Fee)</p>
+                            <a asp-controller="Doctors" asp-action="Details" asp-route-id="@d.DoctorId" class="btn btn-success btn-sm">Đặt lịch khám</a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div class="row">
+            <div class="col-12 text-center mb-5">
+                <a asp-controller="Doctors" asp-action="Index" class="btn alazea-btn">XEM TẤT CẢ BÁC SĨ</a>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- ##### Doctors Area End ##### -->
+<!-- ##### Guide Area Start ##### -->
+<section class="bg-gray section-padding-100-0">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="section-heading text-center">
+                    <h2>HƯỚNG DẪN ĐẶT KHÁM</h2>
+                    <p>Chỉ 5 bước để khám bệnh qua website.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-6 col-md-4 col-lg"><div class="hm-step"><div class="hm-num">1</div><h6>Tìm bác sĩ</h6><p>Tìm theo tên hoặc chuyên khoa, xem thông tin và phí khám.</p></div></div>
+            <div class="col-6 col-md-4 col-lg"><div class="hm-step"><div class="hm-num">2</div><h6>Chọn ngày &amp; giờ</h6><p>Chọn ngày trên lịch, sau đó chọn một khung giờ còn trống.</p></div></div>
+            <div class="col-6 col-md-4 col-lg"><div class="hm-step"><div class="hm-num">3</div><h6>Nhập thông tin</h6><p>Chọn hình thức khám, mô tả triệu chứng và đính kèm ảnh/kết quả xét nghiệm.</p></div></div>
+            <div class="col-6 col-md-6 col-lg"><div class="hm-step"><div class="hm-num">4</div><h6>Thanh toán</h6><p>Quét mã QR chuyển khoản rồi tải ảnh biên lai lên website.</p></div></div>
+            <div class="col-12 col-md-6 col-lg"><div class="hm-step"><div class="hm-num">5</div><h6>Khám &amp; nhận đơn thuốc</h6><p>Theo dõi trạng thái, vào khám đúng giờ và xem đơn thuốc trong mục Lịch khám.</p></div></div>
+        </div>
+
+        <div class="row pb-5">
+            <div class="col-md-4 mb-3"><div class="hm-note"><h6>Khám trực tiếp</h6><p>Đến phòng khám theo giờ hẹn. Đặt cọc 30% phí khám để giữ chỗ.</p></div></div>
+            <div class="col-md-4 mb-3"><div class="hm-note"><h6>Khám trực tuyến</h6><p>Khám qua video với bác sĩ. Thanh toán phí khám khi đặt lịch, nhớ chuẩn bị đường truyền ổn định.</p></div></div>
+            <div class="col-md-4 mb-3"><div class="hm-note"><h6>Cấp cứu</h6><p>Chọn mức độ 1-5 và nhập vị trí, không thu phí trước. Nếu nguy kịch, hãy gọi ngay <b>115</b>.</p></div></div>
+        </div>
+    </div>
+</section>
+<!-- ##### Guide Area End ##### -->
+
+    
+
