@@ -1,0 +1,44 @@
+@model DoctorListVm
+@{
+    ViewData["Title"] = "Tìm bác sĩ";
+}
+
+<div class="container my-5" style="min-height:60vh">
+    <h2 class="mb-4">Tìm bác sĩ</h2>
+
+    <form method="get" asp-action="Index" class="form-row mb-4">
+        <div class="col-md-5 mb-2">
+            <input type="text" name="q" value="@Model.Q" class="form-control" placeholder="Nhập tên bác sĩ" />
+        </div>
+        <div class="col-md-4 mb-2">
+            <select name="specId" class="form-control" asp-items="Model.Specs">
+                <option value="">Tất cả chuyên khoa</option>
+            </select>
+        </div>
+        <div class="col-md-3 mb-2">
+            <button type="submit" class="btn btn-success btn-block">Tìm kiếm</button>
+        </div>
+    </form>
+
+    @if (!Model.Doctors.Any())
+    {
+        <div class="alert alert-info">Không tìm thấy bác sĩ phù hợp. Hãy thử đổi từ khóa hoặc chuyên khoa.</div>
+    }
+
+    <div class="row">
+        @foreach (var d in Model.Doctors)
+        {
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">@d.HoTen</h5>
+                        <p class="mb-1"><b>Chuyên khoa:</b> @d.TenKhoa</p>
+                        <p class="mb-1"><b>Kinh nghiệm:</b> @d.KinhNghiem</p>
+                        <p class="mb-3"><b>Trạng thái:</b> @d.TrangThai</p>
+                        <a asp-action="Details" asp-route-id="@d.DoctorId" class="btn btn-success btn-sm">Xem lịch và đặt khám</a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>

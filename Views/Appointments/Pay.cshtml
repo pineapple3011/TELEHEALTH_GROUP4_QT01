@@ -1,0 +1,61 @@
+@model PaymentVm
+@{
+    ViewData["Title"] = "Thanh toán";
+}
+
+<div class="container my-5" style="min-height:60vh">
+    <h2 class="mb-4">Thanh toán</h2>
+
+    @if (TempData["Err"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Err"]</div>
+    }
+
+    <div class="row">
+        <div class="col-lg-5 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="mb-3">Thông tin lịch hẹn</h5>
+                    <p class="mb-1"><b>Bác sĩ:</b> @Model.DoctorName</p>
+                    <p class="mb-1"><b>Ngày giờ:</b> @Model.DateText lúc @Model.TimeText</p>
+                    <p class="mb-3"><b>Hình thức:</b> @Model.HinhThuc</p>
+                    <hr />
+                    <p class="mb-1">@Model.LoaiGiaoDich:</p>
+                    <h4 class="mb-0">@Cv.Money(Model.Amount)</h4>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-7">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="mb-3">Chuyển khoản ngân hàng</h5>
+                    <img src="@Model.QrUrl" alt="Mã QR chuyển khoản" style="max-width:260px;width:100%" />
+                    <div class="text-left mt-3">
+                        <p class="mb-1"><b>Ngân hàng:</b> @Model.BankId</p>
+                        <p class="mb-1"><b>Số tài khoản:</b> @Model.AccountNo</p>
+                        <p class="mb-1"><b>Chủ tài khoản:</b> @Model.AccountName</p>
+                        <p class="mb-1"><b>Nội dung chuyển khoản:</b> @Model.TransferNote</p>
+                    </div>
+                    <hr />
+
+                    @if (Model.CanUpload)
+                    {
+                        <form asp-action="Pay" asp-route-id="@Model.AppointId" method="post" enctype="multipart/form-data" class="text-left">
+                            <div class="form-group">
+                                <label>Ảnh chụp biên lai chuyển khoản</label>
+                                <input type="file" name="receipt" accept=".jpg,.jpeg,.png,.pdf" class="form-control-file" required />
+                            </div>
+                            <button type="submit" class="btn btn-success">Gửi xác nhận</button>
+                        </form>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info mb-0">Trạng thái: @Model.TrangThaiGiaoDich. Bạn đã gửi biên lai, vui lòng chờ xác nhận.</div>
+                    }
+                </div>
+            </div>
+            <a asp-action="Details" asp-route-id="@Model.AppointId" class="btn btn-link pl-0 mt-3">Xem chi tiết lịch hẹn</a>
+        </div>
+    </div>
+</div>

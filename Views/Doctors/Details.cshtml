@@ -1,0 +1,48 @@
+@model DoctorDetailsVm
+@{
+    ViewData["Title"] = Model.HoTen;
+}
+
+<div class="container my-5" style="min-height:60vh">
+    <a asp-action="Index" class="btn btn-link pl-0 mb-3">&larr; Quay lại danh sách</a>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <h2 class="mb-3">@Model.HoTen</h2>
+            <p class="mb-1"><b>Chuyên khoa:</b> @Model.TenKhoa</p>
+            @if (!string.IsNullOrEmpty(Model.MoTa))
+            {
+                <p class="mb-1">@Model.MoTa</p>
+            }
+            <p class="mb-1"><b>Kinh nghiệm:</b> @Model.KinhNghiem</p>
+            <p class="mb-1"><b>Trạng thái:</b> @Model.TrangThai</p>
+            <p class="mb-0"><b>Phí khám cơ bản:</b> @Cv.Money(Model.Fee)</p>
+        </div>
+    </div>
+
+    <h4 class="mb-3">Chọn giờ khám</h4>
+
+    @if (!Model.Days.Any())
+    {
+        <div class="alert alert-info">Bác sĩ chưa có lịch làm việc sắp tới. Vui lòng quay lại sau.</div>
+    }
+
+    @foreach (var day in Model.Days)
+    {
+        <div class="mb-4">
+            <h6 class="mb-2">@day.DateText <span class="text-muted">(ca @day.RangeText)</span></h6>
+            @if (!day.FreeSlots.Any())
+            {
+                <span class="text-muted">Đã kín lịch</span>
+            }
+            @foreach (var s in day.FreeSlots)
+            {
+                <a class="btn btn-outline-success btn-sm mr-1 mb-1"
+                   asp-controller="Appointments" asp-action="Create"
+                   asp-route-doctorId="@Model.DoctorId"
+                   asp-route-scheduleId="@day.ScheduleId"
+                   asp-route-time="@s">@s</a>
+            }
+        </div>
+    }
+</div>

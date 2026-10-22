@@ -1,0 +1,137 @@
+@model TELEHEALTH_GROUP4_QT01.Models.ViewModels.AppointmentCreateVm
+@{
+    ViewData["Title"] = "Đặt lịch khám & Mức độ cấp cứu";
+}
+
+<div class="container my-4">
+    <h4 class="fw-bold mb-3">Đặt lịch khám</h4>
+    
+    <form asp-action="Create" method="post" enctype="multipart/form-data">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="DoctorId" />
+        <input type="hidden" asp-for="ScheduleId" />
+        <input type="hidden" asp-for="Time" />
+
+        <div class="row g-3">
+            <!-- CỘT 1: Thông tin bác sĩ -->
+            <div class="col-lg-3 col-md-4">
+                <div class="card h-100 p-3 shadow-sm">
+                    <h6 class="fw-bold mb-3 border-bottom pb-2">Thông tin bác sĩ</h6>
+                    <div class="border d-flex align-items-center justify-content-center bg-light mb-3" style="height: 180px;">
+                        <span class="text-muted fs-1">&#9744;</span>
+                    </div>
+                    <h6 class="fw-bold text-primary">@(Model.DoctorName ?? "BS. Nguyễn Văn A")</h6>
+                    <p class="mb-1 text-muted small">Chuyên khoa: @(Model.SpecName ?? "Nội tổng quát")</p>
+                    <p class="mb-3 text-muted small">Kinh nghiệm: 10 năm</p>
+                    <button type="button" class="btn btn-outline-secondary btn-sm mt-auto">Xem thêm thông tin</button>
+                </div>
+            </div>
+
+            <!-- CỘT 2: Chọn ngày khám & Khung giờ khám -->
+            <div class="col-lg-5 col-md-8">
+                <div class="card h-100 p-3 shadow-sm">
+                    <h6 class="fw-bold mb-3 border-bottom pb-2">Chọn ngày khám</h6>
+                    <div class="mb-3">
+                        <label class="form-label small text-muted">Thời gian đã chọn:</label>
+                        <div class="fw-semibold text-dark p-2 bg-light border rounded">
+                            @(Model.DateText ?? "Chưa chọn ngày") - @(Model.TimeText ?? Model.Time ?? "Chưa chọn giờ")
+                        </div>
+                    </div>
+
+                    <h6 class="fw-bold mt-3 mb-2">Khung giờ khám</h6>
+                    <div class="mb-3">
+                        <input asp-for="Time" class="form-control" placeholder="Ví dụ: 08:30" />
+                        <span asp-validation-for="Time" class="text-danger small"></span>
+                    </div>
+                    <div class="form-text text-muted small">Bạn có thể chọn trực tiếp từ lịch bác sĩ hoặc điều chỉnh giờ tại đây.</div>
+                </div>
+            </div>
+
+            <!-- CỘT 3: Hình thức khám & Mức độ cấp cứu (Triage 1-3) -->
+<div class="col-lg-4 col-md-12">
+    <div class="card h-100 p-3 shadow-sm">
+        <h6 class="fw-bold mb-3 border-bottom pb-2">Hình thức khám</h6>
+        <div class="mb-3">
+            <div class="form-check mb-2">
+                <input class="form-check-input" type="radio" asp-for="HinhThuc" value="Trực tiếp" id="typeDirect" onchange="toggleEmergency(false)">
+                <label class="form-check-label fw-semibold" for="typeDirect">Trực tiếp</label>
+            </div>
+            <div class="form-check mb-2">
+                <input class="form-check-input" type="radio" asp-for="HinhThuc" value="Online" id="typeOnline" onchange="toggleEmergency(false)">
+                <label class="form-check-label fw-semibold" for="typeOnline">Trực tuyến</label>
+            </div>
+            <div class="form-check mb-2">
+                <input class="form-check-input" type="radio" asp-for="HinhThuc" value="Cấp cứu" id="typeEmergency" onchange="toggleEmergency(true)">
+                <label class="form-check-label fw-semibold text-danger" for="typeEmergency">Cấp cứu</label>
+            </div>
+            <span asp-validation-for="HinhThuc" class="text-danger small"></span>
+        </div>
+
+        <!-- Phần phân loại cấp cứu Triage 1 - 3 -->
+        <div id="emergencySection" class="border-top pt-3" style="display: none;">
+            <label class="fw-bold mb-2 text-danger">Cấp cứu (Triage 1 - 3)</label>
+
+            <div class="triage-list">
+                <label class="triage-card triage-1" for="t1">
+                    <input class="form-check-input" type="radio" asp-for="MucDoKhanCap" value="1" id="t1">
+                    <span class="triage-text">
+                        <span class="triage-title">Mức 1 - Nguy kịch</span>
+                        <span class="triage-desc">Ngừng tim, ngừng thở, mất ý thức, đau ngực dữ dội, khó thở, nghi đột quỵ</span>
+                    </span>
+                    <span class="triage-badge">Đỏ</span>
+                </label>
+
+                <label class="triage-card triage-2" for="t2">
+                    <input class="form-check-input" type="radio" asp-for="MucDoKhanCap" value="2" id="t2">
+                    <span class="triage-text">
+                        <span class="triage-title">Mức 2 - Ưu tiên</span>
+                        <span class="triage-desc">Đau bụng cấp, sốt cao, vết thương cần xử lý hoặc xét nghiệm</span>
+                    </span>
+                    <span class="triage-badge">Vàng</span>
+                </label>
+
+                <label class="triage-card triage-3" for="t3">
+                    <input class="form-check-input" type="radio" asp-for="MucDoKhanCap" value="3" id="t3">
+                    <span class="triage-text">
+                        <span class="triage-title">Mức 3 - Khám thường</span>
+                        <span class="triage-desc">Triệu chứng nhẹ, không cần xét nghiệm hay thủ thuật gấp</span>
+                    </span>
+                    <span class="triage-badge">Xanh lá</span>
+                </label>
+            </div>
+
+            <!-- giữ nguyên phần còn lại của bạn bên dưới (ô nhập vị trí cấp cứu, đóng </div>...) -->
+
+    <div class="mt-3">
+        <!-- giữ nguyên phần còn lại của bạn (ô nhập vị trí cấp cứu...) -->
+                            <input asp-for="ViTriKhanCap" class="form-control form-control-sm" placeholder="Nhập vị trí cấp cứu cụ thể..." />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- HÀNG DƯỚI: Lý do khám & Đính kèm file -->
+        <div class="card p-3 shadow-sm mt-3">
+            <h6 class="fw-bold mb-2">Lý do khám / Triệu chứng</h6>
+            <textarea asp-for="LyDo" class="form-control mb-1" rows="3" placeholder="Nhập lý do khám của bạn..."></textarea>
+            <span asp-validation-for="LyDo" class="text-danger small"></span>
+
+            <h6 class="fw-bold mt-3 mb-2">Tệp đính kèm (hình ảnh / tài liệu)</h6>
+            <input asp-for="Files" type="file" class="form-control" multiple />
+
+            <div class="d-flex justify-content-end mt-3">
+                <button type="submit" class="btn btn-dark px-4 py-2">Tiếp tục thanh toán &rarr;</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        function toggleEmergency(show) {
+            document.getElementById('emergencySection').style.display = show ? 'block' : 'none';
+        }
+    </script>
+}

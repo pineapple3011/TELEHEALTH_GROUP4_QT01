@@ -1,0 +1,50 @@
+@model List<AppointmentRow>
+@{
+    ViewData["Title"] = "Lịch khám của tôi";
+}
+
+<div class="container my-5" style="min-height:60vh">
+    <h2 class="mb-4">Lịch khám của tôi</h2>
+
+    @if (TempData["Msg"] != null)
+    {
+        <div class="alert alert-success">@TempData["Msg"]</div>
+    }
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">
+            Bạn chưa có lịch khám nào. <a asp-controller="Doctors" asp-action="Index">Tìm bác sĩ và đặt lịch</a>.
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Ngày</th>
+                        <th>Giờ</th>
+                        <th>Bác sĩ</th>
+                        <th>Hình thức</th>
+                        <th>Trạng thái</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var r in Model)
+                    {
+                        <tr>
+                            <td>@r.DateText</td>
+                            <td>@r.TimeText</td>
+                            <td>@r.DoctorName</td>
+                            <td>@r.HinhThuc</td>
+                            <td>@r.TrangThai</td>
+                            <td><a asp-action="Details" asp-route-id="@r.AppointId" class="btn btn-outline-success btn-sm">Chi tiết</a></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
