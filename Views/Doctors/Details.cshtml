@@ -18,10 +18,10 @@
 
 <style>
     .dd-card { border: 1px solid #e3e6ea; border-radius: 12px; background: #fff; }
-    .dd-profile { display: flex; gap: 28px; padding: 28px; flex-wrap: wrap; }
-    .dd-profile .dd-info { flex: 1; min-width: 240px; }
+    .dd-profile { padding: 20px; }
+    .dd-booking { padding: 20px; }
 
-    .cal-wrap { border: 1px solid #cfd4da; border-radius: 22px; padding: 12px 16px 16px; max-width: 560px; background: #fff; }
+    .cal-wrap { border: 1px solid #cfd4da; border-radius: 22px; padding: 12px 16px 16px; max-width: 100%; background: #fff; }
     .cal-head { display: flex; align-items: center; justify-content: space-between; font-weight: 600; padding: 4px 4px 10px; }
     .cal-nav { border: 0; background: transparent; font-size: 22px; line-height: 1; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; }
     .cal-nav:hover:not(:disabled) { background: #eef1f4; }
@@ -42,7 +42,7 @@
     .cal-legend span { display: inline-flex; align-items: center; margin-right: 14px; }
     .cal-legend b { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 5px; }
 
-    .slot-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: 10px; max-width: 560px; }
+    .slot-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 10px; }
     .slot-grid .btn { margin: 0; }
     .shift-title { font-size: 13px; color: #6c757d; margin: 14px 0 8px; }
 </style>
@@ -50,58 +50,71 @@
 <div class="container my-5" style="min-height:60vh">
     <a asp-action="Index" class="btn btn-link pl-0 mb-3">&larr; Quay lại danh sách</a>
 
-    <div class="dd-card dd-profile mb-4">
-        <div>
-            @await Html.PartialAsync("_DoctorAvatar", new AvatarVm
-            {
-                Name = Model.HoTen, Url = Model.AvatarUrl,
-                Width = "180px", Height = "220px", Radius = "12px", FontSize = "3.2rem"
-            })
+    <div class="row">
+        <!-- CỘT TRÁI: thông tin bác sĩ (hẹp) -->
+        <div class="col-lg-4 mb-4">
+            <div class="dd-card dd-profile h-100">
+                <div class="d-flex justify-content-center mb-3">
+                    @await Html.PartialAsync("_DoctorAvatar", new AvatarVm
+                    {
+                        Name = Model.HoTen, Url = Model.AvatarUrl,
+                        Width = "150px", Height = "180px", Radius = "12px", FontSize = "3rem"
+                    })
+                </div>
+                <h4 class="mb-3 text-center">@Model.HoTen</h4>
+                <p class="mb-1"><b>Chuyên khoa:</b> @Model.TenKhoa</p>
+                @if (!string.IsNullOrEmpty(Model.MoTa))
+                {
+                    <p class="mb-1">@Model.MoTa</p>
+                }
+                <p class="mb-1"><b>Kinh nghiệm:</b> @Cv.Years(Model.KinhNghiem)</p>
+                <p class="mb-1"><b>Trạng thái:</b> @Cv.DoctorStatus(Model.TrangThai)</p>
+                <p class="mb-0"><b>Phí khám cơ bản:</b> @Cv.Money(Model.Fee)</p>
+            </div>
         </div>
-        <div class="dd-info">
-            <h2 class="mb-3">@Model.HoTen</h2>
-            <p class="mb-1"><b>Chuyên khoa:</b> @Model.TenKhoa</p>
-            @if (!string.IsNullOrEmpty(Model.MoTa))
-            {
-                <p class="mb-1">@Model.MoTa</p>
-            }
-            <p class="mb-1"><b>Kinh nghiệm:</b> @Cv.Years(Model.KinhNghiem)</p>
-            <p class="mb-1"><b>Trạng thái:</b> @Cv.DoctorStatus(Model.TrangThai)</p>
-            <p class="mb-0"><b>Phí khám cơ bản:</b> @Cv.Money(Model.Fee)</p>
+
+        <!-- CỘT PHẢI: chọn ngày khám + khung giờ khám -->
+        <div class="col-lg-8 mb-4">
+            <div class="dd-card dd-booking h-100">
+                <h4 class="mb-3">Chọn ngày khám</h4>
+
+                @if (!Model.Days.Any())
+                {
+                    <div class="alert alert-info mb-0">Bác sĩ chưa có lịch làm việc sắp tới. Vui lòng quay lại sau.</div>
+                }
+                else
+                {
+                    <div class="row">
+                        <div class="col-md-7 mb-3">
+                            <div class="cal-wrap" id="cal">
+                                <div class="cal-head">
+                                    <button type="button" class="cal-nav" id="calPrev" aria-label="Tháng trước">&#8249;</button>
+                                    <span id="calTitle"></span>
+                                    <button type="button" class="cal-nav" id="calNext" aria-label="Tháng sau">&#8250;</button>
+                                </div>
+                                <div class="cal-grid" id="calDow">
+                                    <div class="cal-dow">T2</div><div class="cal-dow">T3</div><div class="cal-dow">T4</div>
+                                    <div class="cal-dow">T5</div><div class="cal-dow">T6</div><div class="cal-dow">T7</div>
+                                    <div class="cal-dow">CN</div>
+                                </div>
+                                <div class="cal-grid" id="calGrid"></div>
+                                <div class="cal-legend">
+                                    <span><b style="background:#3fae49"></b>Còn lịch</span>
+                                    <span><b style="background:#b5bbc2"></b>Không có lịch / đã kín</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-5 mb-3">
+                            <h5 class="mb-1">Khung giờ khám</h5>
+                            <div id="slotLabel" class="text-muted mb-2" style="font-size:14px"></div>
+                            <div id="slotBox"></div>
+                        </div>
+                    </div>
+                }
+            </div>
         </div>
     </div>
-
-    @if (!Model.Days.Any())
-    {
-        <h4 class="mb-3">Chọn ngày khám</h4>
-        <div class="alert alert-info">Bác sĩ chưa có lịch làm việc sắp tới. Vui lòng quay lại sau.</div>
-    }
-    else
-    {
-        <h4 class="mb-3">Chọn ngày khám</h4>
-
-        <div class="cal-wrap" id="cal">
-            <div class="cal-head">
-                <button type="button" class="cal-nav" id="calPrev" aria-label="Tháng trước">&#8249;</button>
-                <span id="calTitle"></span>
-                <button type="button" class="cal-nav" id="calNext" aria-label="Tháng sau">&#8250;</button>
-            </div>
-            <div class="cal-grid" id="calDow">
-                <div class="cal-dow">T2</div><div class="cal-dow">T3</div><div class="cal-dow">T4</div>
-                <div class="cal-dow">T5</div><div class="cal-dow">T6</div><div class="cal-dow">T7</div>
-                <div class="cal-dow">CN</div>
-            </div>
-            <div class="cal-grid" id="calGrid"></div>
-            <div class="cal-legend">
-                <span><b style="background:#3fae49"></b>Còn lịch</span>
-                <span><b style="background:#b5bbc2"></b>Không có lịch / đã kín</span>
-            </div>
-        </div>
-
-        <h5 class="mt-4 mb-1">Khung giờ khám</h5>
-        <div id="slotLabel" class="text-muted mb-2" style="font-size:14px"></div>
-        <div id="slotBox"></div>
-    }
 </div>
 
 @if (Model.Days.Any())

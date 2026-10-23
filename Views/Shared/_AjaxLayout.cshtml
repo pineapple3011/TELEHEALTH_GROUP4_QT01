@@ -1,0 +1,4 @@
+@* Layout rút gọn: chỉ trả về phần nội dung trang (không header/hero/footer) *@
+<div id="ajax-meta" data-title="Alazea - @ViewData["Title"] - TELEHEALTH" style="display:none"></div>
+@RenderBody()
+@await RenderSectionAsync("Scripts", required: false)

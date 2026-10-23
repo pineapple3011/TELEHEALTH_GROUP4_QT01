@@ -21,6 +21,12 @@ namespace TELEHEALTH_GROUP4_QT01.Models.ViewModels
         public int? SpecId { get; set; }
         public List<SelectListItem> Specs { get; set; } = new();
         public List<DoctorListItem> Doctors { get; set; } = new();
+
+        // --- Thêm cho thanh lọc bên cạnh ---
+        public bool OnlyAvailable { get; set; }                 // chỉ bác sĩ đang nhận khám
+        public string? Sort { get; set; }                       // "", "exp", "feeAsc", "feeDesc", "name"
+        public int TotalAll { get; set; }                       // tổng số bác sĩ (không lọc)
+        public List<SpecCard> SpecCards { get; set; } = new();  // chuyên khoa + số bác sĩ
     }
 
     public class DayVm

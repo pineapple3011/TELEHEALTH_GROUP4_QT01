@@ -1,68 +1,262 @@
 @model DoctorListVm
 @{
     ViewData["Title"] = "Tìm bác sĩ";
+
+    var sorts = new[]
+    {
+        (Key: "",        Text: "Mặc định (đang nhận khám trước)"),
+        (Key: "exp",     Text: "Kinh nghiệm nhiều nhất"),
+        (Key: "feeAsc",  Text: "Phí khám thấp → cao"),
+        (Key: "feeDesc", Text: "Phí khám cao → thấp"),
+        (Key: "name",    Text: "Tên A → Z")
+    };
+
+    var activeSpec = Model.SpecCards.FirstOrDefault(s => s.SpecId == Model.SpecId);
+    bool hasFilter = !string.IsNullOrWhiteSpace(Model.Q) || Model.SpecId != null
+                     || Model.OnlyAvailable || !string.IsNullOrEmpty(Model.Sort);
 }
 
 <style>
-    .doc-card { border: 1px solid #e3e6ea; border-radius: 12px; overflow: hidden; transition: box-shadow .2s, transform .2s; }
-    .doc-card:hover { box-shadow: 0 8px 22px rgba(0,0,0,.09); transform: translateY(-2px); }
-    .doc-card .doc-meta { font-size: 14px; color: #555; }
-    .doc-badge { display: inline-block; font-size: 12px; padding: 2px 10px; border-radius: 20px; }
-    .doc-badge.on { background: #e6f6e8; color: #25803a; }
-    .doc-badge.off { background: #eceff2; color: #6c757d; }
+    /* ===== Thanh lọc bên cạnh ===== */
+    .dl-side .dl-widget {
+        margin-bottom: 36px;
+    }
+
+    .dl-side .dl-title {
+        font-size: 20px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .5px;
+        margin-bottom: 18px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #0056b3;
+        display: inline-block;
+    }
+
+    .dl-side .custom-control-label {
+        cursor: pointer;
+        font-size: 15px;
+        color: #555;
+    }
+
+        .dl-side .custom-control-label .cnt {
+            color: #9aa1a8;
+            margin-left: 4px;
+        }
+
+    .dl-side .custom-control-input:checked ~ .custom-control-label {
+        color: #0056b3;
+        font-weight: 600;
+    }
+
+        .dl-side .custom-control-input:checked ~ .custom-control-label::before {
+            background-color: #0056b3;
+            border-color: #0056b3;
+        }
+
+    .dl-search {
+        position: relative;
+    }
+
+        .dl-search input {
+            padding-right: 44px;
+            border-radius: 22px;
+        }
+
+        .dl-search button {
+            position: absolute;
+            right: 4px;
+            top: 4px;
+            width: 34px;
+            height: 34px;
+            border: 0;
+            border-radius: 50%;
+            background: #0056b3;
+            color: #fff;
+        }
+
+    /* ===== Thanh trên danh sách ===== */
+    .dl-topbar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        padding-bottom: 14px;
+        margin-bottom: 24px;
+        border-bottom: 1px solid #e3e6ea;
+    }
+
+        .dl-topbar .dl-count {
+            font-size: 15px;
+            color: #555;
+            margin: 0;
+        }
+
+    .dl-tag {
+        display: inline-block;
+        margin: 4px 0 0 8px;
+        padding: 3px 12px;
+        font-size: 13px;
+        border-radius: 20px;
+        background: #e6f6e8;
+        color: #25803a;
+    }
+
+    /* ===== Thẻ bác sĩ ===== */
+    .doc-card {
+        border: 1px solid #e3e6ea;
+        border-radius: 12px;
+        overflow: hidden;
+        transition: box-shadow .2s, transform .2s;
+    }
+
+        .doc-card:hover {
+            box-shadow: 0 8px 22px rgba(0,0,0,.09);
+            transform: translateY(-2px);
+        }
+
+        .doc-card .doc-meta {
+            font-size: 14px;
+            color: #555;
+        }
+
+    .doc-badge {
+        display: inline-block;
+        font-size: 12px;
+        padding: 2px 10px;
+        border-radius: 20px;
+    }
+
+        .doc-badge.on {
+            background: #e6f6e8;
+            color: #25803a;
+        }
+
+        .doc-badge.off {
+            background: #eceff2;
+            color: #6c757d;
+        }
 </style>
 
 <div class="container my-5" style="min-height:60vh">
-    <h2 class="mb-4">Tìm bác sĩ</h2>
-
-    <form method="get" asp-action="Index" class="form-row mb-4">
-        <div class="col-md-5 mb-2">
-            <input type="text" name="q" value="@Model.Q" class="form-control" placeholder="Nhập tên bác sĩ" />
-        </div>
-        <div class="col-md-4 mb-2">
-            <select name="specId" class="form-control" asp-items="Model.Specs">
-                <option value="">Tất cả chuyên khoa</option>
-            </select>
-        </div>
-        <div class="col-md-3 mb-2">
-            <button type="submit" class="btn btn-success btn-block">Tìm kiếm</button>
-        </div>
-    </form>
-
-    @if (!Model.Doctors.Any())
-    {
-        <div class="alert alert-info">Không tìm thấy bác sĩ phù hợp. Hãy thử đổi từ khóa hoặc chuyên khoa.</div>
-    }
-
     <div class="row">
-        @foreach (var d in Model.Doctors)
-        {
-            <div class="col-sm-6 col-lg-4 mb-4">
-                <div class="card doc-card h-100">
-                    <a asp-action="Details" asp-route-id="@d.DoctorId">
-                        @await Html.PartialAsync("_DoctorAvatar", new AvatarVm
-                        {
-                            Name = d.HoTen,
-                            Url = d.AvatarUrl,
-                            Width = "100%",
-                            Height = "300px",
-                            Radius = "0",
-                            FontSize = "3.5rem",
-                            Fit = "contain"
-                        })
-                    </a>
-                    <div class="card-body d-flex flex-column">
-                        <h5 class="card-title mb-2">@d.HoTen</h5>
-                        <p class="mb-1 doc-meta"><b>Chuyên khoa:</b> @d.TenKhoa</p>
-                        <p class="mb-1 doc-meta"><b>Kinh nghiệm:</b> @Cv.Years(d.KinhNghiem)</p>
-                        <p class="mb-2 doc-meta"><b>Phí khám:</b> @Cv.Money(d.Fee)</p>
-                        <p class="mb-3">
-                            <span class="doc-badge @(Cv.IsAvailable(d.TrangThai) ? "on" : "off")">@Cv.DoctorStatus(d.TrangThai)</span>
-                        </p>
-                        <a asp-action="Details" asp-route-id="@d.DoctorId" class="btn btn-success btn-sm mt-auto">Xem lịch và đặt khám</a>
+
+        <!-- ========== SIDEBAR ========== -->
+        <div class="col-12 col-md-4 col-lg-3 mb-4">
+            <form method="get" asp-action="Index" data-ajax-get id="doctorFilter" class="dl-side">
+
+                <div class="dl-widget">
+                    <h4 class="dl-title">Tìm kiếm</h4>
+                    <div class="dl-search">
+                        <input type="text" name="q" value="@Model.Q" class="form-control" placeholder="Nhập tên bác sĩ..." />
+                        <button type="submit" aria-label="Tìm"><i class="fa fa-search"></i></button>
                     </div>
                 </div>
+
+                <div class="dl-widget">
+                    <h4 class="dl-title">Chuyên khoa</h4>
+                    <div class="custom-control custom-radio mb-2">
+                        <input type="radio" class="custom-control-input" id="spec-all" name="specId" value=""
+                               data-autosubmit checked="@(Model.SpecId == null)" />
+                        <label class="custom-control-label" for="spec-all">Tất cả <span class="cnt">(@Model.TotalAll)</span></label>
+                    </div>
+                    @foreach (var sp in Model.SpecCards)
+                    {
+                        <div class="custom-control custom-radio mb-2">
+                            <input type="radio" class="custom-control-input" id="spec-@sp.SpecId" name="specId" value="@sp.SpecId"
+                                   data-autosubmit checked="@(Model.SpecId == sp.SpecId)" />
+                            <label class="custom-control-label" for="spec-@sp.SpecId">@sp.Name <span class="cnt">(@sp.DoctorCount)</span></label>
+                        </div>
+                    }
+                </div>
+
+                <div class="dl-widget">
+                    <h4 class="dl-title">Trạng thái</h4>
+                    <div class="custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input" id="onlyAvailable" name="onlyAvailable" value="true"
+                               data-autosubmit checked="@Model.OnlyAvailable" />
+                        <label class="custom-control-label" for="onlyAvailable">Chỉ bác sĩ đang nhận khám</label>
+                    </div>
+                </div>
+
+                <div class="dl-widget">
+                    <h4 class="dl-title">Sắp xếp</h4>
+                    @for (int i = 0; i < sorts.Length; i++)
+                    {
+                        var s = sorts[i];
+                        bool isOn = string.IsNullOrEmpty(Model.Sort) ? s.Key == "" : s.Key == Model.Sort;
+                        <div class="custom-control custom-radio mb-2">
+                            <input type="radio" class="custom-control-input" id="sort-@i" name="sort" value="@s.Key"
+                                   data-autosubmit checked="@isOn" />
+                            <label class="custom-control-label" for="sort-@i">@s.Text</label>
+                        </div>
+                    }
+                </div>
+
+                @if (hasFilter)
+                {
+                    <a asp-action="Index" class="btn btn-outline-secondary btn-sm btn-block">Xóa bộ lọc</a>
+                }
+            </form>
+        </div>
+
+        <!-- ========== DANH SÁCH BÁC SĨ ========== -->
+        <div class="col-12 col-md-8 col-lg-9">
+            <div class="dl-topbar">
+                <p class="dl-count">Hiển thị <b>@Model.Doctors.Count</b> / @Model.TotalAll bác sĩ</p>
+                <div>
+                    @if (activeSpec != null)
+                    {
+                        <span class="dl-tag">@activeSpec.Name</span>
+                    }
+                    @if (Model.OnlyAvailable)
+                    {
+                        <span class="dl-tag">Đang nhận khám</span>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(Model.Q))
+                    {
+                        <span class="dl-tag">“@Model.Q”</span>
+                    }
+                </div>
             </div>
-        }
+
+            @if (!Model.Doctors.Any())
+            {
+                <div class="alert alert-info">Không tìm thấy bác sĩ phù hợp. Hãy thử đổi từ khóa hoặc bỏ bớt bộ lọc.</div>
+            }
+
+            <div class="row">
+                @foreach (var d in Model.Doctors)
+                {
+                    <div class="col-sm-6 col-xl-4 mb-4">
+                        <div class="card doc-card h-100">
+                            <a asp-action="Details" asp-route-id="@d.DoctorId">
+                                @await Html.PartialAsync("_DoctorAvatar", new AvatarVm
+                                {
+                                    Name = d.HoTen,
+                                    Url = d.AvatarUrl,
+                                    Width = "100%",
+                                    Height = "260px",
+                                    Radius = "0",
+                                    FontSize = "3.5rem",
+                                    Fit = "contain"
+                                })
+                            </a>
+                            <div class="card-body d-flex flex-column">
+                                <h5 class="card-title mb-2">@d.HoTen</h5>
+                                <p class="mb-1 doc-meta"><b>Chuyên khoa:</b> @d.TenKhoa</p>
+                                <p class="mb-1 doc-meta"><b>Kinh nghiệm:</b> @Cv.Years(d.KinhNghiem)</p>
+                                <p class="mb-2 doc-meta"><b>Phí khám:</b> @Cv.Money(d.Fee)</p>
+                                <p class="mb-3">
+                                    <span class="doc-badge @(Cv.IsAvailable(d.TrangThai) ? "on" : "off")">@Cv.DoctorStatus(d.TrangThai)</span>
+                                </p>
+                                <a asp-action="Details" asp-route-id="@d.DoctorId" class="btn btn-success btn-sm mt-auto">Xem lịch và đặt khám</a>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
     </div>
 </div>
