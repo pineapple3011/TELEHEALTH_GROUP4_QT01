@@ -1,15 +1,22 @@
-@model DoctorDetailsVm
+@model TELEHEALTH_GROUP4_QT01.Models.ViewModels.DoctorDetailsVm
 @using System.Text.Json
 @{
-    ViewData["Title"] = Model.HoTen;
+    ViewData["Title"] = $"Bác sĩ {Model.HoTen} - Lịch làm việc";
 
-    // Gom các ca theo ngày để lịch hiển thị (1 ngày có thể có nhiều ca: sáng/chiều)
+    // Gom ca theo ngày để vẽ calendar
     var calData = Model.Days
         .GroupBy(d => d.DateIso)
         .Select(g => new
         {
             date = g.Key,
-            shifts = g.Select(s => new { scheduleId = s.ScheduleId, range = s.RangeText, slots = s.FreeSlots }).ToList()
+            shifts = g.Select(s => new
+            {
+                scheduleId = s.ScheduleId,
+                range = s.RangeText,
+                shift = (s.RangeText.Contains("Chiều") || s.RangeText.StartsWith("13") || s.RangeText.StartsWith("14")) ? "Ca Chiều" :
+                        (s.RangeText.Contains("Tối") || s.RangeText.StartsWith("17") || s.RangeText.StartsWith("18")) ? "Ca Tối" : "Ca Sáng",
+                slots = s.FreeSlots
+            }).ToList()
         })
         .ToList();
     var calJson = JsonSerializer.Serialize(calData);
@@ -17,75 +24,298 @@
 }
 
 <style>
-    .dd-card { border: 1px solid #e3e6ea; border-radius: 12px; background: #fff; }
-    .dd-profile { padding: 20px; }
-    .dd-booking { padding: 20px; }
+    .dd-card {
+        border: 1px solid #e9ecef;
+        border-radius: 14px;
+        background: #fff;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+    }
 
-    .cal-wrap { border: 1px solid #cfd4da; border-radius: 22px; padding: 12px 16px 16px; max-width: 100%; background: #fff; }
-    .cal-head { display: flex; align-items: center; justify-content: space-between; font-weight: 600; padding: 4px 4px 10px; }
-    .cal-nav { border: 0; background: transparent; font-size: 22px; line-height: 1; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; }
-    .cal-nav:hover:not(:disabled) { background: #eef1f4; }
-    .cal-nav:disabled { color: #c3c8ce; cursor: default; }
-    .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; }
-    .cal-dow { font-size: 12px; color: #6c757d; padding: 6px 0; border-bottom: 1px solid #eceff2; margin-bottom: 4px; }
-    .cal-cell { position: relative; height: 46px; border: 2px solid transparent; border-radius: 8px; background: transparent; font-size: 14px; padding: 0; }
-    .cal-empty { visibility: hidden; }
-    .cal-off, .cal-full { color: #b5bbc2; cursor: not-allowed; }
-    .cal-full { text-decoration: line-through; }
-    .cal-on { color: #212529; font-weight: 600; cursor: pointer; }
-    .cal-on:hover { background: #eef7ec; }
-    .cal-on i { position: absolute; left: 50%; bottom: 6px; width: 5px; height: 5px; margin-left: -2.5px; border-radius: 50%; background: #3fae49; }
-    .cal-today { box-shadow: inset 0 0 0 1px #9aa3ab; }
-    .cal-sel, .cal-sel:hover { border-color: #212529; background: #f4f5f6; }
+    .dd-profile {
+        padding: 25px;
+    }
 
-    .cal-legend { font-size: 12px; color: #6c757d; margin-top: 10px; }
-    .cal-legend span { display: inline-flex; align-items: center; margin-right: 14px; }
-    .cal-legend b { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 5px; }
+    .dd-booking {
+        padding: 25px;
+    }
 
-    .slot-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 10px; }
-    .slot-grid .btn { margin: 0; }
-    .shift-title { font-size: 13px; color: #6c757d; margin: 14px 0 8px; }
+    /* Calendar Styling */
+    .cal-wrap {
+        border: 1px solid #dfe3e8;
+        border-radius: 16px;
+        padding: 16px;
+        background: #fff;
+    }
+
+    .cal-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-weight: 700;
+        font-size: 16px;
+        color: #1a2f23;
+        padding-bottom: 12px;
+        border-bottom: 1px solid #f1f3f5;
+        margin-bottom: 10px;
+    }
+
+    .cal-nav {
+        border: 0;
+        background: #f1f3f5;
+        font-size: 20px;
+        line-height: 1;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background .2s;
+    }
+
+        .cal-nav:hover:not(:disabled) {
+            background: #0056b3;
+            color: #fff;
+        }
+
+        .cal-nav:disabled {
+            color: #c3c8ce;
+            cursor: default;
+        }
+
+    .cal-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 5px;
+        text-align: center;
+    }
+
+    .cal-dow {
+        font-size: 12px;
+        font-weight: 700;
+        color: #6c757d;
+        padding: 6px 0;
+        border-bottom: 1px solid #eceff2;
+        margin-bottom: 4px;
+    }
+
+    .cal-cell {
+        position: relative;
+        height: 48px;
+        border: 2px solid transparent;
+        border-radius: 10px;
+        background: transparent;
+        font-size: 14px;
+        padding: 0;
+        transition: all .15s;
+    }
+
+    .cal-empty {
+        visibility: hidden;
+    }
+
+    .cal-off, .cal-full {
+        color: #b5bbc2;
+        cursor: not-allowed;
+    }
+
+    .cal-full {
+        text-decoration: line-through;
+    }
+
+    .cal-on {
+        color: #212529;
+        font-weight: 700;
+        cursor: pointer;
+        background: #fdfdfd;
+    }
+
+        .cal-on:hover {
+            background: #e8f5e9;
+            border-color: #2c9d8f;
+        }
+
+        .cal-on i {
+            position: absolute;
+            left: 50%;
+            bottom: 5px;
+            width: 6px;
+            height: 6px;
+            margin-left: -3px;
+            border-radius: 50%;
+            background: #0056b3;
+        }
+
+    .cal-today {
+        box-shadow: inset 0 0 0 1px #2c9d8f;
+    }
+
+    .cal-sel, .cal-sel:hover {
+        border-color: #0056b3;
+        background: #0056b3;
+        color: #fff !important;
+    }
+
+        .cal-sel i {
+            background: #fff !important;
+        }
+
+    /* Slots */
+    .slot-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+        gap: 10px;
+    }
+
+    .slot-btn {
+        border: 1px solid #c8e6c9;
+        background: #f7fdf5;
+        color: #0056b3;
+        font-weight: 700;
+        font-size: 13px;
+        border-radius: 8px;
+        padding: 8px 4px;
+        text-align: center;
+        transition: all .2s;
+        text-decoration: none !important;
+        display: block;
+    }
+
+        .slot-btn:hover {
+            background: #2c9d8f;
+            color: #fff;
+            border-color: #0056b3;
+            transform: scale(1.04);
+        }
+
+        .slot-btn.selected {
+            background: #1a2f23;
+            color: #fff;
+            border-color: #1a2f23;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+    /* Shift filter pills */
+    .shift-pill {
+        border: 1px solid #dee2e6;
+        border-radius: 20px;
+        padding: 4px 12px;
+        font-size: 12px;
+        font-weight: 600;
+        color: #495057;
+        background: #fff;
+        cursor: pointer;
+        margin-right: 6px;
+        transition: all .15s;
+    }
+
+        .shift-pill.active {
+            background: #0056b3;
+            color: #fff;
+            border-color: #2c9d8f;
+        }
 </style>
 
-<div class="container my-5" style="min-height:60vh">
-    <a asp-action="Index" class="btn btn-link pl-0 mb-3">&larr; Quay lại danh sách</a>
+<div class="container my-4" style="min-height: 65vh;">
+    <!-- Breadcrumb -->
+    <div class="mb-3">
+        <a asp-action="Index" class="btn btn-link pl-0 text-success font-weight-bold">
+            <i class="fa fa-arrow-left mr-1"></i> Quay lại danh sách bác sĩ
+        </a>
+    </div>
 
     <div class="row">
-        <!-- CỘT TRÁI: thông tin bác sĩ (hẹp) -->
+        <!-- CỘT TRÁI: THÔNG TIN HỒ SƠ BÁC SĨ -->
         <div class="col-lg-4 mb-4">
             <div class="dd-card dd-profile h-100">
-                <div class="d-flex justify-content-center mb-3">
-                    @await Html.PartialAsync("_DoctorAvatar", new AvatarVm
+                <div class="text-center mb-3">
+                    @if (!string.IsNullOrEmpty(Model.AvatarUrl))
                     {
-                        Name = Model.HoTen, Url = Model.AvatarUrl,
-                        Width = "150px", Height = "180px", Radius = "12px", FontSize = "3rem"
-                    })
+                        <img src="@Url.Content(Model.AvatarUrl)" alt="@Model.HoTen" class="rounded-lg shadow-sm" style="width: 160px; height: 180px; object-fit: cover;" />
+                    }
+                    else
+                    {
+                        <div class="rounded-lg shadow-sm mx-auto d-flex align-items-center justify-content-center text-white font-weight-bold" style="width: 150px; height: 170px; background: linear-gradient(135deg,#70c745,#2c9d8f); font-size:48px;">
+                            BS
+                        </div>
+                    }
                 </div>
-                <h4 class="mb-3 text-center">@Model.HoTen</h4>
-                <p class="mb-1"><b>Chuyên khoa:</b> @Model.TenKhoa</p>
-                @if (!string.IsNullOrEmpty(Model.MoTa))
-                {
-                    <p class="mb-1">@Model.MoTa</p>
-                }
-                <p class="mb-1"><b>Kinh nghiệm:</b> @Cv.Years(Model.KinhNghiem)</p>
-                <p class="mb-1"><b>Trạng thái:</b> @Cv.DoctorStatus(Model.TrangThai)</p>
-                <p class="mb-0"><b>Phí khám cơ bản:</b> @Cv.Money(Model.Fee)</p>
+
+                <div class="text-center mb-3">
+                    <span class="badge badge-soft-success font-weight-bold px-3 py-1 mb-2">
+                        <i class="fa fa-check-circle"></i> Đang nhận lịch khám
+                    </span>
+                    <h4 class="font-weight-bold text-dark mb-1">@Model.HoTen</h4>
+                    <p class="text-muted small mb-1">Bác sĩ Chuyên khoa</p>
+                    <p class="text-success font-weight-bold small mb-2"><i class="fa fa-stethoscope"></i> Chuyên khoa: @Model.TenKhoa</p>
+
+                    <div class="rating-stars mb-2" style="color: #f39c12;">
+                        <i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i>
+                        <b class="text-dark ml-1">4.9</b> <span class="text-muted small">(128 đánh giá)</span>
+                    </div>
+                </div>
+
+                <div class="p-3 bg-light rounded mb-3 small">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Kinh nghiệm chuyên môn:</span>
+                        <b>@Cv.Years(Model.KinhNghiem)</b>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Bệnh nhân đã khám:</span>
+                        <b>500+ ca</b>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Nơi công tác:</span>
+                        <b class="text-right">Bệnh viện Telehealth</b>
+                    </div>
+                    <div class="d-flex justify-content-between pt-2 border-top">
+                        <span class="text-muted">Phí khám cơ bản:</span>
+                        <b class="text-success" style="font-size:15px;">@Cv.Money(Model.Fee)</b>
+                    </div>
+                </div>
+
+                <div class="small text-muted mb-3">
+                    <i class="fa fa-quote-left text-success mr-1"></i> @Model.MoTa
+                </div>
+
+                <div class="border-top pt-3">
+                    <div class="small font-weight-bold text-dark mb-2">Cam kết dịch vụ:</div>
+                    <ul class="list-unstyled small text-muted mb-0">
+                        <li class="mb-1"><i class="fa fa-check text-success mr-2"></i> Tư vấn đúng giờ hẹn theo lịch</li>
+                        <li class="mb-1"><i class="fa fa-check text-success mr-2"></i> Cấp đơn thuốc điện tử hợp chuẩn</li>
+                        <li><i class="fa fa-check text-success mr-2"></i> Miễn phí tư vấn tái khám trong 7 ngày</li>
+                    </ul>
+                </div>
             </div>
         </div>
 
-        <!-- CỘT PHẢI: chọn ngày khám + khung giờ khám -->
+        <!-- CỘT PHẢI: CHỌN NGÀY VÀ KHUNG GIỜ KHÁM -->
         <div class="col-lg-8 mb-4">
             <div class="dd-card dd-booking h-100">
-                <h4 class="mb-3">Chọn ngày khám</h4>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <h4 class="font-weight-bold text-dark mb-1">
+                            <i class="fa fa-calendar-check-o text-success mr-2"></i> Chọn Lịch Làm Việc &amp; Đặt Giờ
+                        </h4>
+                        <p class="text-muted small mb-0">Chọn ngày trên lịch, sau đó bấm vào khung giờ trống bạn muốn khám.</p>
+                    </div>
+                </div>
 
                 @if (!Model.Days.Any())
                 {
-                    <div class="alert alert-info mb-0">Bác sĩ chưa có lịch làm việc sắp tới. Vui lòng quay lại sau.</div>
+                    <div class="alert alert-info p-4 text-center my-4">
+                        <i class="fa fa-calendar-o" style="font-size: 40px;"></i>
+                        <h6 class="font-weight-bold mt-2">Bác sĩ chưa có lịch làm việc trong những ngày tới</h6>
+                        <p class="small text-muted mb-3">Vui lòng quay lại sau hoặc xem các bác sĩ khác cùng chuyên khoa.</p>
+                        <a asp-action="Index" class="btn btn-outline-success btn-sm">Xem bác sĩ khác</a>
+                    </div>
                 }
                 else
                 {
                     <div class="row">
-                        <div class="col-md-7 mb-3">
+                        <!-- Lịch Tháng Chọn Ngày -->
+                        <div class="col-md-7 mb-4">
                             <div class="cal-wrap" id="cal">
                                 <div class="cal-head">
                                     <button type="button" class="cal-nav" id="calPrev" aria-label="Tháng trước">&#8249;</button>
@@ -98,132 +328,262 @@
                                     <div class="cal-dow">CN</div>
                                 </div>
                                 <div class="cal-grid" id="calGrid"></div>
-                                <div class="cal-legend">
-                                    <span><b style="background:#3fae49"></b>Còn lịch</span>
-                                    <span><b style="background:#b5bbc2"></b>Không có lịch / đã kín</span>
+                                <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top small text-muted">
+                                    <span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#28a745;" class="mr-1"></span> Có lịch trống</span>
+                                    <span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#dee2e6;" class="mr-1"></span> Hết chỗ / Nghỉ</span>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="col-md-5 mb-3">
-                            <h5 class="mb-1">Khung giờ khám</h5>
-                            <div id="slotLabel" class="text-muted mb-2" style="font-size:14px"></div>
-                            <div id="slotBox"></div>
+                        <!-- Khung Giờ Khám Của Ngày Đã Chọn -->
+                        <div class="col-md-5 mb-4">
+                            <div class="p-3 bg-light rounded h-100 d-flex flex-column">
+                                <h6 class="font-weight-bold text-dark mb-1" id="selectedDateTitle">
+                                    <i class="fa fa-clock-o text-success mr-1"></i> Khung giờ ngày:
+                                </h6>
+                                <p class="text-muted small mb-3" id="selectedDateDesc">Chọn 1 ngày để xem giờ trống</p>
+
+                                <!-- Bộ lọc Ca làm việc -->
+                                <div class="mb-3 d-flex flex-wrap" id="shiftFilterGroup">
+                                    <span class="shift-pill active" onclick="filterShift('all', this)">Tất cả</span>
+                                    <span class="shift-pill" onclick="filterShift('morning', this)">Sáng</span>
+                                    <span class="shift-pill" onclick="filterShift('afternoon', this)">Chiều</span>
+                                    <span class="shift-pill" onclick="filterShift('evening', this)">Tối</span>
+                                </div>
+
+                                <!-- Danh sách khung giờ -->
+                                <div id="slotsContainer" class="flex-grow-1" style="max-height: 250px; overflow-y: auto;"></div>
+
+                                <!-- Bảng xác nhận giờ đã chọn -->
+                                <div id="confirmBookingBox" class="mt-3 p-3 bg-white border border-success rounded text-center" style="display: none;">
+                                    <div class="small text-muted mb-1">Khung giờ bạn đang chọn:</div>
+                                    <h5 class="font-weight-bold text-success mb-2" id="selectedSlotText">09:30</h5>
+                                    <a href="#" id="btnBookSlot" class="btn btn-success btn-sm btn-block font-weight-bold shadow-sm">
+                                        Tiến hành đặt lịch khám &rarr;
+                                    </a>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 }
+
+                <!-- THÔNG TIN ĐÁNH GIÁ CỦA BỆNH NHÂN -->
+                <div class="border-top pt-4 mt-2">
+                    <h5 class="font-weight-bold text-dark mb-3"><i class="fa fa-comments-o text-success mr-2"></i> Đánh Giá Từ Bệnh Nhân Đã Khám</h5>
+                    <div class="row">
+                        @{
+                            var mockReviews = new[]
+                            {
+                                new { PatientName = "Nguyễn Văn H.", BookingType = "Khám trực tuyến", Rating = 5, DateText = "2 ngày trước", Comment = "Bác sĩ tư vấn rất tận tâm, giải thích phác đồ điều trị rõ ràng, tôi rất yên tâm!" },
+                                new { PatientName = "Trần Thị M.", BookingType = "Khám tại phòng khám", Rating = 5, DateText = "1 tuần trước", Comment = "Thủ tục nhanh, bác sĩ khám kỹ và dặn dò chu đáo." },
+                                new { PatientName = "Lê Hoàng K.", BookingType = "Khám trực tuyến", Rating = 5, DateText = "2 tuần trước", Comment = "Ứng dụng rất tiện lợi, video call mượt và nhận đơn thuốc điện tử ngay sau khi khám." }
+                            };
+                        }
+                        @foreach (var r in mockReviews)
+                        {
+                            <div class="col-md-4 mb-3">
+                                <div class="p-3 border rounded bg-light h-100">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <b class="text-dark small">@r.PatientName</b>
+                                        <span class="badge badge-soft-success small">@r.BookingType</span>
+                                    </div>
+                                    <div class="rating-stars small mb-2" style="color: #f39c12;">
+                                        @for (int i = 0; i < r.Rating; i++)
+                                        {
+                                            <i class="fa fa-star"></i>
+                                        }
+                                        <span class="text-muted small ml-1">@r.DateText</span>
+                                    </div>
+                                    <p class="small text-muted mb-0">"@r.Comment"</p>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
-@if (Model.Days.Any())
-{
+@section Scripts {
     <script>
-    (function () {
-        var DAYS = @Html.Raw(calJson);
-        var CREATE_URL = @Html.Raw(createUrl);
-        var DOCTOR_ID = @Model.DoctorId;
-        var WD = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
+        var calData = @Html.Raw(calJson);
+        var createUrlBase = @Html.Raw(createUrl);
+        var currentYear, currentMonth;
+        var selectedIso = null;
+        var selectedScheduleId = null;
+        var selectedSlotTime = null;
+        var activeShiftFilter = 'all';
 
-        var byDate = {};
-        DAYS.forEach(function (d) { byDate[d.date] = d; });
-        var dates = DAYS.map(function (d) { return d.date; }).sort();
-
-        function pad(n) { return n < 10 ? '0' + n : '' + n; }
-        function iso(y, m, d) { return y + '-' + pad(m + 1) + '-' + pad(d); }
-        function freeCount(info) {
-            if (!info) return 0;
-            return info.shifts.reduce(function (n, s) { return n + s.slots.length; }, 0);
-        }
-        function parse(s) { var p = s.split('-'); return { y: +p[0], m: +p[1] - 1, d: +p[2] }; }
-
-        var now = new Date();
-        var todayIso = iso(now.getFullYear(), now.getMonth(), now.getDate());
-        var minView = { y: now.getFullYear(), m: now.getMonth() };
-
-        // Ngày còn chỗ đầu tiên -> chọn sẵn
-        var firstFree = dates.filter(function (d) { return freeCount(byDate[d]) > 0; })[0] || null;
-        var selected = firstFree;
-        var startRef = parse(firstFree || dates[0]);
-        var view = { y: startRef.y, m: startRef.m };
-
-        var lastRef = parse(dates[dates.length - 1]);
-        var maxView = { y: lastRef.y, m: lastRef.m };
-        if (maxView.y * 12 + maxView.m < minView.y * 12 + minView.m) maxView = minView;
-
-        var elTitle = document.getElementById('calTitle');
-        var elGrid = document.getElementById('calGrid');
-        var elPrev = document.getElementById('calPrev');
-        var elNext = document.getElementById('calNext');
-        var elSlots = document.getElementById('slotBox');
-        var elLabel = document.getElementById('slotLabel');
-
-        function renderCal() {
-            elTitle.textContent = 'Tháng ' + (view.m + 1) + ', ' + view.y;
-            var offset = (new Date(view.y, view.m, 1).getDay() + 6) % 7;     // tuần bắt đầu từ T2
-            var dim = new Date(view.y, view.m + 1, 0).getDate();
-            var html = '';
-            for (var i = 0; i < offset; i++) html += '<div class="cal-cell cal-empty"></div>';
-            for (var d = 1; d <= dim; d++) {
-                var key = iso(view.y, view.m, d);
-                var info = byDate[key];
-                var free = freeCount(info);
-                var cls = 'cal-cell ' + (!info ? 'cal-off' : (free === 0 ? 'cal-full' : 'cal-on'));
-                if (key === todayIso) cls += ' cal-today';
-                if (key === selected) cls += ' cal-sel';
-                html += '<button type="button" class="' + cls + '" data-d="' + key + '"' +
-                        (free > 0 ? '' : ' disabled') + '>' + d + (free > 0 ? '<i></i>' : '') + '</button>';
-            }
-            elGrid.innerHTML = html;
-            elPrev.disabled = (view.y * 12 + view.m) <= (minView.y * 12 + minView.m);
-            elNext.disabled = (view.y * 12 + view.m) >= (maxView.y * 12 + maxView.m);
+        // Lấy ngày đầu tiên có lịch làm việc
+        if (calData && calData.length > 0) {
+            var firstDate = new Date(calData[0].date);
+            currentYear = firstDate.getFullYear();
+            currentMonth = firstDate.getMonth();
+        } else {
+            var now = new Date();
+            currentYear = now.getFullYear();
+            currentMonth = now.getMonth();
         }
 
-        function renderSlots() {
-            if (!selected) {
-                elLabel.textContent = '';
-                elSlots.innerHTML = '<div class="alert alert-info">Các ngày sắp tới đã kín lịch. Vui lòng quay lại sau.</div>';
-                return;
-            }
-            var p = parse(selected);
-            var wd = WD[new Date(p.y, p.m, p.d).getDay()];
-            elLabel.textContent = wd + ', ' + pad(p.d) + '/' + pad(p.m + 1) + '/' + p.y;
+        function renderCalendar() {
+            var titleEl = document.getElementById('calTitle');
+            var gridEl = document.getElementById('calGrid');
+            if (!gridEl) return;
 
-            var info = byDate[selected];
-            var html = '';
-            info.shifts.forEach(function (sh) {
-                if (info.shifts.length > 1) html += '<div class="shift-title">Ca ' + sh.range + '</div>';
-                if (sh.slots.length === 0) { html += '<span class="text-muted">Ca này đã kín lịch</span>'; return; }
-                html += '<div class="slot-grid">';
-                sh.slots.forEach(function (t) {
-                    var href = CREATE_URL + '?doctorId=' + DOCTOR_ID + '&scheduleId=' + sh.scheduleId +
-                               '&time=' + encodeURIComponent(t);
-                    html += '<a class="btn btn-outline-success btn-sm" href="' + href + '">' + t + '</a>';
-                });
-                html += '</div>';
+            gridEl.innerHTML = '';
+            var monthNames = ["Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6",
+                "Tháng 7", "Tháng 8", "Tháng 9", "Tháng 10", "Tháng 11", "Tháng 12"];
+            titleEl.innerText = monthNames[currentMonth] + " / " + currentYear;
+
+            var firstDayIndex = new Date(currentYear, currentMonth, 1).getDay();
+            // Điều chỉnh để Thứ Hai là cột đầu tiên
+            var pad = (firstDayIndex + 6) % 7;
+            for (var i = 0; i < pad; i++) {
+                var empty = document.createElement('div');
+                empty.className = 'cal-cell cal-empty';
+                gridEl.appendChild(empty);
+            }
+
+            var daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+            var todayStr = new Date().toISOString().split('T')[0];
+
+            for (var d = 1; d <= daysInMonth; d++) {
+                var mm = String(currentMonth + 1).padStart(2, '0');
+                var dd = String(d).padStart(2, '0');
+                var iso = currentYear + '-' + mm + '-' + dd;
+
+                var cell = document.createElement('button');
+                cell.type = 'button';
+                cell.className = 'cal-cell';
+                cell.innerText = d;
+
+                if (iso === todayStr) cell.classList.add('cal-today');
+
+                var dayMatch = calData.find(x => x.date === iso);
+                if (dayMatch && dayMatch.shifts.some(s => s.slots && s.slots.length > 0)) {
+                    cell.classList.add('cal-on');
+                    var dot = document.createElement('i');
+                    cell.appendChild(dot);
+                    cell.onclick = (function(matchIso) {
+                        return function() { selectDate(matchIso); };
+                    })(iso);
+                } else {
+                    cell.classList.add('cal-off');
+                    cell.disabled = true;
+                }
+
+                if (selectedIso === iso) {
+                    cell.classList.add('cal-sel');
+                }
+
+                gridEl.appendChild(cell);
+            }
+        }
+
+        function selectDate(iso) {
+            selectedIso = iso;
+            renderCalendar();
+
+            var dayMatch = calData.find(x => x.date === iso);
+            if (!dayMatch) return;
+
+            var dateObj = new Date(iso);
+            var titleStr = "Ngày " + dateObj.toLocaleDateString('vi-VN', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' });
+            document.getElementById('selectedDateTitle').innerText = titleStr;
+            document.getElementById('selectedDateDesc').innerText = "Chọn một khung giờ phù hợp dưới đây:";
+
+            renderSlots(dayMatch);
+        }
+
+        function renderSlots(dayMatch) {
+            var container = document.getElementById('slotsContainer');
+            container.innerHTML = '';
+            document.getElementById('confirmBookingBox').style.display = 'none';
+
+            var totalSlotsCount = 0;
+
+            dayMatch.shifts.forEach(function(shift) {
+                var filteredSlots = shift.slots;
+                if (activeShiftFilter === 'morning') {
+                    filteredSlots = shift.slots.filter(s => parseInt(s.split(':')[0]) < 12);
+                } else if (activeShiftFilter === 'afternoon') {
+                    filteredSlots = shift.slots.filter(s => parseInt(s.split(':')[0]) >= 12 && parseInt(s.split(':')[0]) < 18);
+                } else if (activeShiftFilter === 'evening') {
+                    filteredSlots = shift.slots.filter(s => parseInt(s.split(':')[0]) >= 18);
+                }
+
+                if (filteredSlots.length > 0) {
+                    var shiftHeader = document.createElement('div');
+                    shiftHeader.className = 'small font-weight-bold text-muted mt-2 mb-2';
+                    shiftHeader.innerText = (shift.shift || 'Ca khám') + ' (' + shift.range + '):';
+                    container.appendChild(shiftHeader);
+
+                    var grid = document.createElement('div');
+                    grid.className = 'slot-grid mb-3';
+
+                    filteredSlots.forEach(function(slot) {
+                        totalSlotsCount++;
+                        var btn = document.createElement('a');
+                        btn.href = '#';
+                        btn.className = 'slot-btn';
+                        btn.innerText = slot;
+                        btn.onclick = function(e) {
+                            e.preventDefault();
+                            $('.slot-btn').removeClass('selected');
+                            $(this).addClass('selected');
+                            chooseSlot(shift.scheduleId, slot);
+                        };
+                        grid.appendChild(btn);
+                    });
+                    container.appendChild(grid);
+                }
             });
-            elSlots.innerHTML = html;
+
+            if (totalSlotsCount === 0) {
+                container.innerHTML = '<div class="alert alert-warning small text-center my-3">Không có khung giờ nào trống trong ca này. Vui lòng chọn ca hoặc ngày khác.</div>';
+            }
         }
 
-        elGrid.addEventListener('click', function (e) {
-            var btn = e.target.closest ? e.target.closest('button[data-d]') : null;
-            if (!btn || btn.disabled) return;
-            selected = btn.getAttribute('data-d');
-            renderCal();
-            renderSlots();
-        });
-        elPrev.addEventListener('click', function () {
-            view.m--; if (view.m < 0) { view.m = 11; view.y--; }
-            renderCal();
-        });
-        elNext.addEventListener('click', function () {
-            view.m++; if (view.m > 11) { view.m = 0; view.y++; }
-            renderCal();
+        function filterShift(shiftType, el) {
+            $('.shift-pill').removeClass('active');
+            $(el).addClass('active');
+            activeShiftFilter = shiftType;
+            if (selectedIso) {
+                var dayMatch = calData.find(x => x.date === selectedIso);
+                if (dayMatch) renderSlots(dayMatch);
+            }
+        }
+
+        function chooseSlot(scheduleId, slotTime) {
+            selectedScheduleId = scheduleId;
+            selectedSlotTime = slotTime;
+
+            var box = document.getElementById('confirmBookingBox');
+            box.style.display = 'block';
+            document.getElementById('selectedSlotText').innerText = slotTime + ' - ' + selectedIso;
+
+            var bookBtn = document.getElementById('btnBookSlot');
+            bookBtn.href = createUrlBase + '?doctorId=@Model.DoctorId&scheduleId=' + scheduleId + '&time=' + encodeURIComponent(slotTime);
+        }
+
+        $('#calPrev').click(function() {
+            currentMonth--;
+            if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+            renderCalendar();
         });
 
-        renderCal();
-        renderSlots();
-    })();
+        $('#calNext').click(function() {
+            currentMonth++;
+            if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+            renderCalendar();
+        });
+
+        // Tự động chọn ngày đầu tiên có lịch
+        if (calData && calData.length > 0) {
+            selectDate(calData[0].date);
+        } else {
+            renderCalendar();
+        }
     </script>
 }

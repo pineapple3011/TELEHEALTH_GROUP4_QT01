@@ -1,50 +1,213 @@
-﻿@model HomeVm
+﻿@model TELEHEALTH_GROUP4_QT01.Models.ViewModels.HomeVm
+@functions {
+    public static string GetSpecIcon(string? name)
+    {
+        var n = (name ?? "").ToLower();
+        if (n.Contains("tim") || n.Contains("cardio")) return "fa-heartbeat";
+        if (n.Contains("nhi") || n.Contains("pediatric")) return "fa-child";
+        if (n.Contains("da") || n.Contains("derma")) return "fa-medkit";
+        if (n.Contains("mắt") || n.Contains("eye") || n.Contains("opht")) return "fa-eye";
+        if (n.Contains("răng") || n.Contains("hàm") || n.Contains("dental")) return "fa-smile-o";
+        if (n.Contains("tai") || n.Contains("mũi") || n.Contains("họng")) return "fa-assistive-listening-systems";
+        if (n.Contains("thần kinh") || n.Contains("não")) return "fa-bolt";
+        if (n.Contains("tiêu hóa") || n.Contains("dạ dày")) return "fa-user-md";
+        return "fa-stethoscope";
+    }
+}
 @{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Trang chủ - Hệ thống Telehealth";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
 <style>
-    .hm-doc { border: 1px solid #e3e6ea; border-radius: 12px; overflow: hidden; background: #fff; height: 100%; transition: box-shadow .2s, transform .2s; }
-    .hm-doc:hover { box-shadow: 0 8px 22px rgba(0,0,0,.09); transform: translateY(-2px); }
-    .hm-doc .hm-body { padding: 16px; text-align: center; }
-    .hm-doc h5 { margin-bottom: 4px; font-size: 17px; }
-    .hm-chip { display: inline-block; margin: 0 6px 10px 0; padding: 6px 16px; border: 1px solid #d5dae0; border-radius: 22px; font-size: 14px; color: #333; background: #fff; }
-    .hm-chip:hover { border-color: #3fae49; color: #25803a; text-decoration: none; }
-    .hm-chip small { color: #8a929a; margin-left: 4px; }
-    .hm-step { text-align: center; padding: 0 12px; margin-bottom: 30px; }
-    .hm-step .hm-num { width: 54px; height: 54px; border-radius: 50%; margin: 0 auto 14px; display: flex; align-items: center;
-                       justify-content: center; font-size: 22px; font-weight: 700; color: #fff; background: linear-gradient(135deg,#6fc66b,#2c9d8f); }
-    .hm-step h6 { font-weight: 700; margin-bottom: 6px; }
-    .hm-step p { font-size: 14px; color: #666; margin: 0; }
-    .hm-note { border: 1px solid #e3e6ea; border-radius: 12px; padding: 20px 24px; background: #fff; height: 100%; }
-    .hm-note h6 { font-weight: 700; margin-bottom: 8px; }
-    .hm-note p { font-size: 14px; color: #555; margin-bottom: 4px; }
+    /* Quick Booking Floating Widget */
+    .quick-search-box {
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        padding: 24px 30px;
+        margin-top: 30px; /* cách banner phía trên */
+        margin-bottom: 0;
+        position: relative;
+        z-index: 100;
+        border: 1px solid #e9ecef;
+    }
+
+    /* Doctor Card */
+    .hm-doc-card {
+        background: #fff;
+        border-radius: 14px;
+        border: 1px solid #e9ecef;
+        overflow: hidden;
+        transition: transform .25s, box-shadow .25s;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+        .hm-doc-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 28px rgba(0,0,0,0.08);
+            border-color: #a5d6a7;
+        }
+
+    .hm-doc-body {
+        padding: 18px;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+    }
+
+    /* Specialty Chip */
+    .spec-item-box {
+        background: #fff;
+        border: 1px solid #e9ecef;
+        border-radius: 12px;
+        padding: 18px 14px;
+        text-align: center;
+        transition: all .2s;
+        text-decoration: none !important;
+        display: block;
+        color: inherit;
+        height: 100%;
+    }
+
+        .spec-item-box:hover {
+            border-color: #0056b3;
+            background: #f7fdf5;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 18px rgba(112, 199, 69, 0.15);
+        }
+
+    .spec-icon-circle {
+        width: 52px;
+        height: 52px;
+        border-radius: 50%;
+        background: #e8f5e9;
+        color: #0056b3;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+        margin: 0 auto 10px;
+    }
+
+    /* Steps */
+    .step-circle-num {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #0056b3, #0056b3);
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+        font-weight: 800;
+        margin: 0 auto 14px;
+        box-shadow: 0 4px 14px rgba(40,167,69,0.3);
+    }
+
+    /* Feature Box */
+    .feature-card {
+        padding: 24px;
+        background: #fff;
+        border-radius: 12px;
+        border: 1px solid #e9ecef;
+        box-shadow: 0 4px 14px rgba(0,0,0,0.02);
+        height: 100%;
+        transition: transform .2s;
+    }
+
+        .feature-card:hover {
+            transform: translateY(-2px);
+        }
 </style>
 
-<!-- ##### Doctors Area Start ##### -->
+<!-- ================= HỘP TÌM KIẾM ĐẶT LỊCH NHANH TRÊN TRANG CHỦ ================= -->
+<div class="container">
+    <div class="quick-search-box">
+        <form asp-controller="Doctors" asp-action="Index" method="get" class="row align-items-end">
+            <div class="col-lg-4 col-md-6 mb-3 mb-lg-0">
+                <label class="font-weight-bold small text-dark mb-1">
+                    <i class="fa fa-stethoscope text-success mr-1"></i> Chuyên khoa cần khám:
+                </label>
+                <select name="specId" class="form-control">
+                    <option value="">-- Tất cả chuyên khoa --</option>
+                    @foreach (var sp in Model.Specs)
+                    {
+                        <option value="@sp.SpecId">@sp.Name (@sp.DoctorCount bác sĩ)</option>
+                    }
+                </select>
+            </div>
+
+            <div class="col-lg-3 col-md-6 mb-3 mb-lg-0">
+                <label class="font-weight-bold small text-dark mb-1">
+                    <i class="fa fa-user-md text-success mr-1"></i> Tên bác sĩ hoặc từ khóa:
+                </label>
+                <input type="text" name="q" class="form-control" placeholder="Nhập tên bác sĩ..." />
+            </div>
+
+            <div class="col-lg-3 col-md-6 mb-3 mb-lg-0">
+                <label class="font-weight-bold small text-dark mb-1">
+                    <i class="fa fa-video-camera text-primary mr-1"></i> Hình thức khám:
+                </label>
+                <select name="onlyAvailable" class="form-control">
+                    <option value="false">Tất cả bác sĩ</option>
+                    <option value="true">Chỉ bác sĩ đang nhận khám</option>
+                </select>
+            </div>
+
+            <div class="col-lg-2 col-md-6">
+                <button type="submit" class="btn btn-medical btn-block py-2 font-weight-bold">
+                    <i class="fa fa-search mr-1"></i> TÌM KIẾM
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ================= CHUYÊN KHOA Y TẾ NỔI BẬT ================= -->
 <section class="section-padding-100-0">
     <div class="container">
         <div class="row">
             <div class="col-12">
                 <div class="section-heading text-center">
-                    <h2>ĐỘI NGŨ BÁC SĨ</h2>
-                    <p>Chọn bác sĩ phù hợp và đặt lịch ngay trên website.</p>
+                    <h2>CÁC CHUYÊN KHOA Y TẾ HÀNG ĐẦU</h2>
+                    <p>Đội ngũ chuyên gia sẵn sàng hỗ trợ tư vấn trực tuyến và thăm khám trực tiếp</p>
                 </div>
             </div>
         </div>
 
-        @if (Model.Specs.Any())
-        {
-            <div class="row">
-                <div class="col-12 text-center mb-3">
-                    @foreach (var sp in Model.Specs)
-                    {
-                        <a class="hm-chip" asp-controller="Doctors" asp-action="Index" asp-route-specId="@sp.SpecId">@sp.Name<small>(@sp.DoctorCount)</small></a>
-                    }
+        <div class="row mb-5">
+            @foreach (var sp in Model.Specs)
+            {
+                <div class="col-6 col-md-4 col-lg-3 mb-4">
+                    <a asp-controller="Doctors" asp-action="Index" asp-route-specId="@sp.SpecId" class="spec-item-box">
+                        <div class="spec-icon-circle">
+                            <i class="fa @GetSpecIcon(sp.Name)"></i>
+                        </div>
+                        <h6 class="font-weight-bold text-dark mb-1">@sp.Name</h6>
+                        <span class="badge badge-soft-success small">@sp.DoctorCount bác sĩ trực</span>
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+<!-- ================= ĐỘI NGŨ BÁC SĨ TIÊU BIỂU ================= -->
+<section class="section-padding-100-0 bg-light">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="section-heading text-center">
+                    <h2>ĐỘI NGŨ BÁC SĨ NỔI BẬT</h2>
+                    <p>Bác sĩ chuyên khoa giàu kinh nghiệm, tận tâm vì sức khỏe người bệnh</p>
                 </div>
             </div>
-        }
+        </div>
 
         @if (!Model.Doctors.Any())
         {
@@ -55,23 +218,32 @@
             @foreach (var d in Model.Doctors)
             {
                 <div class="col-sm-6 col-lg-3 mb-4">
-                    <div class="hm-doc">
-                        <a asp-controller="Doctors" asp-action="Details" asp-route-id="@d.DoctorId">
+                    <div class="hm-doc-card">
+                        <a asp-controller="Doctors" asp-action="Details" asp-route-id="@d.DoctorId" class="d-block bg-light">
                             @await Html.PartialAsync("_DoctorAvatar", new AvatarVm
                             {
-                                Name = d.HoTen, Url = d.AvatarUrl,
+                                Name = d.HoTen,
+                                Url = d.AvatarUrl,
                                 Width = "100%",
-                                Height = "280px",
+                                Height = "260px",
                                 Radius = "0",
                                 FontSize = "3.2rem",
                                 Fit = "contain"
                             })
                         </a>
-                        <div class="hm-body">
-                            <h5>@d.HoTen</h5>
-                            <p class="mb-1 text-muted" style="font-size:14px">@d.TenKhoa</p>
-                            <p class="mb-3" style="font-size:13px;color:#777">@Cv.Years(d.KinhNghiem) kinh nghiệm &middot; @Cv.Money(d.Fee)</p>
-                            <a asp-controller="Doctors" asp-action="Details" asp-route-id="@d.DoctorId" class="btn btn-success btn-sm">Đặt lịch khám</a>
+                        <div class="hm-doc-body">
+                            <div class="small text-warning mb-1">
+                                <i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i>
+                                <span class="font-weight-bold text-dark ml-1">4.9</span>
+                            </div>
+                            <h6 class="font-weight-bold text-dark mb-1">@d.HoTen</h6>
+                            <p class="text-muted small mb-1">Bác sĩ Chuyên khoa &bull; @d.TenKhoa</p>
+                            <p class="text-success font-weight-bold small mb-3">@Cv.Money(d.Fee)</p>
+                            <div class="mt-auto">
+                                <a asp-controller="Doctors" asp-action="Details" asp-route-id="@d.DoctorId" class="btn btn-success btn-sm btn-block font-weight-bold py-2 shadow-sm">
+                                    <i class="fa fa-calendar-check-o mr-1"></i> Đặt lịch khám ngay
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -79,41 +251,98 @@
         </div>
 
         <div class="row">
-            <div class="col-12 text-center mb-5">
-                <a asp-controller="Doctors" asp-action="Index" class="btn alazea-btn">XEM TẤT CẢ BÁC SĨ</a>
+            <div class="col-12 text-center pb-5 mt-3">
+                <a asp-controller="Doctors" asp-action="Index" class="btn alazea-btn">
+                    <i class="fa fa-th-list mr-1"></i> XEM TOÀN BỘ DANH SÁCH BÁC SĨ
+                </a>
             </div>
         </div>
     </div>
 </section>
-<!-- ##### Doctors Area End ##### -->
-<!-- ##### Guide Area Start ##### -->
-<section class="bg-gray section-padding-100-0">
+
+<!-- ================= BANNER CẤP CỨU KHẨN CẤP 24/7 ================= -->
+<div class="container my-5">
+    <div class="p-4 p-md-5 rounded-lg text-white shadow-lg" style="background: linear-gradient(135deg, #b71c1c, #dc3545);">
+        <div class="row align-items-center">
+            <div class="col-lg-8 mb-3 mb-lg-0">
+                <div class="badge badge-light text-danger font-weight-bold px-3 py-1 mb-2">
+                    <i class="fa fa-ambulance"></i> TRUNG TÂM CẤP CỨU &amp; HỖ TRỢ KHẨN CẤP 24/7
+                </div>
+                <h3 class="font-weight-bold text-white mb-2">Cần Trợ Giúp Y Tế Khẩn Cấp?</h3>
+                <p class="text-light opacity-90 mb-0">Đội ngũ bác sĩ và kíp trực cấp cứu luôn sẵn sàng 24/7. Điều phối xe cứu thương tại chỗ và tư vấn sơ cấp cứu trực tuyến miễn phí.</p>
+            </div>
+            <div class="col-lg-4 text-lg-right">
+                <a href="tel:115" class="btn btn-light text-danger btn-lg font-weight-bold px-4 shadow mb-2 mr-2">
+                    <i class="fa fa-phone mr-1"></i> GỌI 115
+                </a>
+                <a href="#" data-toggle="modal" data-target="#emergencyModal" class="btn btn-outline-light btn-lg font-weight-bold px-4 shadow mb-2">
+                    Báo cấp cứu
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ================= HƯỚNG DẪN 5 BƯỚC KHÁM BỆNH ================= -->
+<section class="section-padding-100-0 bg-white border-top">
     <div class="container">
         <div class="row">
             <div class="col-12">
                 <div class="section-heading text-center">
-                    <h2>HƯỚNG DẪN ĐẶT KHÁM</h2>
-                    <p>Chỉ 5 bước để khám bệnh qua website.</p>
+                    <h2>QUY TRÌNH KHÁM BỆNH ĐƠN GIẢN</h2>
+                    <p>Chỉ với 5 bước nhanh gọn để nhận tư vấn và điều trị chuyên sâu</p>
                 </div>
             </div>
         </div>
 
-        <div class="row">
-            <div class="col-6 col-md-4 col-lg"><div class="hm-step"><div class="hm-num">1</div><h6>Tìm bác sĩ</h6><p>Tìm theo tên hoặc chuyên khoa, xem thông tin và phí khám.</p></div></div>
-            <div class="col-6 col-md-4 col-lg"><div class="hm-step"><div class="hm-num">2</div><h6>Chọn ngày &amp; giờ</h6><p>Chọn ngày trên lịch, sau đó chọn một khung giờ còn trống.</p></div></div>
-            <div class="col-6 col-md-4 col-lg"><div class="hm-step"><div class="hm-num">3</div><h6>Nhập thông tin</h6><p>Chọn hình thức khám, mô tả triệu chứng và đính kèm ảnh/kết quả xét nghiệm.</p></div></div>
-            <div class="col-6 col-md-6 col-lg"><div class="hm-step"><div class="hm-num">4</div><h6>Thanh toán</h6><p>Quét mã QR chuyển khoản rồi tải ảnh biên lai lên website.</p></div></div>
-            <div class="col-12 col-md-6 col-lg"><div class="hm-step"><div class="hm-num">5</div><h6>Khám &amp; nhận đơn thuốc</h6><p>Theo dõi trạng thái, vào khám đúng giờ và xem đơn thuốc trong mục Lịch khám.</p></div></div>
+        <div class="row mb-5">
+            <div class="col-6 col-md-4 col-lg mb-4 text-center">
+                <div class="step-circle-num">1</div>
+                <h6 class="font-weight-bold mb-1">Tìm bác sĩ</h6>
+                <p class="small text-muted mb-0">Lọc theo chuyên khoa, số năm kinh nghiệm và phí khám niêm yết.</p>
+            </div>
+            <div class="col-6 col-md-4 col-lg mb-4 text-center">
+                <div class="step-circle-num">2</div>
+                <h6 class="font-weight-bold mb-1">Chọn ngày &amp; giờ</h6>
+                <p class="small text-muted mb-0">Chọn khung giờ trống tiện lợi theo thời gian rảnh của bạn.</p>
+            </div>
+            <div class="col-6 col-md-4 col-lg mb-4 text-center">
+                <div class="step-circle-num">3</div>
+                <h6 class="font-weight-bold mb-1">Mô tả triệu chứng</h6>
+                <p class="small text-muted mb-0">Ghi rõ lý do khám và đính kèm hình ảnh hoặc kết quả xét nghiệm cũ.</p>
+            </div>
+            <div class="col-6 col-md-4 col-lg mb-4 text-center">
+                <div class="step-circle-num">4</div>
+                <h6 class="font-weight-bold mb-1">Thanh toán VietQR</h6>
+                <p class="small text-muted mb-0">Quét mã QR chuyển khoản tự động và tải biên lai giữ chỗ tức thì.</p>
+            </div>
+            <div class="col-12 col-md-4 col-lg mb-4 text-center">
+                <div class="step-circle-num">5</div>
+                <h6 class="font-weight-bold mb-1">Khám &amp; Kê đơn</h6>
+                <p class="small text-muted mb-0">Khám trực tuyến HD hoặc tại viện, nhận đơn thuốc điện tử chuẩn Bộ Y tế.</p>
+            </div>
         </div>
 
+        <!-- 3 Hình thức khám tóm tắt -->
         <div class="row pb-5">
-            <div class="col-md-4 mb-3"><div class="hm-note"><h6>Khám trực tiếp</h6><p>Đến phòng khám theo giờ hẹn. Đặt cọc 30% phí khám để giữ chỗ.</p></div></div>
-            <div class="col-md-4 mb-3"><div class="hm-note"><h6>Khám trực tuyến</h6><p>Khám qua video với bác sĩ. Thanh toán phí khám khi đặt lịch, nhớ chuẩn bị đường truyền ổn định.</p></div></div>
-            <div class="col-md-4 mb-3"><div class="hm-note"><h6>Cấp cứu</h6><p>Chọn mức độ 1-5 và nhập vị trí, không thu phí trước. Nếu nguy kịch, hãy gọi ngay <b>115</b>.</p></div></div>
+            <div class="col-md-4 mb-3">
+                <div class="feature-card">
+                    <h6 class="font-weight-bold text-success mb-2"><i class="fa fa-hospital-o mr-1"></i> Khám trực tiếp</h6>
+                    <p class="small text-muted mb-0">Đến khám tại các cơ sở phòng khám đạt chuẩn. Đặt cọc 30% giữ chỗ, phần còn lại thanh toán tại quầy tiếp đón.</p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="feature-card">
+                    <h6 class="font-weight-bold text-primary mb-2"><i class="fa fa-video-camera mr-1"></i> Khám trực tuyến</h6>
+                    <p class="small text-muted mb-0">Tư vấn qua video call chất lượng cao trực tiếp với bác sĩ. Tiết kiệm thời gian di chuyển, nhận đơn thuốc số ngay.</p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="feature-card">
+                    <h6 class="font-weight-bold text-danger mb-2"><i class="fa fa-ambulance mr-1"></i> Cấp cứu 24/7</h6>
+                    <p class="small text-muted mb-0">Phân loại Triage cấp cứu 1-3. Miễn phí đặt cọc trước, đội ngũ điều phối xe cấp cứu hỗ trợ lập tức.</p>
+                </div>
+            </div>
         </div>
     </div>
 </section>
-<!-- ##### Guide Area End ##### -->
-
-    
-

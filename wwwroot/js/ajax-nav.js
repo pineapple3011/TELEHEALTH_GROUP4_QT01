@@ -5,6 +5,12 @@
 
     var loading = null;
 
+    function isHome(p) {
+        p = p.toLowerCase().replace(/\/$/, '');
+        return p === '' || p === '/home' || p === '/home/index';
+    }
+    var pageIsHome = isHome(location.pathname);
+
     function isInternal(a) {
         return a.protocol === location.protocol && a.host === location.host;
     }
@@ -19,11 +25,16 @@
         if (!isInternal(a)) return false;
         // cùng trang, chỉ khác hash -> để trình duyệt tự xử lý
         if (a.pathname === location.pathname && a.search === location.search && a.hash) return false;
+
+        // MỚI: Trang chủ (hero) và trang con (banner) khác layout -> tải trang đầy đủ
+        if (isHome(a.pathname) !== pageIsHome) return false;
+
         return true;
     }
 
     function setActiveMenu(path) {
         var best = null, bestLen = -1;
+        $('.classynav ul li a').removeClass('active-nav');
         $('.classynav ul li').removeClass('active').each(function () {
             var a = $(this).children('a')[0];
             if (!a) return;
@@ -33,7 +44,10 @@
                 best = this; bestLen = p.length;
             }
         });
-        if (best) $(best).addClass('active');
+        if (best) {
+            $(best).addClass('active');
+            if (!isHome(path)) $(best).children('a').addClass('active-nav');
+        }
     }
 
     // keepScroll = true: giữ nguyên vị trí cuộn (dùng khi lọc danh sách)
@@ -57,6 +71,12 @@
 
                 var title = $main.find('#ajax-meta').attr('data-title');
                 if (title) document.title = title;
+
+                var pt = $main.find('#ajax-meta').attr('data-page-title');
+                if (pt) {
+                    $('.subpage-banner h2').text(pt);
+                    $('.subpage-banner .breadcrumb-item.active').text(pt);
+                }
 
                 if (push) history.pushState({ ajax: true }, '', finalUrl);
                 setActiveMenu(new URL(finalUrl, location.href).pathname);
@@ -100,6 +120,7 @@
 
     // Nút Back/Forward
     window.addEventListener('popstate', function () {
+        if (isHome(location.pathname) !== pageIsHome) { location.reload(); return; }
         load(location.href, false);
     });
 

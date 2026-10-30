@@ -1,144 +1,285 @@
-@model PatientProfileVm
+@model TELEHEALTH_GROUP4_QT01.Models.ViewModels.PatientProfileVm
 @{
-    ViewData["Title"] = "Hồ sơ của tôi";
+    ViewData["Title"] = "Hồ sơ sức khỏe của tôi";
     var words = Model.FullName.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
     var initials = words.Length == 0 ? "BN"
         : string.Concat(words.Skip(Math.Max(0, words.Length - 2)).Select(w => char.ToUpperInvariant(w[0])));
+    var completedApps = Model.RecentList.Where(x => x.TrangThai == "Hoàn thành").ToList();
 }
 
 <style>
-    .pt-card { border: 1px solid #e3e6ea; border-radius: 12px; background: #fff; }
-    .pt-avatar { width: 96px; height: 96px; border-radius: 50%; margin: 0 auto 14px; display: flex; align-items: center;
-                 justify-content: center; color: #fff; font-size: 2rem; font-weight: 700;
-                 background: linear-gradient(135deg,#6fc66b,#2c9d8f); }
-    .pt-row { font-size: 14px; padding: 8px 0; border-bottom: 1px dashed #e3e6ea; }
-    .pt-row:last-child { border-bottom: 0; }
-    .pt-row span { display: block; color: #6c757d; font-size: 12px; }
-    .pt-stat { text-align: center; padding: 18px 8px; }
-    .pt-stat b { display: block; font-size: 28px; line-height: 1.1; }
-    .pt-stat small { color: #6c757d; }
-    .pt-badge { font-size: 12px; padding: 2px 10px; border-radius: 20px; background: #eceff2; color: #495057; white-space: nowrap; }
-    .pt-badge.ok { background: #e6f6e8; color: #25803a; }
-    .pt-badge.wait { background: #fff4db; color: #8a6200; }
-    .pt-badge.bad { background: #fde8e8; color: #a12a2a; }
+    /* Thẻ bệnh nhân điện tử */
+    .health-id-card {
+        background: linear-gradient(135deg, #2c9d8f, #0056b3);
+        border-radius: 16px;
+        color: #fff;
+        padding: 24px;
+        box-shadow: 0 10px 25px rgba(0, 86, 179, 0.25);
+    }
+
+    .patient-avatar-box {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.2);
+        border: 2px solid rgba(255,255,255,0.6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        font-weight: 700;
+        color: #fff;
+    }
+
+    /* Tabs */
+    .profile-tabs .nav-link {
+        font-weight: 700;
+        font-size: 14px;
+        color: #495057;
+        border: none;
+        border-bottom: 3px solid transparent;
+        padding: 12px 20px;
+        background: transparent;
+    }
+
+        .profile-tabs .nav-link.active {
+            color: #2c9d8f;
+            border-bottom: 3px solid #0056b3;
+            background: transparent;
+        }
 </style>
 
-@functions {
-    static string BadgeClass(string st) => st switch
-    {
-        "Đã xác nhận" or "Hoàn thành" => "ok",
-        "Chờ xác nhận" => "wait",
-        "Đã hủy" => "bad",
-        _ => ""
-    };
-}
-
-<div class="container my-5" style="min-height:60vh">
-    <h2 class="mb-4">Hồ sơ của tôi</h2>
-
+<div class="container my-4" style="min-height: 65vh;">
+    <!-- Thông báo -->
     @if (TempData["Msg"] != null)
     {
-        <div class="alert alert-success">@TempData["Msg"]</div>
+        <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+            @TempData["Msg"]
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
     }
 
     @if (Model.PendingPayment > 0 && Model.PendingPayAppointId != null)
     {
-        <div class="alert alert-warning d-flex flex-wrap align-items-center justify-content-between">
-            <span>Bạn có <b>@Model.PendingPayment</b> lịch khám đang chờ thanh toán.</span>
-            <a asp-controller="Appointments" asp-action="Pay" asp-route-id="@Model.PendingPayAppointId"
-               class="btn btn-warning btn-sm">Thanh toán ngay</a>
+        <div class="alert alert-warning d-flex flex-wrap align-items-center justify-content-between shadow-sm mb-4 p-3 rounded-lg">
+            <div>
+                Bạn đang có <b>@Model.PendingPayment</b> lịch khám cần thanh toán phí/tiền cọc giữ chỗ.
+            </div>
+            <a asp-controller="Appointments" asp-action="Pay" asp-route-id="@Model.PendingPayAppointId" class="btn btn-warning font-weight-bold text-dark btn-sm mt-2 mt-md-0 shadow-sm">
+                Thanh toán ngay
+            </a>
         </div>
     }
 
     <div class="row">
-        <!-- Thông tin cá nhân -->
+        <!-- CỘT TRÁI: THẺ BỆNH NHÂN & THÔNG TIN LIÊN HỆ -->
         <div class="col-lg-4 mb-4">
-            <div class="pt-card p-4">
-                <div class="pt-avatar">@initials</div>
-                <h5 class="text-center mb-3">@Model.FullName</h5>
+            <div class="health-id-card mb-4">
+                <div class="mb-3">
+                    <span class="small text-uppercase font-weight-bold" style="letter-spacing: 1px; opacity: .85;">Thẻ bệnh nhân điện tử</span>
+                </div>
 
-                <div class="pt-row"><span>Email</span>@Model.Email</div>
-                <div class="pt-row"><span>Số điện thoại</span>@Model.Phone</div>
-                <div class="pt-row"><span>Địa chỉ</span>@(string.IsNullOrWhiteSpace(Model.Address) ? "Chưa cập nhật" : Model.Address)</div>
-                <div class="pt-row"><span>SĐT người thân (khi khẩn cấp)</span>@(string.IsNullOrWhiteSpace(Model.EmergencyPhone) ? "Chưa cập nhật" : Model.EmergencyPhone)</div>
+                <div class="d-flex align-items-center">
+                    <div class="patient-avatar-box mr-3">@initials</div>
+                    <div>
+                        <h5 class="font-weight-bold mb-0 text-white">@Model.FullName</h5>
+                        <div class="small" style="opacity: .9;">Mã BN: <b>@($"BN-{Model.PatientId:D6}")</b></div>
+                    </div>
+                </div>
+            </div>
 
-                <a asp-action="Edit" class="btn btn-success btn-block mt-3">Chỉnh sửa thông tin</a>
+            <div class="card border-0 shadow-sm rounded-lg p-4 bg-white mb-4">
+                <h6 class="font-weight-bold text-dark mb-3 border-bottom pb-2">Thông tin liên hệ</h6>
+                <div class="small mb-2">
+                    <span class="text-muted d-block">Địa chỉ email:</span>
+                    <b class="text-dark">@Model.Email</b>
+                </div>
+                <div class="small mb-2">
+                    <span class="text-muted d-block">Số điện thoại liên lạc:</span>
+                    <b class="text-dark">@Model.Phone</b>
+                </div>
+                <div class="small mb-2">
+                    <span class="text-muted d-block">Địa chỉ thường trú:</span>
+                    <span class="text-dark">@(string.IsNullOrWhiteSpace(Model.Address) ? "Chưa cập nhật địa chỉ" : Model.Address)</span>
+                </div>
+                <div class="small mb-3">
+                    <span class="text-muted d-block">SĐT người thân (liên hệ khẩn cấp):</span>
+                    <b class="text-danger">@(string.IsNullOrWhiteSpace(Model.EmergencyPhone) ? "Chưa cập nhật" : Model.EmergencyPhone)</b>
+                </div>
+
+                <a asp-action="Edit" class="btn btn-outline-success btn-sm btn-block font-weight-bold">
+                    Chỉnh sửa thông tin hồ sơ
+                </a>
             </div>
         </div>
 
-        <div class="col-lg-8">
-            <!-- Thống kê -->
-            <div class="row mb-4">
-                <div class="col-6 col-md-3 mb-3"><div class="pt-card pt-stat"><b>@Model.Total</b><small>Tổng ca khám</small></div></div>
-                <div class="col-6 col-md-3 mb-3"><div class="pt-card pt-stat"><b>@Model.Upcoming</b><small>Sắp tới</small></div></div>
-                <div class="col-6 col-md-3 mb-3"><div class="pt-card pt-stat"><b>@Model.Completed</b><small>Đã hoàn thành</small></div></div>
-                <div class="col-6 col-md-3 mb-3"><div class="pt-card pt-stat"><b>@Model.PendingPayment</b><small>Chờ thanh toán</small></div></div>
-            </div>
+        <!-- CỘT PHẢI: TABS QUẢN LÝ -->
+        <div class="col-lg-8 mb-4">
+            <div class="card border-0 shadow-sm rounded-lg bg-white overflow-hidden">
+                <ul class="nav nav-tabs profile-tabs bg-light px-3 pt-2" id="profileTab" role="tablist">
+                    <li class="nav-item">
+                        <a class="nav-link active" id="upcoming-tab" data-toggle="tab" href="#upcoming" role="tab">
+                            Lịch sắp tới (@Model.Upcoming)
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="records-tab" data-toggle="tab" href="#records" role="tab">
+                            Lịch sử khám (@Model.RecentList.Count)
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="prescriptions-tab" data-toggle="tab" href="#prescriptions" role="tab">
+                            Đơn thuốc (@completedApps.Count)
+                        </a>
+                    </li>
+                </ul>
 
-            <!-- Lịch sắp tới -->
-            <div class="pt-card p-4 mb-4">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h5 class="mb-0">Lịch khám sắp tới</h5>
-                    <a asp-controller="Doctors" asp-action="Index" class="btn btn-outline-success btn-sm">+ Đặt lịch mới</a>
-                </div>
-                @if (!Model.UpcomingList.Any())
-                {
-                    <p class="text-muted mb-0">Bạn chưa có lịch khám sắp tới.</p>
-                }
-                else
-                {
-                    <div class="table-responsive">
-                        <table class="table table-sm mb-0">
-                            <thead><tr><th>Ngày</th><th>Giờ</th><th>Bác sĩ</th><th>Hình thức</th><th>Trạng thái</th><th></th></tr></thead>
-                            <tbody>
-                            @foreach (var r in Model.UpcomingList)
-                            {
-                                <tr>
-                                    <td>@r.DateText</td>
-                                    <td>@r.TimeText</td>
-                                    <td>@r.DoctorName</td>
-                                    <td>@r.HinhThuc</td>
-                                    <td><span class="pt-badge @BadgeClass(r.TrangThai)">@r.TrangThai</span></td>
-                                    <td><a asp-controller="Appointments" asp-action="Details" asp-route-id="@r.AppointId">Chi tiết</a></td>
-                                </tr>
-                            }
-                            </tbody>
-                        </table>
-                    </div>
-                }
-            </div>
+                <div class="tab-content p-4" id="profileTabContent">
+                    <!-- TAB 1: LỊCH SẮP TỚI -->
+                    <div class="tab-pane fade show active" id="upcoming" role="tabpanel">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6 class="font-weight-bold text-dark mb-0">Lịch khám bệnh sắp diễn ra</h6>
+                            <a asp-controller="Doctors" asp-action="Index" class="btn btn-success btn-sm font-weight-bold">Đặt lịch mới</a>
+                        </div>
 
-            <!-- Lịch sử gần đây -->
-            <div class="pt-card p-4">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h5 class="mb-0">Lịch sử khám gần đây</h5>
-                    <a asp-controller="Appointments" asp-action="Index">Xem tất cả</a>
-                </div>
-                @if (!Model.RecentList.Any())
-                {
-                    <p class="text-muted mb-0">Chưa có lịch sử khám.</p>
-                }
-                else
-                {
-                    <div class="table-responsive">
-                        <table class="table table-sm mb-0">
-                            <thead><tr><th>Ngày</th><th>Giờ</th><th>Bác sĩ</th><th>Hình thức</th><th>Trạng thái</th><th></th></tr></thead>
-                            <tbody>
-                            @foreach (var r in Model.RecentList)
-                            {
-                                <tr>
-                                    <td>@r.DateText</td>
-                                    <td>@r.TimeText</td>
-                                    <td>@r.DoctorName</td>
-                                    <td>@r.HinhThuc</td>
-                                    <td><span class="pt-badge @BadgeClass(r.TrangThai)">@r.TrangThai</span></td>
-                                    <td><a asp-controller="Appointments" asp-action="Details" asp-route-id="@r.AppointId">Chi tiết / đơn thuốc</a></td>
-                                </tr>
-                            }
-                            </tbody>
-                        </table>
+                        @if (!Model.UpcomingList.Any())
+                        {
+                            <div class="text-center py-4 text-muted">
+                                <p class="mb-0 small">Bạn không có lịch khám sắp tới nào.</p>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-hover table-sm small mb-0">
+                                    <thead class="bg-light">
+                                        <tr>
+                                            <th>Mã ca</th>
+                                            <th>Ngày giờ</th>
+                                            <th>Bác sĩ</th>
+                                            <th>Hình thức</th>
+                                            <th>Trạng thái</th>
+                                            <th class="text-right">Thao tác</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var r in Model.UpcomingList)
+                                        {
+                                            <tr>
+                                                <td class="font-weight-bold">#TK-@r.AppointId.ToString("D5")</td>
+                                                <td>@r.DateText lúc <b>@r.TimeText</b></td>
+                                                <td>@r.DoctorName</td>
+                                                <td><span class="badge badge-soft-primary">@r.HinhThuc</span></td>
+                                                <td><span class="badge badge-soft-success">@r.TrangThai</span></td>
+                                                <td class="text-right">
+                                                    @if (r.TrangThai == "Chờ thanh toán")
+                                                    {
+                                                        <a asp-controller="Appointments" asp-action="Pay" asp-route-id="@r.AppointId" class="btn btn-warning btn-sm py-0 px-2 font-weight-bold">Trả phí</a>
+                                                    }
+                                                    else if (r.HinhThuc == "Online" && (r.TrangThai == "Đã xác nhận" || r.TrangThai == "Sắp diễn ra"))
+                                                    {
+                                                        <a asp-controller="Appointments" asp-action="Room" asp-route-id="@r.AppointId" class="btn btn-primary btn-sm py-0 px-2 font-weight-bold">Vào khám</a>
+                                                    }
+                                                    <a asp-controller="Appointments" asp-action="Details" asp-route-id="@r.AppointId" class="btn btn-outline-secondary btn-sm py-0 px-2 ml-1">Chi tiết</a>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
                     </div>
-                }
+
+                    <!-- TAB 2: LỊCH SỬ KHÁM -->
+                    <div class="tab-pane fade" id="records" role="tabpanel">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6 class="font-weight-bold text-dark mb-0">Lịch sử các lần khám trước đây</h6>
+                            <a asp-controller="Appointments" asp-action="Index" class="small text-success font-weight-bold">Xem toàn bộ &rarr;</a>
+                        </div>
+
+                        @if (!Model.RecentList.Any())
+                        {
+                            <p class="text-muted small mb-0">Chưa có lịch sử khám bệnh.</p>
+                        }
+                        else
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-hover table-sm small mb-0">
+                                    <thead class="bg-light">
+                                        <tr>
+                                            <th>Mã ca</th>
+                                            <th>Ngày khám</th>
+                                            <th>Bác sĩ</th>
+                                            <th>Hình thức</th>
+                                            <th>Trạng thái</th>
+                                            <th class="text-right">Hồ sơ</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var r in Model.RecentList)
+                                        {
+                                            <tr>
+                                                <td class="font-weight-bold">#TK-@r.AppointId.ToString("D5")</td>
+                                                <td>@r.DateText</td>
+                                                <td>@r.DoctorName</td>
+                                                <td>@r.HinhThuc</td>
+                                                <td>
+                                                    <span class="badge @(r.TrangThai == "Hoàn thành" ? "badge-soft-info" : "badge-soft-danger")">
+                                                        @r.TrangThai
+                                                    </span>
+                                                </td>
+                                                <td class="text-right">
+                                                    <a asp-controller="Appointments" asp-action="Details" asp-route-id="@r.AppointId" class="btn btn-outline-success btn-sm py-0 px-2">Xem bệnh án</a>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                    </div>
+
+                    <!-- TAB 3: ĐƠN THUỐC -->
+                    <div class="tab-pane fade" id="prescriptions" role="tabpanel">
+                        <h6 class="font-weight-bold text-dark mb-3">Đơn thuốc điện tử</h6>
+                        @if (!completedApps.Any())
+                        {
+                            <div class="text-center py-4 text-muted">
+                                <p class="mb-0 small">Chưa có đơn thuốc nào được lưu trong hệ thống.</p>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-hover table-sm small mb-0">
+                                    <thead class="bg-light">
+                                        <tr>
+                                            <th>Mã đơn</th>
+                                            <th>Ngày khám</th>
+                                            <th>Bác sĩ</th>
+                                            <th class="text-right">Chi tiết</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var app in completedApps)
+                                        {
+                                            <tr>
+                                                <td class="font-weight-bold">#DT-@app.AppointId.ToString("D5")</td>
+                                                <td>@app.DateText</td>
+                                                <td>@app.DoctorName</td>
+                                                <td class="text-right">
+                                                    <a asp-controller="Appointments" asp-action="Details" asp-route-id="@app.AppointId" class="btn btn-outline-success btn-sm py-0 px-2">Xem toa thuốc</a>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                    </div>
+                </div>
             </div>
         </div>
     </div>

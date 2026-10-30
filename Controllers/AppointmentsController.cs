@@ -10,9 +10,9 @@ namespace TELEHEALTH_GROUP4_QT01.Controllers
     public class AppointmentsController : PatientBaseController
     {
         // ====== THÔNG TIN NGÂN HÀNG (đổi thành của nhóm; BankId theo danh sách của VietQR, vd: MB, VCB, ACB) ======
-        private const string BankId = "MB";
-        private const string AccountNo = "0123456789";
-        private const string AccountName = "TELEHEALTH GROUP 4";
+        private const string BankId = "NCB";
+        private const string AccountNo = "100013747808";
+        private const string AccountName = "DUONG LINH CHI";
 
         private static readonly string[] AllowedExt = { ".jpg", ".jpeg", ".png", ".pdf" };
         private const long MaxFileSize = 5 * 1024 * 1024;   // 5 MB
@@ -316,6 +316,49 @@ namespace TELEHEALTH_GROUP4_QT01.Controllers
 
             TempData["Msg"] = "Đã gửi biên lai. Lịch hẹn sẽ được xác nhận sau khi kiểm tra thanh toán.";
             return RedirectToAction(nameof(Details), new { id });
+        }
+
+        // PHÒNG CHỜ 
+
+        [HttpGet]
+        public async Task<IActionResult> Room(int id)
+        {
+            var ca = await GetOwnedAsync(id);
+            if (ca == null) return NotFound();
+
+            if (ca.BookingType != HinhThucKham.Online || ca.Status == "Đã hủy")
+                return RedirectToAction(nameof(Details), new { id });
+
+            var doctor = await _context.Doctors.FindAsync(Cv.I(ca.DoctorId));
+            var spec = doctor == null ? null : await _context.Specialties.FindAsync(Cv.I(doctor.SpecId));
+
+            ViewBag.Doctor = doctor;
+            ViewBag.Specialty = spec;     // đúng tên view đang đọc
+            return View(ca);              // truyền model Appointment
+        }
+
+        // =====================================================================
+        // 5. HỦY LỊCH  POST: /Appointments/Cancel
+        // =====================================================================
+        [HttpPost, ValidateAntiForgeryToken]
+        public async Task<IActionResult> Cancel(int id, string? reason)
+        {
+            var ca = await GetOwnedAsync(id);
+            if (ca == null) return NotFound();
+
+            if (ca.Status != "Chờ xác nhận" && ca.Status != "Đã xác nhận")
+            {
+                TempData["Err"] = "Ca khám này không thể hủy ở trạng thái hiện tại.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            ca.Status = "Đã hủy";
+            // ca.CancelReason = reason;   // bỏ comment nếu bảng Appointments có cột lý do hủy
+
+            await _context.SaveChangesAsync();
+
+            TempData["Msg"] = "Đã hủy lịch khám.";
+            return RedirectToAction(nameof(Index));
         }
 
         // =====================================================================
