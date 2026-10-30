@@ -15,6 +15,8 @@ public partial class TelehealthContext : DbContext
     {
     }
 
+    public virtual DbSet<Account> Accounts { get; set; }
+
     public virtual DbSet<Admin> Admins { get; set; }
 
     public virtual DbSet<Appointment> Appointments { get; set; }
@@ -41,10 +43,46 @@ public partial class TelehealthContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Data Source=.;Initial Catalog=TELEHEALTH;Integrated Security=True;Connect Timeout=30;Encrypt=True;Trust Server Certificate=True;Application Intent=ReadWrite;Multi Subnet Failover=False;Command Timeout=30");
+        => optionsBuilder.UseSqlServer("Data Source=DUWASNGUYEN\\SQLEXPRESS;Initial Catalog=TELEHEALTH;Integrated Security=True;Connect Timeout=30;Encrypt=True;Trust Server Certificate=True");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<Account>(entity =>
+        {
+            entity.HasIndex(e => e.Email, "UQ_Accounts_Email").IsUnique();
+
+            entity.Property(e => e.AccountId).HasColumnName("AccountID");
+            entity.Property(e => e.AdminId).HasColumnName("AdminID");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.DoctorId).HasColumnName("DoctorID");
+            entity.Property(e => e.Email)
+                .HasMaxLength(100)
+                .IsUnicode(false);
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
+            entity.Property(e => e.LastLogin).HasColumnType("datetime");
+            entity.Property(e => e.PasswordHash)
+                .HasMaxLength(255)
+                .IsUnicode(false);
+            entity.Property(e => e.PatientId).HasColumnName("PatientID");
+            entity.Property(e => e.Role)
+                .HasMaxLength(20)
+                .IsUnicode(false);
+
+            entity.HasOne(d => d.Admin).WithMany(p => p.Accounts)
+                .HasForeignKey(d => d.AdminId)
+                .HasConstraintName("FK_Accounts_ADMIN");
+
+            entity.HasOne(d => d.Doctor).WithMany(p => p.Accounts)
+                .HasForeignKey(d => d.DoctorId)
+                .HasConstraintName("FK_Accounts_Doctors");
+
+            entity.HasOne(d => d.Patient).WithMany(p => p.Accounts)
+                .HasForeignKey(d => d.PatientId)
+                .HasConstraintName("FK_Accounts_Patients");
+        });
+
         modelBuilder.Entity<Admin>(entity =>
         {
             entity.ToTable("ADMIN");
@@ -134,6 +172,7 @@ public partial class TelehealthContext : DbContext
 
             entity.Property(e => e.DoctorId).HasColumnName("DoctorID");
             entity.Property(e => e.AdminId).HasColumnName("AdminID");
+            entity.Property(e => e.AvatarUrl).HasMaxLength(300);
             entity.Property(e => e.Current)
                 .HasMaxLength(50)
                 .HasDefaultValue("Available");
@@ -141,7 +180,6 @@ public partial class TelehealthContext : DbContext
                 .HasMaxLength(100)
                 .IsUnicode(false);
             entity.Property(e => e.Exp).HasColumnName("EXP");
-            entity.Property(e => e.AvatarUrl).HasMaxLength(300);
             entity.Property(e => e.FullName).HasMaxLength(100);
             entity.Property(e => e.Phone)
                 .HasMaxLength(20)

@@ -1,0 +1,82 @@
+@model DoctorListVm
+@{
+    ViewData["Title"] = "Tài khoản bác sĩ";
+    string Initials(string name)
+    {
+        var w = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        return w.Length == 0 ? "BS" : string.Concat(w.Skip(Math.Max(0, w.Length - 2)).Select(x => char.ToUpperInvariant(x[0])));
+    }
+}
+
+<div class="ad-top">
+    <div>
+        <h1>Tài khoản bác sĩ</h1>
+        <p>@Model.Items.Count bác sĩ.</p>
+    </div>
+    <a class="ad-btn" asp-action="CreateDoctor">Thêm bác sĩ</a>
+</div>
+
+<div class="ad-card">
+    <div class="bd">
+        <form method="get" class="ad-filter">
+            <div class="grow">
+                <label for="q">Tìm kiếm</label>
+                <input id="q" name="q" value="@Model.Q" class="form-control" placeholder="Họ tên, email hoặc số điện thoại" />
+            </div>
+            <div>
+                <label for="specId">Chuyên khoa</label>
+                <select id="specId" name="specId" class="form-control" asp-items="Model.Specs"><option value="">Tất cả</option></select>
+            </div>
+            <button class="ad-btn" type="submit">Lọc</button>
+            @if (!string.IsNullOrWhiteSpace(Model.Q) || Model.SpecId != null) { <a class="ad-btn ghost" asp-action="Doctors">Bỏ lọc</a> }
+        </form>
+    </div>
+</div>
+
+<div class="ad-card">
+    <div class="bd flush ad-scroll">
+        @if (Model.Items.Count == 0)
+        {
+            <div class="ad-empty">Không có bác sĩ nào.</div>
+        }
+        else
+        {
+            <table class="ad-table">
+                <thead>
+                    <tr><th>Bác sĩ</th><th>Chuyên khoa</th><th>Điện thoại</th><th class="num">Kinh nghiệm</th><th>Trạng thái làm việc</th><th class="num">Lịch khám</th><th>Tài khoản</th><th></th></tr>
+                </thead>
+                <tbody>
+                @foreach (var d in Model.Items)
+                {
+                    <tr>
+                        <td>
+                            <div class="ad-person">
+                                @if (!string.IsNullOrWhiteSpace(d.AvatarUrl)) { <img class="ad-avatar" src="@d.AvatarUrl" alt="" /> }
+                                else { <span class="ad-avatar">@Initials(d.FullName)</span> }
+                                <div>@d.FullName<small>@d.Email</small></div>
+                            </div>
+                        </td>
+                        <td>@d.Specialty</td>
+                        <td>@d.Phone</td>
+                        <td class="num">@d.Exp năm</td>
+                        <td><span class="ad-tag @(Cv.IsAvailable(d.Status) ? "ok" : "warn")">@TrangThaiBacSi.Label(d.Status)</span></td>
+                        <td class="num">@d.AppointmentCount</td>
+                        <td>
+                            @if (!d.HasAccount) { <span class="ad-tag warn">Chưa có tài khoản</span> }
+                            else if (d.IsActive) { <span class="ad-tag ok">Hoạt động</span> }
+                            else { <span class="ad-tag bad">Đã khóa</span> }
+                        </td>
+                        <td class="act">
+                            <a class="ad-btn ghost sm" asp-action="EditDoctor" asp-route-id="@d.DoctorId">Sửa</a>
+                            <form asp-action="DeleteDoctor" asp-route-id="@d.DoctorId" method="post" class="ad-inline"
+                                  data-confirm="Xóa bác sĩ &quot;@d.FullName&quot;? Thao tác này không thể hoàn tác.">
+                                <button type="submit" class="ad-btn danger sm">Xóa</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>

@@ -1,0 +1,81 @@
+@model DoctorFormVm
+@{
+    ViewData["Title"] = Model.IsNew ? "Thêm bác sĩ" : "Sửa bác sĩ";
+    // Danh sách trạng thái chuẩn + giữ nguyên giá trị cũ trong DB nếu khác danh sách chuẩn
+    var statusItems = TrangThaiBacSi.All.Select(s => new SelectListItem(TrangThaiBacSi.Label(s), s)).ToList();
+    if (!string.IsNullOrWhiteSpace(Model.Current) && !TrangThaiBacSi.All.Contains(Model.Current))
+        statusItems.Add(new SelectListItem(Model.Current, Model.Current));
+}
+
+<div class="ad-top">
+    <div>
+        <h1>@(Model.IsNew ? "Thêm bác sĩ" : "Sửa bác sĩ")</h1>
+        <p>Thông tin chuyên môn và tài khoản đăng nhập của bác sĩ.</p>
+    </div>
+    <a class="ad-btn ghost" asp-action="Doctors">Quay lại danh sách</a>
+</div>
+
+<div class="ad-card ad-form ad-form-narrow">
+    <div class="bd">
+        <form asp-action="@(Model.IsNew ? "CreateDoctor" : "EditDoctor")" method="post" enctype="multipart/form-data">
+            <input type="hidden" asp-for="DoctorId" />
+            <input type="hidden" asp-for="AvatarUrl" />
+            <div class="row">
+                <div class="form-group col-md-6">
+                    <label asp-for="FullName"></label>
+                    <input asp-for="FullName" class="form-control" />
+                    <span asp-validation-for="FullName" class="text-danger"></span>
+                </div>
+                <div class="form-group col-md-6">
+                    <label asp-for="Phone"></label>
+                    <input asp-for="Phone" class="form-control" />
+                    <span asp-validation-for="Phone" class="text-danger"></span>
+                </div>
+                <div class="form-group col-md-6">
+                    <label asp-for="Email">Email đăng nhập</label>
+                    <input asp-for="Email" class="form-control" />
+                    <span asp-validation-for="Email" class="text-danger"></span>
+                </div>
+                <div class="form-group col-md-6">
+                    <label asp-for="SpecId"></label>
+                    <select asp-for="SpecId" asp-items="Model.Specs" class="form-control"><option value="0">Chọn chuyên khoa</option></select>
+                    <span asp-validation-for="SpecId" class="text-danger"></span>
+                </div>
+                <div class="form-group col-md-6">
+                    <label asp-for="Exp"></label>
+                    <input asp-for="Exp" type="number" min="0" max="60" class="form-control" />
+                    <span asp-validation-for="Exp" class="text-danger"></span>
+                </div>
+                <div class="form-group col-md-6">
+                    <label asp-for="Current"></label>
+                    <select asp-for="Current" class="form-control" asp-items="statusItems"></select>
+                    <span asp-validation-for="Current" class="text-danger"></span>
+                </div>
+                <div class="form-group col-12">
+                    <label asp-for="AvatarFile"></label>
+                    @if (!string.IsNullOrWhiteSpace(Model.AvatarUrl))
+                    {
+                        <div class="mb-2"><img src="@Model.AvatarUrl" alt="" class="ad-avatar" style="width:64px;height:64px;flex-basis:64px" /></div>
+                    }
+                    <input asp-for="AvatarFile" type="file" accept=".jpg,.jpeg,.png,.webp" class="form-control" />
+                    <small class="ad-hint">JPG, PNG hoặc WEBP, tối đa 2MB. Để trống để giữ ảnh hiện tại.</small>
+                    <span asp-validation-for="AvatarFile" class="text-danger d-block"></span>
+                </div>
+                <div class="form-group col-md-6">
+                    <label asp-for="Password">@(Model.IsNew ? "Mật khẩu" : "Mật khẩu mới")</label>
+                    <input asp-for="Password" type="password" autocomplete="new-password" class="form-control" />
+                    <span asp-validation-for="Password" class="text-danger"></span>
+                    @if (!Model.IsNew) { <small class="ad-hint">Để trống nếu không muốn đổi mật khẩu.</small> }
+                </div>
+                <div class="form-group col-md-6 d-flex align-items-end">
+                    <div class="check">
+                        <input asp-for="IsActive" type="checkbox" />
+                        <label asp-for="IsActive"></label>
+                    </div>
+                </div>
+            </div>
+            <button type="submit" class="ad-btn">@(Model.IsNew ? "Thêm bác sĩ" : "Lưu thay đổi")</button>
+            <a class="ad-btn ghost" asp-action="Doctors">Hủy</a>
+        </form>
+    </div>
+</div>

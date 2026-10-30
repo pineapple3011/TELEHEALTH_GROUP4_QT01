@@ -1,0 +1,63 @@
+@model PatientListVm
+@{ ViewData["Title"] = "Tài khoản bệnh nhân"; }
+
+<div class="ad-top">
+    <div>
+        <h1>Tài khoản bệnh nhân</h1>
+        <p>@Model.Items.Count bệnh nhân@(string.IsNullOrWhiteSpace(Model.Q) ? "" : " khớp với từ khóa").</p>
+    </div>
+    <a class="ad-btn" asp-action="CreatePatient">Thêm bệnh nhân</a>
+</div>
+
+<div class="ad-card">
+    <div class="bd">
+        <form method="get" class="ad-filter">
+            <div class="grow">
+                <label for="q">Tìm kiếm</label>
+                <input id="q" name="q" value="@Model.Q" class="form-control" placeholder="Họ tên, email hoặc số điện thoại" />
+            </div>
+            <button class="ad-btn" type="submit">Tìm</button>
+            @if (!string.IsNullOrWhiteSpace(Model.Q)) { <a class="ad-btn ghost" asp-action="Patients">Bỏ lọc</a> }
+        </form>
+    </div>
+</div>
+
+<div class="ad-card">
+    <div class="bd flush ad-scroll">
+        @if (Model.Items.Count == 0)
+        {
+            <div class="ad-empty">Không có bệnh nhân nào.</div>
+        }
+        else
+        {
+            <table class="ad-table">
+                <thead>
+                    <tr><th>Bệnh nhân</th><th>Điện thoại</th><th>Địa chỉ</th><th class="num">Lịch khám</th><th>Tài khoản</th><th></th></tr>
+                </thead>
+                <tbody>
+                @foreach (var p in Model.Items)
+                {
+                    <tr>
+                        <td>@p.FullName<br /><small class="ad-hint">@p.Email</small></td>
+                        <td>@p.Phone</td>
+                        <td>@(string.IsNullOrWhiteSpace(p.Address) ? "Chưa có" : p.Address)</td>
+                        <td class="num">@p.AppointmentCount</td>
+                        <td>
+                            @if (!p.HasAccount) { <span class="ad-tag warn">Chưa có tài khoản</span> }
+                            else if (p.IsActive) { <span class="ad-tag ok">Hoạt động</span> }
+                            else { <span class="ad-tag bad">Đã khóa</span> }
+                        </td>
+                        <td class="act">
+                            <a class="ad-btn ghost sm" asp-action="EditPatient" asp-route-id="@p.PatientId">Sửa</a>
+                            <form asp-action="DeletePatient" asp-route-id="@p.PatientId" method="post" class="ad-inline"
+                                  data-confirm="Xóa bệnh nhân &quot;@p.FullName&quot;? Thao tác này không thể hoàn tác.">
+                                <button type="submit" class="ad-btn danger sm">Xóa</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>

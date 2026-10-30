@@ -21,8 +21,9 @@ public partial class Doctor
 
     public string Current { get; set; } = null!;
 
-    // Đường dẫn ảnh đại diện, ví dụ /uploads/doctors/bs1.jpg (null = hiện avatar chữ cái)
     public string? AvatarUrl { get; set; }
+
+    public virtual ICollection<Account> Accounts { get; set; } = new List<Account>();
 
     public virtual Admin? Admin { get; set; }
 

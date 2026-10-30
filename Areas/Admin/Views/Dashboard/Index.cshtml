@@ -1,0 +1,74 @@
+@model DashboardVm
+@{ ViewData["Title"] = "Tổng quan"; }
+
+<div class="ad-top">
+    <div>
+        <h1>Tổng quan</h1>
+        <p>Tình hình hoạt động hôm nay, @DateTime.Today.ToString("dd/MM/yyyy").</p>
+    </div>
+</div>
+
+<div class="ad-stats">
+    <div class="ad-stat"><small>Bệnh nhân</small><b>@Model.PatientTotal</b></div>
+    <div class="ad-stat"><small>Bác sĩ</small><b>@Model.DoctorTotal</b></div>
+    <div class="ad-stat"><small>Ca khám hôm nay</small><b>@Model.TodayCases</b></div>
+    <div class="ad-stat"><small>Doanh thu tháng này</small><b>@Cv.Money(Model.RevenueThisMonth)</b></div>
+    <div class="ad-stat @(Model.PendingPayments > 0 ? "warn" : "")">
+        <small>Giao dịch chờ xác nhận</small><b>@Model.PendingPayments</b>
+        <em><a asp-controller="Revenue" asp-action="Index" asp-fragment="pending">Xem và duyệt</a></em>
+    </div>
+    <div class="ad-stat"><small>Lịch khám chờ xác nhận</small><b>@Model.PendingAppointments</b></div>
+</div>
+
+<div class="ad-cols">
+    <div class="ad-card">
+        <div class="hd"><h2>Doanh thu 6 tháng gần nhất</h2><a asp-controller="Revenue" asp-action="Index">Chi tiết</a></div>
+        <div class="bd"><div class="ad-chart"><canvas id="revChart"></canvas></div></div>
+    </div>
+
+    <div class="ad-card">
+        <div class="hd"><h2>Bác sĩ cần kiểm tra</h2><a asp-controller="Monitoring" asp-action="Index" asp-fragment="status">Xem tất cả</a></div>
+        <div class="bd flush">
+            @if (Model.Suspicious.Count == 0)
+            {
+                <div class="ad-empty">Hiện không có bác sĩ nào đáng ngờ.</div>
+            }
+            else
+            {
+                <div class="ad-scroll">
+                <table class="ad-table">
+                    <thead><tr><th>Bác sĩ</th><th>Trạng thái</th><th>Lý do</th></tr></thead>
+                    <tbody>
+                    @foreach (var r in Model.Suspicious)
+                    {
+                        <tr class="flag">
+                            <td>@r.DoctorName<br /><small class="ad-hint">@r.Specialty</small></td>
+                            <td><span class="ad-tag warn">@TrangThaiBacSi.Label(r.Status)</span></td>
+                            <td><ul class="ad-reasons">@foreach (var why in r.Reasons) { <li>@why</li> }</ul></td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script>
+        new Chart(document.getElementById('revChart'), {
+            type: 'bar',
+            data: {
+                labels: @Json.Serialize(Model.MonthLabels),
+                datasets: [{ label: 'Doanh thu (đ)', data: @Json.Serialize(Model.MonthRevenue), backgroundColor: '#1f8f82', borderRadius: 3 }]
+            },
+            options: {
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true, ticks: { callback: function (v) { return (v / 1000000) + ' tr'; } } } }
+            }
+        });
+    </script>
+}

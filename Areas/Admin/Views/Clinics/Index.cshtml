@@ -1,0 +1,56 @@
+@model ClinicListVm
+@{ ViewData["Title"] = "Phòng khám"; }
+
+<div class="ad-top">
+    <div>
+        <h1>Phòng khám</h1>
+        <p>@Model.Items.Count phòng khám.</p>
+    </div>
+    <a class="ad-btn" asp-action="Create" asp-route-specId="@Model.SpecId">Thêm phòng khám</a>
+</div>
+
+<div class="ad-card">
+    <div class="bd">
+        <form method="get" class="ad-filter">
+            <div>
+                <label for="specId">Chuyên khoa</label>
+                <select id="specId" name="specId" class="form-control" asp-items="Model.Specs"><option value="">Tất cả</option></select>
+            </div>
+            <button class="ad-btn" type="submit">Lọc</button>
+            @if (Model.SpecId != null) { <a class="ad-btn ghost" asp-action="Index">Bỏ lọc</a> }
+        </form>
+    </div>
+</div>
+
+<div class="ad-card">
+    <div class="bd flush ad-scroll">
+        @if (Model.Items.Count == 0)
+        {
+            <div class="ad-empty">Chưa có phòng khám nào.</div>
+        }
+        else
+        {
+            <table class="ad-table">
+                <thead><tr><th>Phòng khám</th><th>Vị trí</th><th>Chuyên khoa</th><th class="num">Lịch khám</th><th></th></tr></thead>
+                <tbody>
+                @foreach (var c in Model.Items)
+                {
+                    <tr>
+                        <td>@c.Name</td>
+                        <td>@c.Location</td>
+                        <td>@c.Specialty</td>
+                        <td class="num">@c.AppointmentCount</td>
+                        <td class="act">
+                            <a class="ad-btn ghost sm" asp-action="Edit" asp-route-id="@c.ClinicId">Sửa</a>
+                            <form asp-action="Delete" asp-route-id="@c.ClinicId" method="post" class="ad-inline"
+                                  data-confirm="Xóa phòng khám &quot;@c.Name&quot;?">
+                                <button type="submit" class="ad-btn danger sm">Xóa</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>

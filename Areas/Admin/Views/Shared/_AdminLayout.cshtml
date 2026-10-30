@@ -1,0 +1,76 @@
+@{
+    var ctrl = (ViewContext.RouteData.Values["controller"] as string) ?? "";
+    var act = (ViewContext.RouteData.Values["action"] as string) ?? "";
+
+    bool On(string c, string? a = null) =>
+        string.Equals(ctrl, c, StringComparison.OrdinalIgnoreCase) &&
+        (a == null || string.Equals(act, a, StringComparison.OrdinalIgnoreCase));
+
+    // Tab Bệnh nhân / Bác sĩ cùng thuộc Accounts nên so theo tên action
+    var onPatients = On("Accounts") && (act.EndsWith("Patient", StringComparison.OrdinalIgnoreCase) || act.Equals("Patients", StringComparison.OrdinalIgnoreCase));
+    var onDoctors = On("Accounts") && !onPatients;
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@ViewData["Title"] - TELEHEALTH Admin</title>
+    <link rel="icon" href="~/favicon.ico" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" />
+    <link rel="stylesheet" href="~/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
+</head>
+<body class="admin">
+    <div class="ad-shell">
+        <aside class="ad-side">
+            <div class="ad-brand">
+                <b>TELEHEALTH</b>
+                <span>Quản trị hệ thống</span>
+            </div>
+            <nav>
+                <a class="ad-link @(On("Dashboard") ? "active" : "")" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">Tổng quan</a>
+
+                <div class="ad-group">Tài khoản</div>
+                <a class="ad-link @(onPatients ? "active" : "")" asp-area="Admin" asp-controller="Accounts" asp-action="Patients">Bệnh nhân</a>
+                <a class="ad-link @(onDoctors ? "active" : "")" asp-area="Admin" asp-controller="Accounts" asp-action="Doctors">Bác sĩ</a>
+
+                <div class="ad-group">Theo dõi và báo cáo</div>
+                <a class="ad-link @(On("Monitoring") ? "active" : "")" asp-area="Admin" asp-controller="Monitoring" asp-action="Index">Bệnh nhân, hồ sơ, bác sĩ</a>
+                <a class="ad-link @(On("Revenue") ? "active" : "")" asp-area="Admin" asp-controller="Revenue" asp-action="Index">Doanh thu</a>
+
+                <div class="ad-group">Danh mục</div>
+                <a class="ad-link @(On("Specialties") ? "active" : "")" asp-area="Admin" asp-controller="Specialties" asp-action="Index">Chuyên khoa và giá</a>
+                <a class="ad-link @(On("Clinics") ? "active" : "")" asp-area="Admin" asp-controller="Clinics" asp-action="Index">Phòng khám</a>
+
+                <div class="ad-back">
+                    <a class="ad-link" asp-area="" asp-controller="Home" asp-action="Index">Về trang bệnh nhân</a>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="ad-main">
+            @if (TempData["Msg"] != null)
+            {
+                <div class="ad-alert ok" role="status">@TempData["Msg"]</div>
+            }
+            @if (TempData["Err"] != null)
+            {
+                <div class="ad-alert bad" role="alert">@TempData["Err"]</div>
+            }
+            @RenderBody()
+        </main>
+    </div>
+
+    <script>
+        // Xác nhận trước khi thực hiện thao tác nguy hiểm: <form data-confirm="...">
+        document.addEventListener('submit', function (e) {
+            var m = e.target.getAttribute && e.target.getAttribute('data-confirm');
+            if (m && !window.confirm(m)) e.preventDefault();
+        });
+    </script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

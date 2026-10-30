@@ -1,0 +1,59 @@
+@model PatientFormVm
+@{ ViewData["Title"] = Model.IsNew ? "Thêm bệnh nhân" : "Sửa bệnh nhân"; }
+
+<div class="ad-top">
+    <div>
+        <h1>@(Model.IsNew ? "Thêm bệnh nhân" : "Sửa bệnh nhân")</h1>
+        <p>Thông tin hồ sơ và tài khoản đăng nhập của bệnh nhân.</p>
+    </div>
+    <a class="ad-btn ghost" asp-action="Patients">Quay lại danh sách</a>
+</div>
+
+<div class="ad-card ad-form ad-form-narrow">
+    <div class="bd">
+        <form asp-action="@(Model.IsNew ? "CreatePatient" : "EditPatient")" method="post">
+            <input type="hidden" asp-for="PatientId" />
+            <div class="row">
+                <div class="form-group col-md-6">
+                    <label asp-for="FullName"></label>
+                    <input asp-for="FullName" class="form-control" />
+                    <span asp-validation-for="FullName" class="text-danger"></span>
+                </div>
+                <div class="form-group col-md-6">
+                    <label asp-for="Phone"></label>
+                    <input asp-for="Phone" class="form-control" />
+                    <span asp-validation-for="Phone" class="text-danger"></span>
+                </div>
+                <div class="form-group col-md-6">
+                    <label asp-for="Email">Email đăng nhập</label>
+                    <input asp-for="Email" class="form-control" />
+                    <span asp-validation-for="Email" class="text-danger"></span>
+                </div>
+                <div class="form-group col-md-6">
+                    <label asp-for="EmergencyPhone"></label>
+                    <input asp-for="EmergencyPhone" class="form-control" />
+                    <span asp-validation-for="EmergencyPhone" class="text-danger"></span>
+                </div>
+                <div class="form-group col-12">
+                    <label asp-for="Address"></label>
+                    <input asp-for="Address" class="form-control" />
+                    <span asp-validation-for="Address" class="text-danger"></span>
+                </div>
+                <div class="form-group col-md-6">
+                    <label asp-for="Password">@(Model.IsNew ? "Mật khẩu" : "Mật khẩu mới")</label>
+                    <input asp-for="Password" type="password" autocomplete="new-password" class="form-control" />
+                    <span asp-validation-for="Password" class="text-danger"></span>
+                    @if (!Model.IsNew) { <small class="ad-hint">Để trống nếu không muốn đổi mật khẩu.</small> }
+                </div>
+                <div class="form-group col-md-6 d-flex align-items-end">
+                    <div class="check">
+                        <input asp-for="IsActive" type="checkbox" />
+                        <label asp-for="IsActive"></label>
+                    </div>
+                </div>
+            </div>
+            <button type="submit" class="ad-btn">@(Model.IsNew ? "Thêm bệnh nhân" : "Lưu thay đổi")</button>
+            <a class="ad-btn ghost" asp-action="Patients">Hủy</a>
+        </form>
+    </div>
+</div>

@@ -1,0 +1,32 @@
+@model SpecFormVm
+@{ ViewData["Title"] = Model.IsNew ? "Thêm chuyên khoa" : "Sửa chuyên khoa"; }
+
+<div class="ad-top">
+    <div><h1>@(Model.IsNew ? "Thêm chuyên khoa" : "Sửa chuyên khoa")</h1></div>
+    <a class="ad-btn ghost" asp-action="Index">Quay lại danh sách</a>
+</div>
+
+<div class="ad-card ad-form ad-form-narrow">
+    <div class="bd">
+        <form asp-action="@(Model.IsNew ? "Create" : "Edit")" method="post">
+            <input type="hidden" asp-for="SpecId" />
+            <div class="form-group">
+                <label asp-for="SpecialtyName"></label>
+                <input asp-for="SpecialtyName" class="form-control" />
+                <span asp-validation-for="SpecialtyName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Description"></label>
+                <textarea asp-for="Description" rows="3" class="form-control"></textarea>
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="BasePrice"></label>
+                <input asp-for="BasePrice" type="number" min="0" step="any" class="form-control" style="max-width:240px" />
+                <span asp-validation-for="BasePrice" class="text-danger"></span>
+            </div>
+            <button type="submit" class="ad-btn">@(Model.IsNew ? "Thêm chuyên khoa" : "Lưu thay đổi")</button>
+            <a class="ad-btn ghost" asp-action="Index">Hủy</a>
+        </form>
+    </div>
+</div>

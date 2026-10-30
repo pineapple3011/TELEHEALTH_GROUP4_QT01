@@ -1,0 +1,141 @@
+@model MonitoringVm
+@{
+    ViewData["Title"] = "Theo dõi";
+    var maxRecords = Math.Max(1, Model.Workload.Count == 0 ? 1 : Model.Workload.Max(w => w.Records));
+    var suspicious = Model.StatusRows.Count(r => r.Suspicious);
+}
+
+<div class="ad-top">
+    <div>
+        <h1>Theo dõi bệnh nhân và bác sĩ</h1>
+        <p>Số liệu từ @Model.From.ToString("dd/MM/yyyy") đến @Model.To.ToString("dd/MM/yyyy").</p>
+    </div>
+</div>
+
+<div class="ad-card">
+    <div class="bd">
+        <form method="get" class="ad-filter">
+            <div><label for="from">Từ ngày</label><input id="from" type="date" name="from" value="@Model.From.ToString("yyyy-MM-dd")" class="form-control" /></div>
+            <div><label for="to">Đến ngày</label><input id="to" type="date" name="to" value="@Model.To.ToString("yyyy-MM-dd")" class="form-control" /></div>
+            <div>
+                <label for="hours">Ngưỡng không hoạt động của bác sĩ (giờ)</label>
+                <input id="hours" type="number" min="1" max="12" name="hours" value="@Model.Hours" class="form-control" style="width:110px" />
+            </div>
+            <button class="ad-btn" type="submit">Xem báo cáo</button>
+        </form>
+    </div>
+</div>
+
+@* ===================== BỆNH NHÂN ===================== *@
+<div class="ad-stats">
+    <div class="ad-stat"><small>Tổng số bệnh nhân</small><b>@Model.PatientTotal</b><em>@Model.PatientWithAppt đã từng đặt lịch</em></div>
+    <div class="ad-stat"><small>Bệnh nhân được khám trong kỳ</small><b>@Model.PatientServedInRange</b><em>không tính lịch đã hủy</em></div>
+    <div class="ad-stat"><small>Tài khoản mới trong kỳ</small><b>@Model.PatientNewInRange</b></div>
+    <div class="ad-stat @(Model.PatientLocked > 0 ? "warn" : "")"><small>Tài khoản hoạt động</small><b>@Model.PatientActive</b><em>@Model.PatientLocked đã khóa</em></div>
+</div>
+
+<div class="ad-card">
+    <div class="hd"><h2>Tài khoản bệnh nhân mới theo tháng</h2><span class="ad-hint">6 tháng gần nhất, tính theo ngày tạo tài khoản</span></div>
+    <div class="bd"><div class="ad-chart" style="height:220px"><canvas id="newChart"></canvas></div></div>
+</div>
+
+@* ===================== HỒ SƠ THEO BÁC SĨ ===================== *@
+<div class="ad-card">
+    <div class="hd">
+        <h2>Hồ sơ bệnh án theo bác sĩ</h2>
+        <a class="ad-btn ghost sm" asp-action="ExportWorkload" asp-route-from="@Model.From.ToString("yyyy-MM-dd")" asp-route-to="@Model.To.ToString("yyyy-MM-dd")">Xuất CSV</a>
+    </div>
+    <div class="bd flush ad-scroll">
+        @if (Model.Workload.Count == 0)
+        {
+            <div class="ad-empty">Chưa có bác sĩ nào.</div>
+        }
+        else
+        {
+            <table class="ad-table">
+                <thead><tr><th>Bác sĩ</th><th>Chuyên khoa</th><th class="num">Ca khám</th><th class="num">Hoàn thành</th><th class="num">Hồ sơ bệnh án</th><th style="width:22%"></th></tr></thead>
+                <tbody>
+                @foreach (var w in Model.Workload)
+                {
+                    <tr>
+                        <td>@w.DoctorName</td>
+                        <td>@w.Specialty</td>
+                        <td class="num">@w.Appointments</td>
+                        <td class="num">@w.Completed</td>
+                        <td class="num"><b>@w.Records</b></td>
+                        <td><div class="ad-bar"><i style="width:@((int)(100.0 * w.Records / maxRecords))%"></i></div></td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>
+
+@* ===================== TRẠNG THÁI BÁC SĨ ===================== *@
+<div class="ad-card" id="status">
+    <div class="hd">
+        <h2>Trạng thái làm việc của bác sĩ</h2>
+        <div class="ad-pill-row">
+            @foreach (var (label, count) in Model.StatusSummary)
+            {
+                <span class="ad-tag">@label: @count</span>
+            }
+        </div>
+    </div>
+    <div class="bd" style="padding-bottom:6px">
+        <p class="ad-hint" style="margin:0">
+            Chỉ liệt kê bác sĩ đang để trạng thái khác "Đang nhận khám". Một bác sĩ bị đánh dấu khi hôm nay không có ca khám nào,
+            có ca quá giờ hơn 30 phút mà chưa có hồ sơ, hoặc không tạo hồ sơ nào trong @Model.Hours giờ qua.
+            @if (suspicious > 0) { <b>Hiện có @suspicious bác sĩ cần kiểm tra.</b> }
+        </p>
+    </div>
+    <div class="bd flush ad-scroll">
+        @if (Model.StatusRows.Count == 0)
+        {
+            <div class="ad-empty">Tất cả bác sĩ đang ở trạng thái nhận khám.</div>
+        }
+        else
+        {
+            <table class="ad-table">
+                <thead><tr><th>Bác sĩ</th><th>Trạng thái</th><th class="num">Ca hôm nay</th><th class="num">Hồ sơ hôm nay</th><th>Hồ sơ gần nhất</th><th>Đánh giá</th><th></th></tr></thead>
+                <tbody>
+                @foreach (var r in Model.StatusRows)
+                {
+                    <tr class="@(r.Suspicious ? "flag" : "")">
+                        <td>@r.DoctorName<br /><small class="ad-hint">@r.Specialty</small></td>
+                        <td><span class="ad-tag warn">@TrangThaiBacSi.Label(r.Status)</span></td>
+                        <td class="num">@r.TodayCases</td>
+                        <td class="num">@r.TodayRecords</td>
+                        <td>@(r.LastRecordAt == null ? "Chưa có" : r.LastRecordAt.Value.ToString("dd/MM/yyyy HH:mm"))</td>
+                        <td>
+                            @if (r.Suspicious) { <ul class="ad-reasons">@foreach (var why in r.Reasons) { <li>@why</li> }</ul> }
+                            else { <span class="ad-tag ok">Đang làm việc bình thường</span> }
+                        </td>
+                        <td class="act">
+                            <form asp-action="ResetStatus" asp-route-id="@r.DoctorId" method="post" class="ad-inline"
+                                  data-confirm="Đặt &quot;@r.DoctorName&quot; về trạng thái Đang nhận khám?">
+                                <button type="submit" class="ad-btn ghost sm">Đặt về Đang nhận khám</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script>
+        new Chart(document.getElementById('newChart'), {
+            type: 'line',
+            data: {
+                labels: @Json.Serialize(Model.MonthLabels),
+                datasets: [{ label: 'Tài khoản mới', data: @Json.Serialize(Model.MonthNew), borderColor: '#1f8f82', backgroundColor: 'rgba(31,143,130,.12)', fill: true, tension: .25 }]
+            },
+            options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
+        });
+    </script>
+}

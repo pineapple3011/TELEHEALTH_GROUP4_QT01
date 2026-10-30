@@ -1,0 +1,52 @@
+@model List<SpecRowVm>
+@{ ViewData["Title"] = "Chuyên khoa và giá"; }
+
+<div class="ad-top">
+    <div>
+        <h1>Chuyên khoa và giá dịch vụ</h1>
+        <p>Giá khám cơ bản của từng chuyên khoa. Đổi giá chỉ áp dụng cho lịch khám đặt mới, giao dịch cũ giữ nguyên.</p>
+    </div>
+    <a class="ad-btn" asp-action="Create">Thêm chuyên khoa</a>
+</div>
+
+<div class="ad-card">
+    <div class="bd flush ad-scroll">
+        @if (Model.Count == 0)
+        {
+            <div class="ad-empty">Chưa có chuyên khoa nào.</div>
+        }
+        else
+        {
+            <table class="ad-table">
+                <thead><tr><th>Chuyên khoa</th><th class="num">Bác sĩ</th><th class="num">Phòng khám</th><th>Giá khám cơ bản (đ)</th><th></th></tr></thead>
+                <tbody>
+                @foreach (var s in Model)
+                {
+                    <tr>
+                        <td>
+                            @s.Name
+                            @if (!string.IsNullOrWhiteSpace(s.Description)) { <br /><small class="ad-hint">@s.Description</small> }
+                        </td>
+                        <td class="num">@s.DoctorCount</td>
+                        <td class="num">@s.ClinicCount</td>
+                        <td>
+                            <form asp-action="UpdatePrice" method="post" class="ad-inline">
+                                <input type="hidden" name="id" value="@s.SpecId" />
+                                <input type="number" name="price" min="0" step="any" value="@((long)s.Price)" class="form-control form-control-sm" style="width:140px;display:inline-block" aria-label="Giá khám @s.Name" />
+                                <button type="submit" class="ad-btn ghost sm">Lưu giá</button>
+                            </form>
+                        </td>
+                        <td class="act">
+                            <a class="ad-btn ghost sm" asp-action="Edit" asp-route-id="@s.SpecId">Sửa</a>
+                            <form asp-action="Delete" asp-route-id="@s.SpecId" method="post" class="ad-inline"
+                                  data-confirm="Xóa chuyên khoa &quot;@s.Name&quot;?">
+                                <button type="submit" class="ad-btn danger sm">Xóa</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>

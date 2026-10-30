@@ -1,0 +1,32 @@
+@model ClinicFormVm
+@{ ViewData["Title"] = Model.IsNew ? "Thêm phòng khám" : "Sửa phòng khám"; }
+
+<div class="ad-top">
+    <div><h1>@(Model.IsNew ? "Thêm phòng khám" : "Sửa phòng khám")</h1></div>
+    <a class="ad-btn ghost" asp-action="Index">Quay lại danh sách</a>
+</div>
+
+<div class="ad-card ad-form ad-form-narrow">
+    <div class="bd">
+        <form asp-action="@(Model.IsNew ? "Create" : "Edit")" method="post">
+            <input type="hidden" asp-for="ClinicId" />
+            <div class="form-group">
+                <label asp-for="ClinicName"></label>
+                <input asp-for="ClinicName" class="form-control" />
+                <span asp-validation-for="ClinicName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Location"></label>
+                <input asp-for="Location" class="form-control" placeholder="Ví dụ: Tầng 2, tòa A" />
+                <span asp-validation-for="Location" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="SpecId"></label>
+                <select asp-for="SpecId" asp-items="Model.Specs" class="form-control"><option value="0">Chọn chuyên khoa</option></select>
+                <span asp-validation-for="SpecId" class="text-danger"></span>
+            </div>
+            <button type="submit" class="ad-btn">@(Model.IsNew ? "Thêm phòng khám" : "Lưu thay đổi")</button>
+            <a class="ad-btn ghost" asp-action="Index">Hủy</a>
+        </form>
+    </div>
+</div>

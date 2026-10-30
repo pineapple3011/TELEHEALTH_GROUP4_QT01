@@ -13,6 +13,8 @@ public partial class Admin
 
     public string Phone { get; set; } = null!;
 
+    public virtual ICollection<Account> Accounts { get; set; } = new List<Account>();
+
     public virtual ICollection<Doctor> Doctors { get; set; } = new List<Doctor>();
 
     public virtual ICollection<Patient> Patients { get; set; } = new List<Patient>();

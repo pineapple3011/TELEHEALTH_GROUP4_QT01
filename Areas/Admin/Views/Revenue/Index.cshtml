@@ -1,0 +1,161 @@
+@model RevenueVm
+@{
+    ViewData["Title"] = "Doanh thu";
+    var fromIso = Model.From.ToString("yyyy-MM-dd");
+    var toIso = Model.To.ToString("yyyy-MM-dd");
+    string Pct(decimal v) => Model.Total == 0 ? "0" : ((int)(100m * v / Model.Total)).ToString();
+}
+
+<div class="ad-top">
+    <div>
+        <h1>Thống kê doanh thu</h1>
+        <p>Chỉ tính các giao dịch đã thanh toán, từ @Model.From.ToString("dd/MM/yyyy") đến @Model.To.ToString("dd/MM/yyyy").</p>
+    </div>
+    <a class="ad-btn ghost" asp-action="ExportCsv" asp-route-from="@fromIso" asp-route-to="@toIso">Xuất báo cáo CSV</a>
+</div>
+
+<div class="ad-card">
+    <div class="bd">
+        <form method="get" class="ad-filter">
+            <div><label for="from">Từ ngày</label><input id="from" type="date" name="from" value="@fromIso" class="form-control" /></div>
+            <div><label for="to">Đến ngày</label><input id="to" type="date" name="to" value="@toIso" class="form-control" /></div>
+            <button class="ad-btn" type="submit">Xem báo cáo</button>
+        </form>
+    </div>
+</div>
+
+<div class="ad-stats">
+    <div class="ad-stat"><small>Tổng doanh thu</small><b>@Cv.Money(Model.Total)</b></div>
+    <div class="ad-stat"><small>Số giao dịch</small><b>@Model.Count</b></div>
+    <div class="ad-stat"><small>Trung bình mỗi giao dịch</small><b>@Cv.Money(Model.Average)</b></div>
+    <div class="ad-stat @(Model.Pending.Count > 0 ? "warn" : "")"><small>Đang chờ xác nhận</small><b>@Cv.Money(Model.PendingAmount)</b><em>@Model.Pending.Count giao dịch, chưa tính vào doanh thu</em></div>
+</div>
+
+<div class="ad-card">
+    <div class="hd"><h2>Doanh thu theo tháng</h2></div>
+    <div class="bd"><div class="ad-chart"><canvas id="monthChart"></canvas></div></div>
+</div>
+
+<div class="ad-cols">
+    <div class="ad-card">
+        <div class="hd"><h2>Theo chuyên khoa</h2></div>
+        <div class="bd flush ad-scroll">
+            @if (Model.BySpecialty.Count == 0) { <div class="ad-empty">Chưa có doanh thu trong kỳ.</div> }
+            else
+            {
+                <table class="ad-table">
+                    <thead><tr><th>Chuyên khoa</th><th class="num">Giao dịch</th><th class="num">Doanh thu</th><th style="width:25%"></th></tr></thead>
+                    <tbody>
+                    @foreach (var x in Model.BySpecialty)
+                    {
+                        <tr><td>@x.Label</td><td class="num">@x.Count</td><td class="num">@Cv.Money(x.Total)</td>
+                            <td><div class="ad-bar"><i style="width:@(Pct(x.Total))%"></i></div></td></tr>
+                    }
+                    </tbody>
+                </table>
+            }
+        </div>
+    </div>
+
+    <div class="ad-card">
+        <div class="hd"><h2>Bác sĩ có doanh thu cao nhất</h2></div>
+        <div class="bd flush ad-scroll">
+            @if (Model.ByDoctor.Count == 0) { <div class="ad-empty">Chưa có doanh thu trong kỳ.</div> }
+            else
+            {
+                <table class="ad-table">
+                    <thead><tr><th>Bác sĩ</th><th class="num">Giao dịch</th><th class="num">Doanh thu</th><th style="width:25%"></th></tr></thead>
+                    <tbody>
+                    @foreach (var x in Model.ByDoctor)
+                    {
+                        <tr><td>@x.Label</td><td class="num">@x.Count</td><td class="num">@Cv.Money(x.Total)</td>
+                            <td><div class="ad-bar"><i style="width:@(Pct(x.Total))%"></i></div></td></tr>
+                    }
+                    </tbody>
+                </table>
+            }
+        </div>
+    </div>
+</div>
+
+<div class="ad-card">
+    <div class="hd"><h2>Theo hình thức khám</h2></div>
+    <div class="bd flush ad-scroll">
+        @if (Model.ByType.Count == 0) { <div class="ad-empty">Chưa có doanh thu trong kỳ.</div> }
+        else
+        {
+            <table class="ad-table">
+                <thead><tr><th>Hình thức</th><th class="num">Giao dịch</th><th class="num">Doanh thu</th><th style="width:30%"></th></tr></thead>
+                <tbody>
+                @foreach (var x in Model.ByType)
+                {
+                    <tr><td>@x.Label</td><td class="num">@x.Count</td><td class="num">@Cv.Money(x.Total)</td>
+                        <td><div class="ad-bar"><i style="width:@(Pct(x.Total))%"></i></div></td></tr>
+                }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>
+
+<div class="ad-card" id="pending">
+    <div class="hd">
+        <h2>Giao dịch chờ xác nhận</h2>
+        <span class="ad-hint">Bệnh nhân đã gửi biên lai chuyển khoản. Xác nhận sẽ ghi nhận doanh thu và chuyển lịch khám "Chờ xác nhận" sang "Đã xác nhận".</span>
+    </div>
+    <div class="bd flush ad-scroll">
+        @if (Model.Pending.Count == 0)
+        {
+            <div class="ad-empty">Không có giao dịch nào đang chờ.</div>
+        }
+        else
+        {
+            <table class="ad-table">
+                <thead><tr><th>Lịch khám</th><th>Bệnh nhân</th><th>Bác sĩ</th><th class="num">Số tiền</th><th>Biên lai</th><th></th></tr></thead>
+                <tbody>
+                @foreach (var p in Model.Pending)
+                {
+                    <tr>
+                        <td>#@p.AppointId<br /><small class="ad-hint">@p.Time.ToString("dd/MM/yyyy HH:mm")</small></td>
+                        <td>@p.Patient</td>
+                        <td>@p.Doctor</td>
+                        <td class="num">@Cv.Money(p.Amount)</td>
+                        <td>
+                            @if (!string.IsNullOrWhiteSpace(p.ReceiptUrl)) { <a href="@p.ReceiptUrl" target="_blank" rel="noopener">Xem biên lai</a> }
+                            else { <span class="ad-hint">Chưa có ảnh</span> }
+                        </td>
+                        <td class="act">
+                            <form asp-action="Confirm" asp-route-id="@p.PaymentId" method="post" class="ad-inline"
+                                  data-confirm="Xác nhận đã nhận @Cv.Money(p.Amount) cho lịch khám #@p.AppointId?">
+                                <button type="submit" class="ad-btn sm">Xác nhận</button>
+                            </form>
+                            <form asp-action="Reject" asp-route-id="@p.PaymentId" method="post" class="ad-inline"
+                                  data-confirm="Từ chối biên lai này? Bệnh nhân sẽ phải gửi lại.">
+                                <button type="submit" class="ad-btn danger sm">Từ chối</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script>
+        new Chart(document.getElementById('monthChart'), {
+            type: 'bar',
+            data: {
+                labels: @Json.Serialize(Model.ByMonth.Select(m => m.Label)),
+                datasets: [{ label: 'Doanh thu (đ)', data: @Json.Serialize(Model.ByMonth.Select(m => m.Total)), backgroundColor: '#1f8f82', borderRadius: 3 }]
+            },
+            options: {
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true, ticks: { callback: function (v) { return (v / 1000000) + ' tr'; } } } }
+            }
+        });
+    </script>
+}
