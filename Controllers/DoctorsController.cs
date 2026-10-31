@@ -17,13 +17,13 @@ namespace TELEHEALTH_GROUP4_QT01.Controllers
             _context = context;
         }
 
-        // GET: /Doctors?q=...&specId=...
-        public async Task<IActionResult> Index(string? q, int? specId)
+        // GET: /Doctors?q=...&specId=...&onlyAvailable=true&sort=exp
+        public async Task<IActionResult> Index(string? q, int? specId, bool onlyAvailable = false, string? sort = null)
         {
             var specs = await _context.Specialties.ToListAsync();
             var doctors = await _context.Doctors.ToListAsync();
 
-            var items = doctors
+            var query = doctors
                 .Where(d => specId == null || Cv.I(d.SpecId) == specId)
                 .Where(d => string.IsNullOrWhiteSpace(q) ||
                             (d.FullName ?? "").Contains(q.Trim(), StringComparison.OrdinalIgnoreCase))
@@ -37,14 +37,32 @@ namespace TELEHEALTH_GROUP4_QT01.Controllers
                     AvatarUrl = d.AvatarUrl,
                     Fee = (long)Cv.M(specs.FirstOrDefault(s => s.SpecId == Cv.I(d.SpecId))?.BasePrice)
                 })
-                .OrderByDescending(x => Cv.IsAvailable(x.TrangThai))
-                .ToList();
+                .Where(x => !onlyAvailable || Cv.IsAvailable(x.TrangThai));
+
+            var vi = CultureInfo.GetCultureInfo("vi-VN");
+            IEnumerable<DoctorListItem> ordered = sort switch
+            {
+                "exp" => query.OrderByDescending(x => int.TryParse(x.KinhNghiem, out var n) ? n : 0),
+                "feeAsc" => query.OrderBy(x => x.Fee),
+                "feeDesc" => query.OrderByDescending(x => x.Fee),
+                "name" => query.OrderBy(x => x.HoTen, StringComparer.Create(vi, true)),
+                _ => query.OrderByDescending(x => Cv.IsAvailable(x.TrangThai))   // mặc định
+            };
 
             var vm = new DoctorListVm
             {
                 Q = q,
                 SpecId = specId,
-                Doctors = items,
+                OnlyAvailable = onlyAvailable,
+                Sort = sort,
+                TotalAll = doctors.Count,
+                Doctors = ordered.ToList(),
+                SpecCards = specs.Select(s => new SpecCard
+                {
+                    SpecId = s.SpecId,
+                    Name = s.SpecialtyName ?? "",
+                    DoctorCount = doctors.Count(d => Cv.I(d.SpecId) == s.SpecId)
+                }).ToList(),
                 Specs = specs.Select(s => new SelectListItem
                 {
                     Value = s.SpecId.ToString(),

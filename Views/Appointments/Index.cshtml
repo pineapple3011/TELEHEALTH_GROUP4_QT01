@@ -1,50 +1,471 @@
-@model List<AppointmentRow>
+@model List<TELEHEALTH_GROUP4_QT01.Models.ViewModels.AppointmentRow>
 @{
     ViewData["Title"] = "Lịch khám của tôi";
+
+    var total = Model.Count;
+    var upcoming = Model.Count(r => r.TrangThai != "Đã hủy" && r.TrangThai != "Hoàn thành");
+    var pendingConfirm = Model.Count(r => r.TrangThai == "Chờ xác nhận");
+    var completed = Model.Count(r => r.TrangThai == "Hoàn thành");
+    var cancelled = Model.Count(r => r.TrangThai == "Đã hủy");
 }
 
-<div class="container my-5" style="min-height:60vh">
-    <h2 class="mb-4">Lịch khám của tôi</h2>
-
-    @if (TempData["Msg"] != null)
-    {
-        <div class="alert alert-success">@TempData["Msg"]</div>
+<style>
+    .appt-stat-card {
+        border-radius: 12px;
+        padding: 18px 14px;
+        background: #fff;
+        border: 1px solid #e9ecef;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+        transition: transform .2s, box-shadow .2s;
+        text-align: center;
+        height: 100%;
+        cursor: pointer;
+        color: inherit;
+        display: block;
     }
 
+        .appt-stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+        }
+
+        .appt-stat-card.active-stat {
+            border-color: #0056b3;
+            background: #f7fdf5;
+            box-shadow: 0 4px 14px rgba(112, 199, 69, 0.2);
+        }
+
+    .appt-stat-num {
+        font-size: 26px;
+        font-weight: 800;
+        line-height: 1.1;
+        margin-bottom: 4px;
+    }
+
+    .stat-blue {
+        color: #0056b3;
+    }
+
+    .appt-stat-label {
+        font-size: 13px;
+        color: #6c757d;
+        font-weight: 600;
+        margin: 0;
+    }
+
+    /* Appointment Card Item */
+    .appt-card-item {
+        background: #fff;
+        border-radius: 14px;
+        border: 1px solid #e7ebef;
+        padding: 22px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 14px rgba(0,0,0,0.02);
+        transition: box-shadow .25s, border-color .25s;
+    }
+
+        .appt-card-item:hover {
+            box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+            border-color: #c7d2de;
+        }
+
+    .appt-header-bar {
+        border-bottom: 1px solid #f1f3f5;
+        padding-bottom: 12px;
+        margin-bottom: 16px;
+    }
+
+    .appt-code {
+        font-weight: 700;
+        color: #1a2f23;
+        font-size: 16px;
+    }
+
+    .appt-doc-avatar {
+        width: 60px;
+        height: 60px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-weight: 700;
+        font-size: 20px;
+        background: linear-gradient(135deg, #0056b3, #2c9d8f);
+    }
+
+    .appt-info-block {
+        font-size: 14px;
+        color: #495057;
+    }
+
+        .appt-info-block i {
+            width: 18px;
+            color: #0056b3;
+        }
+
+    .appt-btn-group .btn {
+        margin: 3px 2px;
+        font-size: 13px;
+        font-weight: 600;
+        border-radius: 6px;
+        padding: 6px 12px;
+    }
+</style>
+
+<div class="container my-4" style="min-height: 65vh;">
+    <!-- Alert Thông Báo -->
+    @if (TempData["Msg"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+            <i class="fa fa-check-circle mr-2"></i> @TempData["Msg"]
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    }
+
+    <!-- Header & Nút Đặt Lịch Mới -->
+    <div class="d-flex flex-wrap align-items-center justify-content-between mb-4">
+        <div>
+            <h3 class="font-weight-bold text-dark mb-1">
+                <i class="fa fa-calendar-check-o text-success mr-2"></i> Lịch Khám Của Tôi
+            </h3>
+            <p class="text-muted mb-0 small">Theo dõi hồ sơ khám bệnh, lịch hẹn trực tuyến, phiếu khám và đơn thuốc điện tử</p>
+        </div>
+        <div class="mt-3 mt-md-0">
+            <a asp-controller="Doctors" asp-action="Index" class="btn alazea-btn btn-sm">
+                <i class="fa fa-plus-circle"></i> ĐẶT LỊCH KHÁM MỚI
+            </a>
+        </div>
+    </div>
+
+    <!-- 5 THẺ THỐNG KÊ TỔNG QUAN -->
+    <div class="row mb-4">
+        <div class="col-6 col-md-3 col-lg-2 mb-3">
+            <div class="appt-stat-card active-stat" onclick="filterByStatus('all', this)">
+                <div class="appt-stat-num stat-blue">@total</div>          @* trước: text-dark *@
+                <div class="appt-stat-label">Tất cả ca khám</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3 col-lg-2 mb-3">
+            <div class="appt-stat-card" onclick="filterByStatus('upcoming', this)">
+                <div class="appt-stat-num stat-blue">@upcoming</div>       @* trước: text-info *@
+                <div class="appt-stat-label">Sắp diễn ra</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3 col-lg-2 mb-3">
+            <div class="appt-stat-card" onclick="filterByStatus('pending', this)">
+                <div class="appt-stat-num stat-blue">@pendingConfirm</div> @* trước: text-warning *@
+                <div class="appt-stat-label">Chờ xác nhận</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3 col-lg-3 mb-3">
+            <div class="appt-stat-card" onclick="filterByStatus('completed', this)">
+                <div class="appt-stat-num stat-blue">@completed</div>
+                <div class="appt-stat-label">Đã hoàn thành</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3 col-lg-3 mb-3">
+            <div class="appt-stat-card" onclick="filterByStatus('cancelled', this)">
+                <div class="appt-stat-num text-danger">@cancelled</div>
+                <div class="appt-stat-label">Đã hủy</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- THANH TÌM KIẾM VÀ LỌC NHANH -->
+    <div class="card border-0 shadow-sm rounded-lg mb-4 p-3 bg-white">
+        <div class="row align-items-center">
+            <div class="col-12 col-md-6 mb-2 mb-md-0">
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text bg-light border-right-0"><i class="fa fa-search text-muted"></i></span>
+                    </div>
+                    <input type="text" id="searchInput" onkeyup="filterAppointments()" class="form-control border-left-0" placeholder="Tìm theo tên bác sĩ, ngày khám, mã #TK..." />
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <select id="typeFilter" onchange="filterAppointments()" class="form-control">
+                    <option value="">-- Tất cả hình thức --</option>
+                    <option value="Online">Khám trực tuyến (Online)</option>
+                    <option value="Offline">Khám trực tiếp (Tại viện)</option>
+                    <option value="Cấp cứu">Cấp cứu khẩn cấp</option>
+                </select>
+            </div>
+            <div class="col-6 col-md-3 text-right">
+                <span class="text-muted small">Hiển thị: <b id="visibleCount">@total</b> ca khám</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- DANH SÁCH LỊCH KHÁM -->
     @if (!Model.Any())
     {
-        <div class="alert alert-info">
-            Bạn chưa có lịch khám nào. <a asp-controller="Doctors" asp-action="Index">Tìm bác sĩ và đặt lịch</a>.
+        <div class="card border-0 shadow-sm p-5 text-center my-4">
+            <div class="mb-3">
+                <i class="fa fa-calendar-times-o text-muted" style="font-size: 56px;"></i>
+            </div>
+            <h5 class="text-dark font-weight-bold">Bạn chưa có lịch khám nào trong hệ thống</h5>
+            <p class="text-muted mb-3">Hãy chọn bác sĩ chuyên khoa phù hợp và đặt lịch khám ngay trên website.</p>
+            <div>
+                <a asp-controller="Doctors" asp-action="Index" class="btn btn-success px-4 py-2 font-weight-bold">
+                    <i class="fa fa-user-md mr-1"></i> Tìm bác sĩ &amp; Đặt lịch ngay
+                </a>
+            </div>
         </div>
     }
     else
     {
-        <div class="table-responsive">
-            <table class="table table-hover">
-                <thead>
-                    <tr>
-                        <th>Ngày</th>
-                        <th>Giờ</th>
-                        <th>Bác sĩ</th>
-                        <th>Hình thức</th>
-                        <th>Trạng thái</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var r in Model)
-                    {
-                        <tr>
-                            <td>@r.DateText</td>
-                            <td>@r.TimeText</td>
-                            <td>@r.DoctorName</td>
-                            <td>@r.HinhThuc</td>
-                            <td>@r.TrangThai</td>
-                            <td><a asp-action="Details" asp-route-id="@r.AppointId" class="btn btn-outline-success btn-sm">Chi tiết</a></td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+        <div class="row" id="apptList">
+            @foreach (var r in Model)
+            {
+                var isOnline = r.HinhThuc == "Online";
+                var isEmergency = r.HinhThuc == "Cấp cứu";
+                var isCompleted = r.TrangThai == "Hoàn thành";
+                var isCancelled = r.TrangThai == "Đã hủy";
+                var canCancel = (r.TrangThai == "Chờ xác nhận" || r.TrangThai == "Đã xác nhận");
+                var canJoinOnline = isOnline && !isCancelled;
+
+                var dataStatus = isCancelled ? "cancelled" : (isCompleted ? "completed" : (r.TrangThai == "Chờ xác nhận" ? "pending" : "upcoming"));
+
+                <div class="col-12 appt-item-wrapper" data-status="@dataStatus" data-type="@r.HinhThuc" data-search="@r.DoctorName.ToLower() @r.DateText @r.AppointId @r.HinhThuc.ToLower()">
+                    <div class="appt-card-item">
+                        <!-- Header ca khám -->
+                        <div class="appt-header-bar d-flex flex-wrap align-items-center justify-content-between">
+                            <div class="d-flex align-items-center mb-2 mb-md-0">
+                                <span class="appt-code mr-3">TK-@r.AppointId.ToString("D5")</span>
+                                @if (r.TrangThai == "Đã xác nhận")
+                                {
+                                    <span class="badge badge-soft-success px-3 py-1 rounded-pill">Đã xác nhận lịch</span>
+                                }
+                                else if (r.TrangThai == "Chờ xác nhận")
+                                {
+                                    <span class="badge badge-soft-warning px-3 py-1 rounded-pill">Chờ bác sĩ xác nhận</span>
+                                }
+                                else if (isCompleted)
+                                {
+                                    <span class="badge badge-soft-info px-3 py-1 rounded-pill">Đã khám xong</span>
+                                }
+                                else if (isCancelled)
+                                {
+                                    <span class="badge badge-soft-danger px-3 py-1 rounded-pill">Đã hủy</span>
+                                }
+                            </div>
+
+                            <div>
+                                @if (isOnline)
+                                {
+                                    <span class="badge badge-soft-primary px-3 py-1 rounded-pill">
+                                        <i class="fa fa-video-camera mr-1"></i> Khám trực tuyến
+                                    </span>
+                                }
+                                else if (isEmergency)
+                                {
+                                    <span class="badge badge-soft-danger px-3 py-1 rounded-pill">
+                                        <i class="fa fa-ambulance mr-1"></i> Cấp cứu
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge badge-soft-secondary px-3 py-1 rounded-pill">
+                                        <i class="fa fa-hospital-o mr-1"></i> Khám trực tiếp
+                                    </span>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Body ca khám -->
+                        <div class="row align-items-center">
+                            <!-- Bác sĩ -->
+                            <div class="col-lg-4 col-md-6 mb-3 mb-lg-0">
+                                <div class="d-flex align-items-center">
+                                    <div class="appt-doc-avatar mr-3 shadow-sm">
+                                        BS
+                                    </div>
+                                    <div>
+                                        <h6 class="font-weight-bold mb-1 text-dark">@r.DoctorName</h6>
+                                        <p class="text-muted small mb-0">
+                                            <p class="text-muted small mb-0">Bác sĩ chuyên khoa Telehealth</p>                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Thời gian hẹn -->
+                            <div class="col-lg-4 col-md-6 mb-3 mb-lg-0 appt-info-block">
+                                    <div class="mb-1">Ngày khám: <b>@r.DateText</b></div>
+                                    <div class="mb-0">Khung giờ hẹn: <b class="text-success">@r.TimeText</b></div>
+                            </div>
+
+                            <!-- Nút thao tác chi tiết -->
+                            <div class="col-lg-4 col-md-12 text-lg-right appt-btn-group">
+                                    @if (canJoinOnline)
+                                    {
+                                        <a asp-action="Room" asp-route-id="@r.AppointId" class="btn btn-primary shadow-sm">Vào phòng khám</a>
+                                    }
+
+                                    <a asp-action="Details" asp-route-id="@r.AppointId" class="btn btn-outline-success">Chi tiết</a>
+
+                                    <button type="button" class="btn btn-outline-secondary" onclick="openPrintModal('@r.AppointId', '@r.DoctorName', '@r.DateText', '@r.TimeText', '@r.HinhThuc')">In phiếu</button>
+
+                                    @if (canCancel)
+                                    {
+                                        <button type="button" class="btn btn-outline-danger" onclick="openCancelModal('@r.AppointId', '@r.DoctorName', '@r.DateText lúc @r.TimeText')">Hủy</button>
+                                    }
+
+                                    @if (isCompleted || isCancelled)
+                                    {
+                                        <a asp-controller="Doctors" asp-action="Index" class="btn btn-outline-info">Đặt lại</a>
+                                    }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
         </div>
     }
 </div>
+
+<!-- ================= MODAL IN PHIẾU HẸN KHÁM ================= -->
+<div class="modal fade" id="printModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title font-weight-bold"><i class="fa fa-ticket mr-2"></i> PHIẾU HẸN KHÁM BỆNH ĐIỆN TỬ</h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body p-4" id="printableTicket">
+                <div class="text-center pb-3 border-bottom mb-3">
+                    <h5 class="font-weight-bold mb-1 text-success">TRUNG TÂM Y TẾ &amp; TELEHEALTH QUỐC TẾ</h5>
+                    <p class="small text-muted mb-0">Địa chỉ: 2 Cầu Giấy, Hà Nội - Hotline y tế: 1900 1234</p>
+                    <div class="badge badge-success mt-2">MÃ CA: <span id="mTicketId">#TK-00001</span></div>
+                </div>
+
+                <div class="p-3 bg-light rounded mb-3">
+                    <div class="row small mb-2">
+                        <div class="col-5 text-muted">Họ tên người khám:</div>
+                        <div class="col-7 font-weight-bold">Bệnh nhân Telehealth</div>
+                    </div>
+                    <div class="row small mb-2">
+                        <div class="col-5 text-muted">Bác sĩ khám:</div>
+                        <div class="col-7 font-weight-bold" id="mDoctorName">-</div>
+                    </div>
+                    <div class="row small mb-2">
+                        <div class="col-5 text-muted">Thời gian hẹn:</div>
+                        <div class="col-7 font-weight-bold text-success" id="mDateTime">-</div>
+                    </div>
+                    <div class="row small mb-2">
+                        <div class="col-5 text-muted">Hình thức:</div>
+                        <div class="col-7 font-weight-bold" id="mBookingType">-</div>
+                    </div>
+                </div>
+
+                <div class="text-center p-2 border rounded mb-2">
+                    <i class="fa fa-barcode" style="font-size: 38px; letter-spacing: 4px;"></i>
+                    <div class="small text-muted">Mã QR / Barcode tra cứu tự động tại quầy tiếp đón</div>
+                </div>
+
+                <p class="small text-muted text-center mb-0">
+                    <i class="fa fa-info-circle"></i> Vui lòng có mặt trước giờ hẹn 10 phút hoặc kiểm tra đường truyền nếu khám trực tuyến.
+                </p>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-primary" onclick="window.print()"><i class="fa fa-print mr-1"></i> In ngay</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ================= MODAL HỦY LỊCH HẸN ================= -->
+<div class="modal fade" id="cancelModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content border-0 shadow-lg">
+            <form asp-action="Cancel" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" id="cancelApptId" />
+
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title font-weight-bold"><i class="fa fa-exclamation-triangle mr-2"></i> XÁC NHẬN HỦY LỊCH KHÁM</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body p-4">
+                    <p>Bạn có chắc chắn muốn hủy lịch khám với <b id="cancelDocName">-</b> vào thời gian <b id="cancelTime">-</b> không?</p>
+                    <div class="form-group">
+                        <label class="font-weight-bold small">Lý do hủy lịch hẹn (tùy chọn):</label>
+                        <textarea name="reason" class="form-control" rows="3" placeholder="Nhập lý do hủy (ví dụ: bận đột xuất, đã đỡ bệnh...)"></textarea>
+                    </div>
+                    <div class="alert alert-warning small mb-0">
+                        <i class="fa fa-info-circle"></i> Nếu bạn đã thanh toán cọc giữ chỗ, bệnh viện sẽ xử lý hoàn trả theo chính sách y tế.
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Giữ lại lịch</button>
+                    <button type="submit" class="btn btn-danger font-weight-bold">Xác nhận hủy lịch</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        var currentFilterStatus = 'all';
+
+        function filterByStatus(status, el) {
+            $('.appt-stat-card').removeClass('active-stat');
+            $(el).addClass('active-stat');
+            currentFilterStatus = status;
+            filterAppointments();
+        }
+
+        function filterAppointments() {
+            var q = ($('#searchInput').val() || '').toLowerCase();
+            var type = ($('#typeFilter').val() || '');
+
+            var visible = 0;
+            $('.appt-item-wrapper').each(function() {
+                var item = $(this);
+                var itemStatus = item.data('status');
+                var itemType = item.data('type');
+                var itemSearch = (item.data('search') || '').toString();
+
+                var matchStatus = (currentFilterStatus === 'all') ||
+                    (currentFilterStatus === 'upcoming' && itemStatus === 'upcoming') ||
+                    (currentFilterStatus === 'pending' && itemStatus === 'pending') ||
+                    (currentFilterStatus === 'completed' && itemStatus === 'completed') ||
+                    (currentFilterStatus === 'cancelled' && itemStatus === 'cancelled');
+
+                var matchType = (!type) || (itemType === type);
+                var matchSearch = (!q) || (itemSearch.indexOf(q) !== -1);
+
+                if (matchStatus && matchType && matchSearch) {
+                    item.show();
+                    visible++;
+                } else {
+                    item.hide();
+                }
+            });
+            $('#visibleCount').text(visible);
+        }
+
+        function openPrintModal(id, doc, date, time, type) {
+            document.getElementById('mTicketId').innerText = '#TK-' + String(id).padStart(5, '0');
+            document.getElementById('mDoctorName').innerText = doc;
+            document.getElementById('mDateTime').innerText = date + ' lúc ' + time;
+            document.getElementById('mBookingType').innerText = type;
+            $('#printModal').modal('show');
+        }
+
+        function openCancelModal(id, doc, timeStr) {
+            document.getElementById('cancelApptId').value = id;
+            document.getElementById('cancelDocName').innerText = doc;
+            document.getElementById('cancelTime').innerText = timeStr;
+            $('#cancelModal').modal('show');
+        }
+    </script>
+}

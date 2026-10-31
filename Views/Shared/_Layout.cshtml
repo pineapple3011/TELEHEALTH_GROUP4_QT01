@@ -1,87 +1,371 @@
 ﻿<!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 
 <head>
     <meta charset="UTF-8">
-    <meta name="description" content="">
+    <meta name="description" content="TELEHEALTH - Hệ thống y tế và đặt lịch khám bệnh trực tuyến thông minh">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <!-- The above 4 meta tags *must* come first in the head; any other head content must come *after* these tags -->
-    <!-- Title -->
-    <title>Alazea - Gardening @ViewData["Title"] - TELEHEALTH Landscaping HTML Template</title>
+    <title>@ViewData["Title"] - TELEHEALTH | Hệ Thống Y Tế &amp; Khám Bệnh Thông Minh</title>
 
     <!-- Favicon -->
     <link rel="icon" href="~/img/core-img/favicon.ico">
 
     <!-- Core Stylesheet -->
     <link rel="stylesheet" href="~/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
+    <!-- Healthcare Custom UI Enhancement for Alazea Template -->
+    <style>
+            :root {
+                --medical-green: #0056b3;
+                --medical-dark-green: #0056b3;
+                --medical-teal: #20c997;
+                --medical-blue: #0d6efd;
+                --medical-navy: #1f3a6e;
+                --medical-red: #dc3545;
+                --medical-orange: #fd7e14;
+                --medical-bg-soft: #f4f8f5;
+            }
+
+            body {
+                color: #495057;
+                background-color: #fbfdfc;
+            }
+
+            /* Top Header Tweaks */
+            .top-header-area {
+                background-color: #1a2f23;
+                border-bottom: 1px solid rgba(255,255,255,0.08);
+                font-size: 13px;
+            }
+
+            .top-header-meta a {
+                color: #d1e7dd !important;
+                margin-right: 20px;
+                text-decoration: none;
+                transition: color .2s;
+            }
+
+                .top-header-meta a:hover {
+                    color: #ffffff !important;
+                }
+
+                .top-header-meta a i {
+                    color: var(--medical-green);
+                    margin-right: 6px;
+                }
+
+            .top-patient-badge {
+                background: rgba(112, 199, 69, 0.2);
+                color: #ffffff !important;
+                padding: 4px 14px;
+                border-radius: 20px;
+                border: 1px solid rgba(112, 199, 69, 0.4);
+                font-weight: 600;
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+            }
+
+                .top-patient-badge:hover {
+                    background: rgba(112, 199, 69, 0.35);
+                }
+
+            .top-emergency-btn {
+                background: #dc3545;
+                color: #fff !important;
+                padding: 4px 12px;
+                border-radius: 20px;
+                font-weight: 700;
+                letter-spacing: .5px;
+                margin-left: 10px;
+                animation: pulse-sos 2s infinite;
+            }
+
+            @@keyframes pulse-sos {
+                0% {
+                    box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7);
+                }
+
+                70% {
+                    box-shadow: 0 0 0 8px rgba(220, 53, 69, 0);
+                }
+
+                100% {
+                    box-shadow: 0 0 0 0 rgba(220, 53, 69, 0);
+                }
+            }
+
+            /* Active Navigation */
+            .classynav ul li a.active-nav {
+                color: #81d4fa !important; /* xanh nhạt */
+                font-weight: 700;
+                position: relative;
+            }
+
+                .classynav ul li a.active-nav::after {
+                    content: '';
+                    position: absolute;
+                    bottom: -6px;
+                    left: 12px;
+                    right: 12px;
+                    height: 3px;
+                    background: #81d4fa; /* gạch chân cùng màu */
+                    border-radius: 3px;
+                }
+
+            /* Subpage Banner */
+            .subpage-banner {
+                position: relative;
+                background-color: #1a2f23;
+                background-size: cover;
+                background-position: center;
+                padding: 150px 0 50px;
+                color: #fff;
+                margin-bottom: 30px;
+            }
+
+                .subpage-banner h1, .subpage-banner h2 {
+                    color: #fff;
+                    font-weight: 700;
+                    margin-bottom: 8px;
+                    font-size: 28px;
+                }
+
+                .subpage-banner .breadcrumb {
+                    background: transparent;
+                    padding: 0;
+                    margin: 0;
+                    font-size: 14px;
+                }
+
+                    .subpage-banner .breadcrumb a {
+                        color: rgba(255,255,255,0.8);
+                        text-decoration: none;
+                    }
+
+                .subpage-banner .breadcrumb-item.active {
+                    color: #fff;
+                    font-weight: 600;
+                }
+
+            /* Modern Badges & Buttons */
+            .badge-soft-success {
+                background: #e8f5e9;
+                color: #2e7d32;
+                font-weight: 600;
+                border: 1px solid #c8e6c9;
+            }
+
+            .badge-soft-warning {
+                background: #fff8e1;
+                color: #f57f17;
+                font-weight: 600;
+                border: 1px solid #ffe082;
+            }
+
+            .badge-soft-info {
+                background: #e1f5fe;
+                color: #0277bd;
+                font-weight: 600;
+                border: 1px solid #b3e5fc;
+            }
+
+            .badge-soft-danger {
+                background: #ffebee;
+                color: #c62828;
+                font-weight: 600;
+                border: 1px solid #ffcdd2;
+            }
+
+            .badge-soft-primary {
+                background: #e8eaf6;
+                color: #283593;
+                font-weight: 600;
+                border: 1px solid #c5cae9;
+            }
+
+            .badge-soft-secondary {
+                background: #f5f5f5;
+                color: #616161;
+                font-weight: 600;
+                border: 1px solid #e0e0e0;
+            }
+
+            .btn-medical {
+                background: linear-gradient(135deg, #0056b3, #0056b3);
+                color: #fff !important;
+                font-weight: 600;
+                border-radius: 8px;
+                padding: 8px 18px;
+                border: none;
+                box-shadow: 0 4px 10px rgba(112, 199, 69, 0.25);
+                transition: all .2s;
+            }
+
+                .btn-medical:hover {
+                    background: linear-gradient(135deg, #0056b3, #0056b3);
+                    box-shadow: 0 6px 14px rgba(112, 199, 69, 0.35);
+                    transform: translateY(-1px);
+                }
+
+            /* Floating Action Buttons (FAB) */
+            .fab-container {
+                position: fixed;
+                bottom: 25px;
+                right: 25px;
+                z-index: 999;
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+                align-items: flex-end;
+            }
+
+            .fab-btn {
+                width: 50px;
+                height: 50px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: #fff !important;
+                font-size: 20px;
+                box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+                transition: transform .2s, box-shadow .2s;
+                text-decoration: none !important;
+                cursor: pointer;
+                border: none;
+            }
+
+                .fab-btn:hover {
+                    transform: scale(1.08);
+                    box-shadow: 0 8px 22px rgba(0,0,0,0.3);
+                }
+
+            .fab-sos {
+                background: linear-gradient(135deg, #ff3b30, #dc3545);
+                animation: pulse-sos 1.8s infinite;
+            }
+
+            .fab-chat {
+                background: linear-gradient(135deg, #0056b3, #2c9d8f);
+            }
+
+            .fab-tooltip {
+                position: absolute;
+                right: 60px;
+                background: #333;
+                color: #fff;
+                padding: 5px 12px;
+                border-radius: 6px;
+                font-size: 12px;
+                white-space: nowrap;
+                opacity: 0;
+                pointer-events: none;
+                transition: opacity .2s;
+            }
+
+            .fab-btn:hover .fab-tooltip {
+                opacity: 1;
+            }
+
+            /* Language Switch */
+            .lang-switch {
+                display: inline-flex !important;
+                align-items: center;
+                gap: 8px;
+                line-height: 1;
+                vertical-align: middle;
+                margin-right: 18px;
+                font-size: inherit;
+            }
+
+                .lang-switch a {
+                    color: #fff !important;
+                    font-weight: 600;
+                    text-decoration: none;
+                    opacity: .65;
+                }
+
+                    .lang-switch a:hover {
+                        opacity: 1;
+                    }
+
+                    .lang-switch a.active {
+                        opacity: 1;
+                        text-decoration: underline;
+                    }
+            @@media (min-width: 992px) {
+                .classy-navbar .classynav ul {
+                    display: flex;
+                    flex-wrap: nowrap; /* không cho xuống dòng */
+                    align-items: center;
+                }
+
+                    .classy-navbar .classynav   ul li {
+                        white-space: nowrap;
+                    }
+
+                        .classy-navbar .classynav ul li a {
+                            padding: 0 15px !important; /* thu hẹp khoảng cách giữa các mục */
+                            font-size: 20px !important; /* giảm cỡ chữ một chút */
+                            white-space: nowrap;
+                        }
+
+                            .classy-navbar .classynav ul li a i {
+                                margin-right: 5px;
+                            }
+            }
+    </style>
 </head>
 
 <body>
-    <!-- Preloader -->
+    <!-- Preloader (Giữ nguyên của template Alazea) -->
     <div class="preloader d-flex align-items-center justify-content-center">
         <div class="preloader-circle"></div>
         <div class="preloader-img">
-            <img src="~/img/core-img/leaf.png" alt="">
+            <img src="~/img/core-img/leaf.png" alt="Leaf">
         </div>
     </div>
 
     <!-- ##### Header Area Start ##### -->
     <header class="header-area">
-
         <!-- ***** Top Header Area ***** -->
         <div class="top-header-area">
             <div class="container">
                 <div class="row">
                     <div class="col-12">
                         <div class="top-header-content d-flex align-items-center justify-content-between">
-                            <!-- Top Header Content -->
+                            <!-- Top Header Content Left -->
                             <div class="top-header-meta">
-                                <a href="#" data-toggle="tooltip" data-placement="bottom" title="infodeercreative@gmail.com"><i class="fa fa-envelope-o" aria-hidden="true"></i> <span>Email: infodeercreative@gmail.com</span></a>
-                                <a href="#" data-toggle="tooltip" data-placement="bottom" title="+1 234 122 122"><i class="fa fa-phone" aria-hidden="true"></i> <span>Call Us: +1 234 122 122</span></a>
-                            </div>
+                                <a href="mailto:hotline@telehealth.vn" data-toggle="tooltip" data-placement="bottom" title="hotline@telehealth.vn">
+                                    <i class="fa fa-envelope-o" aria-hidden="true"></i> <span>Hỗ trợ: hotline@telehealth.vn</span>
+                                </a>
+                                <a href="tel:19001234" data-toggle="tooltip" data-placement="bottom" title="Tổng đài y tế trực tuyến">
+                                    <i class="fa fa-phone" aria-hidden="true"></i> <span>Tổng đài: <b>1900 1234</b> (24/7)</span>
+                                </a>
+                                <a href="#" data-toggle="modal" data-target="#emergencyModal" class="top-emergency-btn">
+                                    <i class="fa fa-ambulance text-white" aria-hidden="true"></i> CẤP CỨU 115
+                                </a>
 
-                            <!-- Top Header Content -->
-                            <div class="top-header-meta d-flex">
-                                <!-- Language Dropdown -->
-                                <div class="language-dropdown">
-                                    <div class="dropdown">
-                                        <button class="btn btn-secondary dropdown-toggle mr-30" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Language</button>
-                                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                                            <a class="dropdown-item" href="#">USA</a>
-                                            <a class="dropdown-item" href="#">UK</a>
-                                            <a class="dropdown-item" href="#">Bangla</a>
-                                            <a class="dropdown-item" href="#">Hindi</a>
-                                            <a class="dropdown-item" href="#">Spanish</a>
-                                            <a class="dropdown-item" href="#">Latin</a>
-                                        </div>
-                                    </div>
-                                </div>
-                                <!-- Login -->
-                                <div class="login">
-                                    <a href="#"><i class="fa fa-user" aria-hidden="true"></i> <span>Login</span></a>
-                                </div>
-                                <!-- Cart -->
-                                <div class="cart">
-                                    <a href="#"><i class="fa fa-shopping-cart" aria-hidden="true"></i> <span>Cart <span class="cart-quantity">(1)</span></span></a>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- ***** Navbar Area ***** -->
+        <!-- ***** Navbar Area (Giữ nguyên cấu trúc 5 menu phân hệ bệnh nhân) ***** -->
         <div class="alazea-main-menu">
             <div class="classy-nav-container breakpoint-off">
                 <div class="container">
                     <!-- Menu -->
                     <nav class="classy-navbar justify-content-between" id="alazeaNav">
 
-                        <!-- Nav Brand -->
-                        <a href="index.html" class="nav-brand"><img src="~/img/core-img/logo.png" alt=""></a>
+                        <!-- Nav Brand Logo -->
+                        <a asp-controller="Home" asp-action="Index" class="nav-brand">
+                            <img src="~/img/core-img/logo.png" alt="Telehealth Logo" style="max-height:48px;">
+                        </a>
 
                         <!-- Navbar Toggler -->
                         <div class="classy-navbar-toggler">
@@ -90,26 +374,30 @@
 
                         <!-- Menu -->
                         <div class="classy-menu">
-
                             <!-- Close Button -->
                             <div class="classycloseIcon">
                                 <div class="cross-wrap"><span class="top"></span><span class="bottom"></span></div>
                             </div>
 
-                            <!-- Navbar Start -->
+                            @{
+                                var curCtrl = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
+                                var curAct = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
+                            }
+
+                            <!-- Navbar Start (Đúng 5 Menus của Phân hệ Bệnh nhân) -->
                             <div class="classynav">
                                 <ul>
                                     <li><a asp-controller="Home" asp-action="Index">Trang chủ</a></li>
-                                    <li><a asp-controller="Doctors" asp-action="Index">Tìm bác sĩ</a></li>
-                                    <li><a asp-controller="Appointments" asp-action="Index">Lịch khám của tôi</a></li>
-                                    <li><a asp-controller="Patients" asp-action="Index">Hồ sơ của tôi</a></li>
+                                    <li><a asp-controller="About" asp-action="Index" class="@(curCtrl == "About" ? "active-nav" : "")">Giới thiệu</a></li>
+                                    <li><a asp-controller="Doctors" asp-action="Index" class="@(curCtrl == "Doctors" ? "active-nav" : "")">Tìm bác sĩ</a></li>
+                                    <li><a asp-controller="Appointments" asp-action="Index" class="@(curCtrl == "Appointments" ? "active-nav" : "")">Lịch khám của tôi</a></li>
+                                    <li><a asp-controller="Patients" asp-action="Index" class="@(curCtrl == "Patients" ? "active-nav" : "")">Hồ sơ của tôi</a></li>
                                 </ul>
 
                                 <!-- Search Icon -->
                                 <div id="searchIcon">
                                     <i class="fa fa-search" aria-hidden="true"></i>
                                 </div>
-
                             </div>
                             <!-- Navbar End -->
                         </div>
@@ -117,11 +405,10 @@
 
                     <!-- Search Form -->
                     <div class="search-form">
-                        <form action="#" method="get">
-                            <input type="search" name="search" id="search" placeholder="Type keywords @ViewData["Title"] - TELEHEALTH press enter...">
+                        <form asp-controller="Doctors" asp-action="Index" method="get">
+                            <input type="search" name="q" id="search" placeholder="Tìm kiếm bác sĩ, chuyên khoa hoặc triệu chứng...">
                             <button type="submit" class="d-none"></button>
                         </form>
-                        <!-- Close Icon -->
                         <div class="closeIcon"><i class="fa fa-times" aria-hidden="true"></i></div>
                     </div>
                 </div>
@@ -129,200 +416,244 @@
         </div>
     </header>
     <!-- ##### Header Area End ##### -->
-    <!-- ##### Hero Area Start ##### -->
-    <section class="hero-area">
-        <div class="hero-post-slides owl-carousel">
+    @if (curCtrl == "Home" && curAct == "Index")
+    {
+        <!-- ##### Hero Area Start (Carousel Alazea trên trang chủ) ##### -->
+        <section class="hero-area">
+            <div class="hero-post-slides owl-carousel">
 
-            <!-- Single Hero Post -->
-            <div class="single-hero-post bg-overlay">
-                <!-- Post Image -->
-                <div class="slide-img bg-img" style="background-image: url(@Url.Content("~/img/bg-img/1.jpg"));"></div>
-                <div class="container h-100">
-                    <div class="row h-100 align-items-center">
-                        <div class="col-12">
-                            <!-- Post Content -->
-                            <div class="hero-slides-content text-center">
-                                <h2>Chăm sóc sức khỏe của bạn, ngay cả khi bạn không thể đến bệnh viện</h2>
-                                <p>Chọn bác sĩ, chọn giờ trống, mô tả triệu chứng và gửi kèm ảnh hoặc kết quả xét nghiệm. Khám trực tiếp, trực tuyến hoặc cấp cứu.</p>
-                                <div class="welcome-btn-group">
-                                    <a asp-controller="Doctors" asp-action="Index" class="btn alazea-btn active">TÌM BÁC SĨ</a>
+                <!-- Single Hero Post 1 -->
+                <div class="single-hero-post bg-overlay">
+                    <div class="slide-img bg-img" style="background-image: url(@Url.Content("~/img/bg-img/1.jpg"));"></div>
+                    <div class="container h-100">
+                        <div class="row h-100 align-items-center">
+                            <div class="col-12">
+                                <div class="hero-slides-content text-center">
+                                    <h2>Chăm sóc sức khỏe toàn diện ngay tại nhà của bạn</h2>
+                                    <p>Kết nối trực tiếp cùng đội ngũ bác sĩ chuyên khoa giàu kinh nghiệm. Khám trực tuyến HD, đặt lịch khám tại viện và nhận đơn thuốc điện tử tiện lợi 24/7.</p>
+                                    <div class="welcome-btn-group">
+                                        <a asp-controller="Doctors" asp-action="Index" class="btn alazea-btn active mr-2"><i class="fa fa-stethoscope"></i> TÌM BÁC SĨ NGAY</a>
+                                        <a asp-controller="Appointments" asp-action="Index" class="btn alazea-btn"><i class="fa fa-calendar"></i> LỊCH KHÁM CỦA TÔI</a>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Single Hero Post -->
-            <div class="single-hero-post bg-overlay">
-                <!-- Post Image -->
-                <div class="slide-img bg-img" style="background-image: url(@Url.Content("~/img/bg-img/2.jpg"));"></div>
-                <div class="container h-100">
-                    <div class="row h-100 align-items-center">
-                        <div class="col-12">
-                            <!-- Post Content -->
-                            <div class="hero-slides-content text-center">
-                                <h2>Chăm sóc sức khỏe của bạn, ngay cả khi bạn không thể đến bệnh viện</h2>
-                                <p>Chọn bác sĩ, chọn giờ trống, mô tả triệu chứng và gửi kèm ảnh hoặc kết quả xét nghiệm. Khám trực tiếp, trực tuyến hoặc cấp cứu.</p>
-                                <div class="welcome-btn-group">
-                                    <a asp-controller="Doctors" asp-action="Index" class="btn alazea-btn active">TÌM BÁC SĨ</a>
-
+                <!-- Single Hero Post 2 -->
+                <div class="single-hero-post bg-overlay">
+                    <div class="slide-img bg-img" style="background-image: url(@Url.Content("~/img/bg-img/2.jpg"));"></div>
+                    <div class="container h-100">
+                        <div class="row h-100 align-items-center">
+                            <div class="col-12">
+                                <div class="hero-slides-content text-center">
+                                    <h2>Khám chuyên khoa, cấp cứu và nhận phác đồ chuẩn y khoa</h2>
+                                    <p>Chọn giờ khám theo lịch rảnh, đính kèm kết quả xét nghiệm, thanh toán an toàn qua VietQR và lưu trữ bệnh án số trọn đời.</p>
+                                    <div class="welcome-btn-group">
+                                        <a asp-controller="Doctors" asp-action="Index" class="btn alazea-btn active mr-2"><i class="fa fa-user-md"></i> ĐẶT LỊCH KHÁM</a>
+                                        <a href="#" data-toggle="modal" data-target="#emergencyModal" class="btn btn-danger py-3 px-4 rounded font-weight-bold"><i class="fa fa-ambulance"></i> BÁO CẤP CỨU</a>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
+
             </div>
-
-        </div>
-    </section>
-    <!-- ##### Hero Area End ##### -->
-    @RenderBody()
-
-
-    <!-- ##### Contact Area Start ##### -->
-    <section class="contact-area section-padding-100-0">
-        <div class="container">
-            <div class="row align-items-center justify-content-between">
-                <div class="col-12 col-lg-5">
-                    <!-- Section Heading -->
-                    <div class="section-heading">
-                        <h2>GET IN TOUCH</h2>
-                        <p>Send us a message, we will call back later</p>
+        </section>
+        <!-- ##### Hero Area End ##### -->
+    }
+    else
+    {
+        <!-- ##### Subpage Breadcrumb Header ##### -->
+        <div class="subpage-banner" style="background-image: linear-gradient(rgba(17,17,17,.55), rgba(17,17,17,.55)), url(@Url.Content("~/img/bg-img/1.jpg"));">
+            <div class="container">
+                <div class="row align-items-center">
+                    <div class="col-md-7">
+                        <h2>@ViewData["Title"]</h2>
+                        <nav aria-label="breadcrumb">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index"><i class="fa fa-home"></i> Trang chủ</a></li>
+                                <li class="breadcrumb-item active" aria-current="page">@ViewData["Title"]</li>
+                            </ol>
+                        </nav>
                     </div>
-                    <!-- Contact Form Area -->
-                    <div class="contact-form-area mb-100">
-                        <form action="#" method="post">
-                            <div class="row">
-                                <div class="col-12 col-sm-6">
-                                    <div class="form-group">
-                                        <input type="text" class="form-control" id="contact-name" placeholder="Your Name">
-                                    </div>
-                                </div>
-                                <div class="col-12 col-sm-6">
-                                    <div class="form-group">
-                                        <input type="email" class="form-control" id="contact-email" placeholder="Your Email">
-                                    </div>
-                                </div>
-                                <div class="col-12">
-                                    <div class="form-group">
-                                        <input type="text" class="form-control" id="contact-subject" placeholder="Subject">
-                                    </div>
-                                </div>
-                                <div class="col-12">
-                                    <div class="form-group">
-                                        <textarea class="form-control" name="message" id="message" cols="30" rows="10" placeholder="Message"></textarea>
-                                    </div>
-                                </div>
-                                <div class="col-12">
-                                    <button type="submit" class="btn alazea-btn mt-15">Send Message</button>
-                                </div>
+                    <div class="col-md-5 text-md-right mt-3 mt-md-0">
+                        <a asp-controller="Doctors" asp-action="Index" class="btn btn-light btn-sm font-weight-bold text-success mr-2">
+                            <i class="fa fa-plus-circle"></i> Đặt khám mới
+                        </a>
+                        <a asp-controller="Appointments" asp-action="Index" class="btn btn-outline-light btn-sm font-weight-bold">
+                            <i class="fa fa-calendar"></i> Lịch của tôi
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- ##### Main Content Body ##### -->
+    <div id="main-content" style="min-height: 65vh; transition: opacity .15s">
+        @RenderBody()
+    </div>
+
+    <!-- ##### Floating Action Buttons (FAB) ##### -->
+    <div class="fab-container">
+        <!-- Nút Cấp Cứu Nhanh -->
+        <a href="#" data-toggle="modal" data-target="#emergencyModal" class="fab-btn fab-sos" title="Báo Cấp Cứu 115">
+            <i class="fa fa-ambulance"></i>
+            <span class="fab-tooltip">Báo Cấp Cứu Khẩn Cấp (115)</span>
+        </a>
+        <!-- Nút Chat Y Tế / Trợ lý ảo -->
+        <a href="#" data-toggle="modal" data-target="#assistantModal" class="fab-btn fab-chat" title="Tư Vấn Y Tế 24/7">
+            <i class="fa fa-commenting-o"></i>
+            <span class="fab-tooltip">Tư vấn sức khỏe 24/7</span>
+        </a>
+    </div>
+
+    <!-- ##### Modal Hỗ Trợ Cấp Cứu Khẩn Cấp ##### -->
+    <div class="modal fade" id="emergencyModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title font-weight-bold"><i class="fa fa-ambulance mr-2"></i> TRUNG TÂM ĐIỀU PHỐI CẤP CỨU 24/7</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body p-4 text-center">
+                    <div class="mb-3">
+                        <i class="fa fa-heartbeat text-danger" style="font-size: 50px;"></i>
+                    </div>
+                    <h4 class="font-weight-bold text-danger mb-2">HOTLINE CẤP CỨU KHẨN CẤP</h4>
+                    <p class="text-muted">Nếu bạn hoặc người thân đang trong tình trạng nguy kịch (khó thở, ngừng tim, mất ý thức, chấn thương nặng), vui lòng bấm gọi ngay:</p>
+                    <div class="d-flex justify-content-center gap-3 my-3">
+                        <a href="tel:115" class="btn btn-danger btn-lg px-4 font-weight-bold mr-2">
+                            <i class="fa fa-phone mr-1"></i> GỌI 115 (MIỄN PHÍ)
+                        </a>
+                        <a href="tel:19001234" class="btn btn-outline-danger btn-lg px-4 font-weight-bold">
+                            <i class="fa fa-hospital-o mr-1"></i> VIỆN: 1900 1234
+                        </a>
+                    </div>
+                    <hr />
+                    <p class="small text-muted mb-0">Hoặc bạn có thể chọn hình thức <b>"Cấp cứu"</b> khi đặt lịch để kíp trực cấp cứu của viện tiếp nhận vị trí GPS ngay lập tức.</p>
+                </div>
+                <div class="modal-footer bg-light">
+                    <a asp-controller="Doctors" asp-action="Index" class="btn btn-success btn-sm"><i class="fa fa-stethoscope"></i> Đặt lịch cấp cứu trực tuyến</a>
+                    <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Đóng</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ##### Modal Trợ Lý Y Tế Ảo / Chatbot ##### -->
+    <div class="modal fade" id="assistantModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title font-weight-bold"><i class="fa fa-user-md mr-2"></i> TRỢ LÝ Y TẾ THÔNG MINH TELEHEALTH</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body p-3" style="max-height: 420px; overflow-y: auto;">
+                    <div class="d-flex mb-3">
+                        <div class="bg-light p-3 rounded" style="max-width: 85%;">
+                            <b class="text-success d-block mb-1"><i class="fa fa-stethoscope"></i> Trợ lý Y tế:</b>
+                            Xin chào! Tôi có thể hỗ trợ gì cho bạn hôm nay? Bạn có thể hỏi về triệu chứng, hướng dẫn chọn chuyên khoa, hoặc hỗ trợ tra cứu lịch khám.
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-end mb-3">
+                        <div class="bg-success text-white p-3 rounded" style="max-width: 85%;">
+                            Tôi muốn tìm bác sĩ khám triệu chứng đau đầu và sốt cao.
+                        </div>
+                    </div>
+                    <div class="d-flex mb-3">
+                        <div class="bg-light p-3 rounded" style="max-width: 85%;">
+                            <b class="text-success d-block mb-1"><i class="fa fa-stethoscope"></i> Gợi ý chuyên khoa:</b>
+                            Với triệu chứng sốt kèm đau đầu, bạn nên đăng ký khám <b>Nội tổng quát</b> hoặc <b>Nhi khoa</b> (nếu là trẻ nhỏ). Bạn có thể bấm nút bên dưới để xem danh sách bác sĩ đang trực!
+                            <div class="mt-2">
+                                <a asp-controller="Doctors" asp-action="Index" class="btn btn-outline-success btn-sm">Xem bác sĩ Nội tổng quát &rarr;</a>
                             </div>
-                        </form>
+                        </div>
                     </div>
                 </div>
-
-                <div class="col-12 col-lg-6">
-                    <!-- Google Maps -->
-                    <div class="map-area mb-100">
-                        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d22236.40558254599!2d-118.25292394686001!3d34.057682914027104!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x80c2c75ddc27da13%3A0xe22fdf6f254608f4!2z4Kay4Ka4IOCmj-CmnuCnjeCmnOCnh-CmsuCnh-CmuCwg4KaV4KeN4Kav4Ka-4Kay4Ka_4Kar4KeL4Kaw4KeN4Kao4Ka_4Kav4Ka84Ka-LCDgpq7gpr7gprDgp43gppXgpr_gpqgg4Kav4KeB4KaV4KeN4Kak4Kaw4Ka-4Ka34KeN4Kaf4KeN4Kaw!5e0!3m2!1sbn!2sbd!4v1532328708137" allowfullscreen></iframe>
+                <div class="modal-footer bg-light p-2">
+                    <div class="input-group">
+                        <input type="text" class="form-control form-control-sm" placeholder="Nhập triệu chứng hoặc câu hỏi của bạn...">
+                        <div class="input-group-append">
+                            <button class="btn btn-success btn-sm" type="button"><i class="fa fa-paper-plane"></i> Gửi</button>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </section>
-    <!-- ##### Contact Area End ##### -->
-    <!-- ##### Footer Area Start ##### -->
-    <footer class="footer-area bg-img" style="background-image: url(img/bg-img/3.jpg);">
-        <!-- Main Footer Area -->
+    </div>
+
+    <!-- ##### Footer Area Start (Giữ nguyên giao diện chuẩn Alazea) ##### -->
+    <footer class="footer-area bg-img" style="background-image: url(@Url.Content("~/img/bg-img/3.jpg"));">
         <div class="main-footer-area">
             <div class="container">
                 <div class="row">
-
-                    <!-- Single Footer Widget -->
+                    <!-- Widget 1: Giới thiệu hệ thống -->
                     <div class="col-12 col-sm-6 col-lg-3">
                         <div class="single-footer-widget">
                             <div class="footer-logo mb-30">
-                                <a href="#"><img src="~/img/core-img/logo.png" alt=""></a>
+                                <a asp-controller="Home" asp-action="Index">
+                                    <img src="~/img/core-img/logo.png" alt="Telehealth" style="max-height:48px;">
+                                </a>
                             </div>
-                            <p>Lorem ipsum dolor sit samet, consectetur adipiscing elit. India situs atione mantor</p>
+                            <p>Hệ thống y tế từ xa hàng đầu kết nối người bệnh và bác sĩ chuyên khoa mọi lúc, mọi nơi với phác đồ chuẩn y khoa và hồ sơ bệnh án điện tử an toàn.</p>
                             <div class="social-info">
-                                <a href="#"><i class="fa fa-facebook" aria-hidden="true"></i></a>
-                                <a href="#"><i class="fa fa-twitter" aria-hidden="true"></i></a>
-                                <a href="#"><i class="fa fa-google-plus" aria-hidden="true"></i></a>
-                                <a href="#"><i class="fa fa-instagram" aria-hidden="true"></i></a>
-                                <a href="#"><i class="fa fa-linkedin" aria-hidden="true"></i></a>
+                                <a href="#"><i class="fa fa-facebook"></i></a>
+                                <a href="#"><i class="fa fa-twitter"></i></a>
+                                <a href="#"><i class="fa fa-google-plus"></i></a>
+                                <a href="#"><i class="fa fa-instagram"></i></a>
+                                <a href="#"><i class="fa fa-youtube-play"></i></a>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Single Footer Widget -->
+                    <!-- Widget 2: Liên kết tiện ích cho Bệnh nhân -->
                     <div class="col-12 col-sm-6 col-lg-3">
                         <div class="single-footer-widget">
                             <div class="widget-title">
-                                <h5>QUICK LINK</h5>
+                                <h5>DÀNH CHO BỆNH NHÂN</h5>
                             </div>
                             <nav class="widget-nav">
                                 <ul>
-                                    <li><a href="#">Purchase</a></li>
-                                    <li><a href="#">FAQs</a></li>
-                                    <li><a href="#">Payment</a></li>
-                                    <li><a href="#">News</a></li>
-                                    <li><a href="#">Return</a></li>
-                                    <li><a href="#">Advertise</a></li>
-                                    <li><a href="#">Shipping</a></li>
-                                    <li><a href="#">Career</a></li>
-                                    <li><a href="#">Orders</a></li>
-                                    <li><a href="#">Policities</a></li>
+                                    <li><a asp-controller="Doctors" asp-action="Index">Tìm kiếm bác sĩ</a></li>
+                                    <li><a asp-controller="Appointments" asp-action="Index">Lịch khám của tôi</a></li>
+                                    <li><a asp-controller="Patients" asp-action="Index">Hồ sơ bệnh án điện tử</a></li>
+                                    <li><a asp-controller="About" asp-action="Index">Quy trình khám chữa bệnh</a></li>
+                                    <li><a href="#">Chính sách hoàn tiền cọc</a></li>
+                                    <li><a href="#">Bảo hiểm y tế (BHYT)</a></li>
+                                    <li><a href="#">Hướng dẫn gọi Video Call</a></li>
+                                    <li><a href="#">Đơn thuốc điện tử</a></li>
+                                    <li><a href="#">Bảo mật thông tin y khoa</a></li>
+                                    <li><a href="#">Giải đáp thắc mắc (FAQs)</a></li>
                                 </ul>
                             </nav>
                         </div>
                     </div>
 
-                    <!-- Single Footer Widget -->
+                    <!-- Widget 3: Chuyên khoa nổi bật -->
                     <div class="col-12 col-sm-6 col-lg-3">
-                        <div class="single-footer-widget">
-                            <div class="widget-title">
-                                <h5>BEST SELLER</h5>
-                            </div>
 
-                            <!-- Single Best Seller Products -->
-                            <div class="single-best-seller-product d-flex align-items-center">
-                                <div class="product-thumbnail">
-                                    <a href="shop-details.html"><img src="~/img/bg-img/4.jpg" alt=""></a>
-                                </div>
-                                <div class="product-info">
-                                    <a href="shop-details.html">Cactus Flower</a>
-                                    <p>$10.99</p>
-                                </div>
-                            </div>
-
-                            <!-- Single Best Seller Products -->
-                            <div class="single-best-seller-product d-flex align-items-center">
-                                <div class="product-thumbnail">
-                                    <a href="shop-details.html"><img src="~/img/bg-img/5.jpg" alt=""></a>
-                                </div>
-                                <div class="product-info">
-                                    <a href="shop-details.html">Tulip Flower</a>
-                                    <p>$11.99</p>
-                                </div>
-                            </div>
-                        </div>
                     </div>
 
-                    <!-- Single Footer Widget -->
+                    <!-- Widget 4: Thông tin liên hệ cơ sở y tế -->
                     <div class="col-12 col-sm-6 col-lg-3">
                         <div class="single-footer-widget">
                             <div class="widget-title">
-                                <h5>CONTACT</h5>
+                                <h5>TRUNG TÂM Y TẾ</h5>
                             </div>
-
                             <div class="contact-information">
-                                <p><span>Address:</span> 505 Silk Rd, New York</p>
-                                <p><span>Phone:</span> +1 234 122 122</p>
-                                <p><span>Email:</span> info.deercreative@gmail.com</p>
-                                <p><span>Open hours:</span> Mon - Sun: 8 AM to 9 PM</p>
-                                <p><span>Happy hours:</span> Sat: 2 PM to 4 PM</p>
+                                <p><span>Cơ sở chính:</span> 2 Cầu Giấy, Quận Cầu Giấy, Hà Nội</p>
+                                <p><span>Cấp cứu 24/7:</span> 115 / 1900 1234</p>
+                                <p><span>Email y tế:</span> info@telehealth.vn</p>
+                                <p><span>Giờ khám trực tiếp:</span> 07:00 - 20:30 (Cả Thứ 7, CN)</p>
+                                <p><span>Khám trực tuyến:</span> Hoạt động 24/7</p>
                             </div>
                         </div>
                     </div>
@@ -334,30 +665,23 @@
         <div class="footer-bottom-area">
             <div class="container">
                 <div class="row">
-                    <div class="col-12">
-                        <div class="border-line"></div>
-                    </div>
-                    <!-- Copywrite Text -->
+                    <div class="col-12"><div class="border-line"></div></div>
                     <div class="col-12 col-md-6">
                         <div class="copywrite-text">
                             <p>
-                                &copy; <!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
-                                Copyright &copy;<script>document.write(new Date().getFullYear());</script> All rights reserved | This template is made with <i class="fa fa-heart-o" aria-hidden="true"></i> by <a href="https://colorlib.com" target="_blank">Colorlib</a>
-                                <!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
+                                Copyright &copy; @DateTime.Now.Year All rights reserved | TELEHEALTH GROUP 4 - Phân hệ Bệnh nhân.
                             </p>
                         </div>
                     </div>
-                    <!-- Footer Nav -->
                     <div class="col-12 col-md-6">
                         <div class="footer-nav">
                             <nav>
                                 <ul>
-                                    <li><a href="#">Home</a></li>
-                                    <li><a href="#">About</a></li>
-                                    <li><a href="#">Service</a></li>
-                                    <li><a href="#">Portfolio</a></li>
-                                    <li><a href="#">Blog</a></li>
-                                    <li><a href="#">Contact</a></li>
+                                    <li><a asp-controller="Home" asp-action="Index">Trang chủ</a></li>
+                                    <li><a asp-controller="About" asp-action="Index">Giới thiệu</a></li>
+                                    <li><a asp-controller="Doctors" asp-action="Index">Tìm bác sĩ</a></li>
+                                    <li><a asp-controller="Appointments" asp-action="Index">Lịch khám</a></li>
+                                    <li><a asp-controller="Patients" asp-action="Index">Hồ sơ</a></li>
                                 </ul>
                             </nav>
                         </div>
@@ -367,18 +691,14 @@
         </div>
     </footer>
     <!-- ##### Footer Area End ##### -->
-    <!-- ##### All Javascript Files ##### -->
-    <!-- jQuery-2.2.4 js -->
+    <!-- ##### All Javascript Files (Giữ nguyên của template Alazea) ##### -->
     <script src="~/js/jquery/jquery-2.2.4.min.js"></script>
-    <!-- Popper js -->
     <script src="~/js/bootstrap/popper.min.js"></script>
-    <!-- Bootstrap js -->
     <script src="~/js/bootstrap/bootstrap.min.js"></script>
-    <!-- All Plugins js -->
     <script src="~/js/plugins/plugins.js"></script>
-    <!-- Active js -->
     <script src="~/js/active.js"></script>
+    <script src="~/js/ajax-nav.js"></script>
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
-
 </html>

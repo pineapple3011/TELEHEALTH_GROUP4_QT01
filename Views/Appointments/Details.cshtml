@@ -1,117 +1,710 @@
-@model AppointmentDetailsVm
+@model TELEHEALTH_GROUP4_QT01.Models.ViewModels.AppointmentDetailsVm
 @{
-    ViewData["Title"] = "Chi tiết lịch khám";
+    ViewData["Title"] = $"Chi tiết lịch khám #TK-{Model.AppointId:D5}";
+    var isOnline = Model.HinhThuc == "Online";
+    var isEmergency = Model.HinhThuc == "Cấp cứu";
+    var isCompleted = Model.TrangThai == "Hoàn thành";
+    var isCancelled = Model.TrangThai == "Đã hủy";
+    var canCancel = (Model.TrangThai == "Chờ xác nhận" || Model.TrangThai == "Đã xác nhận");
+    var canJoinOnline = isOnline && !isCancelled;
+    var receiptFile = Model.Files.FirstOrDefault(f => f.Loai != null && (f.Loai.Contains("Biên lai") || f.Loai.Contains("receipt")));
 }
 
-<div class="container my-5" style="min-height:60vh">
-    @if (TempData["Msg"] != null)
-    {
-        <div class="alert alert-success">@TempData["Msg"]</div>
+<style>
+    .stepper-wrap {
+        display: flex;
+        justify-content: space-between;
+        position: relative;
+        margin: 20px 0 35px;
     }
 
-    <a asp-action="Index" class="btn btn-link pl-0 mb-3">&larr; Lịch khám của tôi</a>
-    <h2 class="mb-4">Chi tiết lịch khám #@Model.AppointId</h2>
+        .stepper-wrap::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 40px;
+            right: 40px;
+            height: 4px;
+            background: #e9ecef;
+            z-index: 1;
+        }
 
-    <div class="row">
-        <div class="col-lg-6 mb-4">
-            <div class="card h-100">
-                <div class="card-body">
-                    <h5 class="mb-3">Thông tin ca khám</h5>
-                    <table class="table table-sm mb-0">
-                        <tr><th style="width:40%">Bác sĩ</th><td>@Model.DoctorName</td></tr>
-                        <tr><th>Chuyên khoa</th><td>@Model.SpecName</td></tr>
-                        <tr><th>Ngày giờ</th><td>@Model.DateText lúc @Model.TimeText</td></tr>
-                        <tr><th>Hình thức</th><td>@Model.HinhThuc</td></tr>
-                        <tr><th>Trạng thái</th><td>@Model.TrangThai</td></tr>
-                        @if (!string.IsNullOrEmpty(Model.MucDoKhanCap))
-                        {
-                            <tr><th>Mức độ cấp cứu</th><td>Mức @Model.MucDoKhanCap</td></tr>
-                            <tr><th>Vị trí</th><td>@Model.ViTriKhanCap</td></tr>
-                        }
-                    </table>
-                </div>
-            </div>
+    .step-item {
+        position: relative;
+        z-index: 2;
+        text-align: center;
+        flex: 1;
+    }
+
+    .step-circle {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        background: #fff;
+        border: 3px solid #dee2e6;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 10px;
+        font-weight: 700;
+        color: #6c757d;
+        transition: all .25s;
+    }
+
+    .step-item.active .step-circle {
+        border-color: #0056b3;
+        background: #2c9d8f;
+        color: #fff;
+        box-shadow: 0 0 0 5px rgba(112,199,69,0.25);
+    }
+
+    .step-item.completed .step-circle {
+        border-color: #0056b3;
+        background: #2c9d8f;
+        color: #fff;
+    }
+
+    .step-title {
+        font-size: 13px;
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 2px;
+    }
+
+    .step-desc {
+        font-size: 11px;
+        color: #868e96;
+    }
+
+    .detail-card {
+        background: #fff;
+        border-radius: 12px;
+        border: 1px solid #e9ecef;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+        margin-bottom: 24px;
+        overflow: hidden;
+    }
+
+    .detail-card-head {
+        padding: 16px 20px;
+        background: #fdfdfd;
+        border-bottom: 1px solid #f1f3f5;
+        font-weight: 700;
+        font-size: 15px;
+        color: #2c9d8f;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .detail-card-body {
+        padding: 20px;
+    }
+
+    .doc-avatar-lg {
+        width: 80px;
+        height: 80px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-size: 26px;
+        font-weight: 700;
+        background: linear-gradient(135deg, #0056b3, #2c9d8f);
+    }
+
+    .rx-table th {
+        background: #f8f9fa;
+        font-weight: 700;
+        font-size: 13px;
+        color: #2c9d8f;
+        border-top: none;
+    }
+</style>
+
+<div class="container my-4" style="min-height: 65vh;">
+    <!-- Top Action Toolbar -->
+    <div class="d-flex flex-wrap align-items-center justify-content-between mb-3">
+        <a asp-action="Index" class="btn btn-link pl-0 text-success font-weight-bold">
+            <i class="fa fa-arrow-left mr-1"></i> Quay lại danh sách lịch khám
+        </a>
+        <div class="mt-2 mt-md-0">
+            <button type="button" class="btn btn-outline-secondary btn-sm mr-2" onclick="window.print()">
+                <i class="fa fa-print mr-1"></i> In hồ sơ
+            </button>
+            <button type="button" class="btn btn-outline-info btn-sm mr-2" onclick="downloadIcs()">
+                <i class="fa fa-calendar-plus-o mr-1"></i> Thêm vào Calendar
+            </button>
+            @if (canCancel)
+            {
+                <button type="button" class="btn btn-outline-danger btn-sm" onclick="$('#cancelModal').modal('show')">
+                    <i class="fa fa-times mr-1"></i> Hủy ca khám
+                </button>
+            }
         </div>
+    </div>
 
-        <div class="col-lg-6 mb-4">
-            <div class="card h-100">
-                <div class="card-body">
-                    <h5 class="mb-3">Thanh toán</h5>
-                    @if (Model.HasPayment)
-                    {
-                        <p class="mb-1"><b>@Model.LoaiGiaoDich:</b> @Cv.Money(Model.Amount)</p>
-                        <p class="mb-3"><b>Trạng thái:</b> @Model.TrangThaiGiaoDich</p>
-                        @if (Model.CanPay)
-                        {
-                            <a asp-action="Pay" asp-route-id="@Model.AppointId" class="btn btn-success btn-sm">Thanh toán ngay</a>
-                        }
-                    }
-                    else
-                    {
-                        <p class="text-muted mb-0">Ca khám này không có khoản thanh toán.</p>
-                    }
+    @if (TempData["Msg"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+            <i class="fa fa-check-circle mr-2"></i> @TempData["Msg"]
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    }
+    @if (TempData["Err"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+            <i class="fa fa-exclamation-triangle mr-2"></i> @TempData["Err"]
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    }
 
-                    <hr />
-                    <h5 class="mb-3">File đính kèm</h5>
-                    @if (!Model.Files.Any())
-                    {
-                        <p class="text-muted mb-0">Chưa có file nào.</p>
-                    }
-                    else
-                    {
-                        <ul class="mb-0">
-                            @foreach (var f in Model.Files)
-                            {
-                                <li><a href="@f.Url" target="_blank">@f.Loai</a> <span class="text-muted">(@f.Ngay)</span></li>
-                            }
-                        </ul>
-                    }
+    <!-- Banner Trạng Thái Ca Khám -->
+    <div class="card border-0 shadow-sm rounded-lg mb-4 p-4 text-white" style="background: linear-gradient(135deg, #0056b3, #2c9d8f);">
+        <div class="row align-items-center">
+            <div class="col-lg-8 mb-3 mb-lg-0">
+                <div class="d-flex align-items-center mb-2">
+                    <span class="badge badge-light text-dark font-weight-bold px-3 py-1 rounded-pill mr-3">
+                        MÃ HỒ SƠ: #TK-@Model.AppointId.ToString("D5")
+                    </span>
+                    <span class="badge @(Model.TrangThai == "Đã xác nhận" ? "badge-success" : (isCompleted ? "badge-info" : (isCancelled ? "badge-danger" : "badge-warning"))) px-3 py-1 rounded-pill font-weight-bold">
+                        @Model.TrangThai
+                    </span>
                 </div>
+                <h3 class="font-weight-bold text-white mb-1">
+                    Lịch hẹn lúc @Model.TimeText - @Model.DateText
+                </h3>
+                <p class="mb-0 text-light opacity-90 small">
+                    <i class="fa fa-user-md text-success"></i> Bác sĩ phụ trách: <b>@Model.DoctorName</b> &bull; Chuyên khoa: <b>@Model.SpecName</b>
+                </p>
+            </div>
+            <div class="col-lg-4 text-lg-right">
+                @if (Model.CanPay)
+                {
+                    <a asp-action="Pay" asp-route-id="@Model.AppointId" class="btn btn-warning btn-lg font-weight-bold text-dark shadow">
+                        <i class="fa fa-credit-card mr-1"></i> Thanh toán (@Cv.Money(Model.Amount))
+                    </a>
+                }
+                else if (canJoinOnline)
+                {
+                    <a asp-action="Room" asp-route-id="@Model.AppointId" class="btn btn-success btn-lg font-weight-bold shadow">
+                        <i class="fa fa-video-camera mr-1"></i> Vào phòng khám Video
+                    </a>
+                }
+                else if (isCompleted)
+                {
+                    <button type="button" class="btn btn-outline-light btn-sm" onclick="$('#rateModal').modal('show')">
+                        <i class="fa fa-star text-warning mr-1"></i> Đánh giá bác sĩ
+                    </button>
+                }
             </div>
         </div>
     </div>
 
-    <div class="card">
-        <div class="card-body">
-            <h5 class="mb-3">Kết quả khám và đơn thuốc</h5>
-            @if (!Model.HasRecord)
-            {
-                <p class="text-muted mb-0">Bác sĩ chưa cập nhật kết quả khám cho ca này.</p>
-            }
-            else
-            {
-                <p class="mb-1"><b>Chẩn đoán:</b> @Model.ChanDoan</p>
-                @if (!string.IsNullOrEmpty(Model.NgayTaiKham))
-                {
-                    <p class="mb-3"><b>Ngày tái khám:</b> @Model.NgayTaiKham</p>
-                }
+    <!-- TIẾN TRÌNH 5 BƯỚC KHÁM BỆNH -->
+    <div class="card border-0 shadow-sm p-4 mb-4 bg-white rounded-lg">
+        <h6 class="font-weight-bold text-dark mb-2"><i class="fa fa-road text-success mr-2"></i> Tiến trình ca khám</h6>
+        <div class="stepper-wrap">
+            <div class="step-item completed">
+                <div class="step-circle"><i class="fa fa-check"></i></div>
+                <div class="step-title">1. Đặt lịch</div>
+                <div class="step-desc">Đã gửi yêu cầu</div>
+            </div>
+            <div class="step-item @(Model.HasPayment ? (Model.CanPay ? "active" : "completed") : "completed")">
+                <div class="step-circle">
+                    @if (Model.HasPayment && Model.CanPay)
+                    {
+                        <span>2</span>
+                    }
+                    else
+                    {
 
-                @if (!Model.Prescriptions.Any())
-                {
-                    <p class="text-muted mb-0">Không có thuốc được kê.</p>
-                }
-                else
-                {
-                    <div class="table-responsive">
-                        <table class="table table-sm">
-                            <thead>
-                                <tr><th>Thuốc</th><th>Số lượng</th><th>Liều dùng</th><th>Cách dùng</th></tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var p in Model.Prescriptions)
-                                {
-                                    <tr>
-                                        <td>@p.TenThuoc</td>
-                                        <td>@p.SoLuong</td>
-                                        <td>@p.LieuDung</td>
-                                        <td>@p.CachDung</td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
+                        <i class="fa fa-check"></i>
+                    }
+                </div>
+                <div class="step-title">2. Thanh toán</div>
+                <div class="step-desc">@(Model.CanPay ? "Chờ thanh toán" : "Đã thanh toán/Cọc")</div>
+            </div>
+            <div class="step-item @(Model.TrangThai == "Chờ xác nhận" ? "active" : (!isCancelled ? "completed" : ""))">
+                <div class="step-circle">
+                    @if (Model.TrangThai == "Chờ xác nhận")
+                    {
+                        <span>3</span>
+                    }
+                    else
+                    {
+
+                        <i class="fa fa-check"></i>
+                    }
+                </div>
+                <div class="step-title">3. Bác sĩ duyệt</div>
+                <div class="step-desc">@(Model.TrangThai == "Chờ xác nhận" ? "Đang chờ duyệt" : "Đã xác nhận")</div>
+            </div>
+            <div class="step-item @(Model.TrangThai == "Đã xác nhận" ? "active" : (isCompleted ? "completed" : ""))">
+                <div class="step-circle">
+                    @if (isCompleted)
+                    {
+                        <i class="fa fa-check"></i>
+                    }
+                    else
+                    {
+
+                        <span>4</span>
+                    }
+                </div>
+                <div class="step-title">4. Khám bệnh</div>
+                <div class="step-desc">@(isOnline ? "Khám Online HD" : "Tại phòng khám")</div>
+            </div>
+            <div class="step-item @(isCompleted ? "completed" : "")">
+                <div class="step-circle">
+                    @if (isCompleted)
+                    {
+                        <i class="fa fa-check"></i>
+                    }
+                    else
+                    {
+
+                        <span>5</span>
+                    }
+                </div>
+                <div class="step-title">5. Kết quả &amp; Đơn thuốc</div>
+                <div class="step-desc">@(Model.HasRecord ? "Đã kê đơn" : "Đang cập nhật")</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- CỘT TRÁI: Bác sĩ & Chi tiết ca khám -->
+        <div class="col-lg-6 mb-4">
+            <!-- Thẻ Bác sĩ -->
+            <div class="detail-card">
+                <div class="detail-card-head">
+                    <span><i class="fa fa-user-md text-success mr-2"></i> Bác Sĩ Phụ Trách</span>
+                    <a asp-controller="Doctors" asp-action="Index" class="small text-success">Danh bạ bác sĩ &rarr;</a>
+                </div>
+                <div class="detail-card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="doc-avatar-lg mr-3 shadow-sm">
+                            BS
+                        </div>
+                        <div>
+                            <h5 class="font-weight-bold mb-1">@Model.DoctorName</h5>
+                            <p class="text-muted small mb-1">
+                                <i class="fa fa-stethoscope text-success"></i> Chuyên khoa: <b>@Model.SpecName</b>
+                            </p>
+                            <p class="text-muted small mb-0">
+                                <i class="fa fa-hospital-o text-muted"></i> Trung tâm Y tế Telehealth Quốc tế
+                            </p>
+                        </div>
                     </div>
-                }
-            }
+                    <div class="p-3 bg-light rounded small">
+                        <div class="mb-1"><b>Cơ sở tiếp nhận:</b> Phòng khám Đa khoa Telehealth</div>
+                        <div class="mb-0 text-muted"><b>Địa chỉ:</b> 2 Cầu Giấy, Quận Cầu Giấy, Hà Nội</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Thẻ Chi tiết lịch hẹn -->
+            <div class="detail-card">
+                <div class="detail-card-head">
+                    <span><i class="fa fa-info-circle text-info mr-2"></i> Thông Tin Chi Tiết Lịch Hẹn</span>
+                </div>
+                <div class="detail-card-body">
+                    <table class="table table-sm mb-0">
+                        <tr>
+                            <td class="text-muted" style="width: 40%;">Ngày khám:</td>
+                            <td class="font-weight-bold">@Model.DateText</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Khung giờ hẹn:</td>
+                            <td class="font-weight-bold text-success">@Model.TimeText</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Hình thức khám:</td>
+                            <td>
+                                @if (isOnline)
+                                {
+                                    <span class="badge badge-soft-primary"><i class="fa fa-video-camera"></i> Khám trực tuyến Video Call</span>
+                                }
+                                else if (isEmergency)
+                                {
+                                    <span class="badge badge-soft-danger"><i class="fa fa-ambulance"></i> Cấp cứu khẩn cấp</span>
+                                }
+                                else
+                                {
+                                    <span class="badge badge-soft-secondary"><i class="fa fa-hospital-o"></i> Khám trực tiếp tại viện</span>
+                                }
+                            </td>
+                        </tr>
+                        @if (isEmergency && !string.IsNullOrEmpty(Model.MucDoKhanCap))
+                        {
+                            <tr>
+                                <td class="text-muted">Mức độ cấp cứu:</td>
+                                <td class="text-danger font-weight-bold">Mức @Model.MucDoKhanCap</td>
+                            </tr>
+                            <tr>
+                                <td class="text-muted">Vị trí đón xe:</td>
+                                <td class="text-danger">@Model.ViTriKhanCap</td>
+                            </tr>
+                        }
+                    </table>
+
+                    <hr />
+                    <h6 class="font-weight-bold small text-dark mb-2">Hồ sơ / Ảnh triệu chứng đính kèm:</h6>
+                    @if (!Model.Files.Any())
+                    {
+                        <p class="text-muted small mb-0">Không có file đính kèm cho ca này.</p>
+                    }
+                    else
+                    {
+                        <div class="row">
+                            @foreach (var f in Model.Files)
+                            {
+                                <div class="col-sm-6 mb-2">
+                                    <a href="@f.Url" target="_blank" class="p-2 border rounded d-flex align-items-center text-dark text-decoration-none bg-light small">
+                                        <i class="fa fa-file-text-o text-primary mr-2" style="font-size: 20px;"></i>
+                                        <div class="text-truncate">
+                                            <div class="font-weight-bold text-truncate">@f.Loai</div>
+                                            <div class="text-muted" style="font-size:11px;">@f.Ngay</div>
+                                        </div>
+                                    </a>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- CỘT PHẢI: Thanh toán & Kết quả khám + Đơn thuốc -->
+        <div class="col-lg-6 mb-4">
+            <!-- Thẻ Thanh toán & Biên lai -->
+            <div class="detail-card">
+                <div class="detail-card-head">
+                    <span><i class="fa fa-credit-card text-warning mr-2"></i> Thanh Toán &amp; Hóa Đơn</span>
+                    @if (Model.CanPay)
+                    {
+                        <span class="badge badge-warning text-dark font-weight-bold">Chờ thanh toán</span>
+                    }
+                    else if (Model.HasPayment)
+                    {
+                        <span class="badge badge-success font-weight-bold">@Model.TrangThaiGiaoDich</span>
+                    }
+                </div>
+                <div class="detail-card-body">
+                    @if (Model.HasPayment)
+                    {
+                        <div class="d-flex justify-content-between align-items-center p-3 bg-light rounded mb-3">
+                            <div>
+                                <span class="text-muted small d-block">@Model.LoaiGiaoDich:</span>
+                                <h4 class="font-weight-bold text-dark mb-0">@Cv.Money(Model.Amount)</h4>
+                            </div>
+                            <div>
+                                @if (Model.CanPay)
+                                {
+                                    <a asp-action="Pay" asp-route-id="@Model.AppointId" class="btn btn-warning font-weight-bold shadow-sm">
+                                        <i class="fa fa-qrcode mr-1"></i> Quét mã VietQR
+                                    </a>
+                                }
+                                else
+                                {
+                                    <span class="badge badge-soft-success p-2"><i class="fa fa-check-circle"></i> @Model.TrangThaiGiaoDich</span>
+                                }
+                            </div>
+                        </div>
+
+                        @if (receiptFile != null)
+                        {
+                            <div class="mt-3 p-2 border rounded bg-white">
+                                <span class="small font-weight-bold text-muted d-block mb-1">Ảnh biên lai đã gửi:</span>
+                                <a href="@receiptFile.Url" target="_blank" class="d-inline-block">
+                                    <img src="@receiptFile.Url" alt="Biên lai" style="max-height: 90px; border-radius: 6px;" class="border" />
+                                    <span class="small text-primary ml-2"><i class="fa fa-search-plus"></i> Xem ảnh lớn</span>
+                                </a>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <p class="text-muted small mb-0">Ca khám cấp cứu hoặc miễn phí cọc không phát sinh khoản thanh toán trước.</p>
+                    }
+                </div>
+            </div>
+
+            <!-- Thẻ Kết quả khám & Đơn thuốc -->
+            <div class="detail-card">
+                <div class="detail-card-head">
+                    <span><i class="fa fa-medkit text-danger mr-2"></i> Hồ Sơ Bệnh Án &amp; Đơn Thuốc</span>
+                    @if (Model.HasRecord)
+                    {
+                        <button type="button" class="btn btn-outline-success btn-sm font-weight-bold" onclick="$('#rxModal').modal('show')">
+                            <i class="fa fa-print mr-1"></i> In đơn thuốc chuẩn
+                        </button>
+                    }
+                </div>
+                <div class="detail-card-body">
+                    @if (!Model.HasRecord)
+                    {
+                        <div class="text-center py-4 text-muted">
+                            <i class="fa fa-stethoscope" style="font-size: 36px; opacity: .4;"></i>
+                            <p class="mt-2 mb-0 small">Bác sĩ chưa cập nhật kết quả và đơn thuốc cho ca khám này.</p>
+                            <small class="text-muted">Kết quả sẽ được hiển thị ngay sau khi buổi khám hoàn tất.</small>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="p-3 bg-light rounded mb-3">
+                            <div class="mb-2">
+                                <span class="text-muted small d-block">Chẩn đoán của bác sĩ:</span>
+                                <h6 class="font-weight-bold text-primary mb-0">@Model.ChanDoan</h6>
+                            </div>
+                            @if (!string.IsNullOrEmpty(Model.NgayTaiKham))
+                            {
+                                <div class="mt-2 pt-2 border-top d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <span class="text-muted small">Hẹn tái khám vào:</span>
+                                        <b class="text-danger ml-1">@Model.NgayTaiKham</b>
+                                    </div>
+                                    <a asp-controller="Doctors" asp-action="Index" class="btn btn-outline-success btn-sm py-1 px-2 font-weight-bold" style="font-size:12px;">
+                                        Đặt lịch tái khám &rarr;
+                                    </a>
+                                </div>
+                            }
+                        </div>
+
+                        <h6 class="font-weight-bold small text-dark mb-2">Đơn thuốc được kê:</h6>
+                        @if (!Model.Prescriptions.Any())
+                        {
+                            <p class="text-muted small mb-0">Không có đơn thuốc chỉ định.</p>
+                        }
+                        else
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-sm table-bordered rx-table mb-2">
+                                    <thead>
+                                        <tr>
+                                            <th>Tên thuốc</th>
+                                            <th>Số lượng</th>
+                                            <th>Liều dùng</th>
+                                            <th>Cách dùng</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var p in Model.Prescriptions)
+                                        {
+                                            <tr>
+                                                <td class="font-weight-bold text-dark">@p.TenThuoc</td>
+                                                <td>@p.SoLuong</td>
+                                                <td>@p.LieuDung</td>
+                                                <td class="small text-muted">@p.CachDung</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top">
+                                <span class="small text-muted"><i class="fa fa-info-circle text-info"></i> Uống thuốc đúng giờ và đủ liều</span>
+                                <button type="button" class="btn btn-outline-primary btn-sm" onclick="alert('Đã kích hoạt thông báo nhắc uống thuốc hàng ngày (08:00, 12:00, 20:00) qua hệ thống.')">
+                                    <i class="fa fa-bell-o mr-1"></i> Bật nhắc uống thuốc
+                                </button>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
         </div>
     </div>
 </div>
+
+<!-- ================= MODAL IN ĐƠN THUỐC CHUẨN ================= -->
+<div class="modal fade" id="rxModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title font-weight-bold"><i class="fa fa-file-text-o mr-2"></i> ĐƠN THUỐC ĐIỆN TỬ CHUẨN BỘ Y TẾ</h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body p-4" id="printPrescription">
+                <div class="d-flex justify-content-between border-bottom pb-3 mb-3">
+                    <div>
+                        <h5 class="font-weight-bold text-success mb-1">BỆNH VIỆN ĐA KHOA QUỐC TẾ TELEHEALTH</h5>
+                        <p class="small text-muted mb-0">Địa chỉ: 2 Cầu Giấy, Hà Nội - Hotline: 1900 1234</p>
+                        <p class="small text-muted mb-0">Giấy phép hoạt động: 288/BYT-GPHĐ</p>
+                    </div>
+                    <div class="text-right">
+                        <div class="font-weight-bold text-danger">MÃ ĐƠN: #DT-@Model.AppointId.ToString("D5")</div>
+                        <small class="text-muted">Ngày khám: @Model.DateText</small>
+                    </div>
+                </div>
+
+                <div class="row small mb-3">
+                    <div class="col-6">
+                        <div><b>Họ tên người bệnh:</b> Bệnh nhân Telehealth</div>
+                        <div><b>Chẩn đoán:</b> @Model.ChanDoan</div>
+                    </div>
+                    <div class="col-6">
+                        <div><b>Bác sĩ điều trị:</b> @Model.DoctorName</div>
+                        <div><b>Chuyên khoa:</b> @Model.SpecName</div>
+                        <div><b>Ngày tái khám:</b> @(!string.IsNullOrEmpty(Model.NgayTaiKham) ? Model.NgayTaiKham : "Theo chỉ định")</div>
+                    </div>
+                </div>
+
+                <table class="table table-bordered table-sm small mb-3">
+                    <thead class="bg-light">
+                        <tr>
+                            <th style="width: 5%;">STT</th>
+                            <th style="width: 40%;">Tên thuốc</th>
+                            <th style="width: 15%;">Số lượng</th>
+                            <th style="width: 20%;">Liều dùng</th>
+                            <th style="width: 20%;">Cách dùng</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            int idx = 1;
+                        }
+                        @foreach (var p in Model.Prescriptions)
+                        {
+                            <tr>
+                                <td class="text-center">@(idx++)</td>
+                                <td class="font-weight-bold">@p.TenThuoc</td>
+                                <td>@p.SoLuong</td>
+                                <td>@p.LieuDung</td>
+                                <td>@p.CachDung</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+
+                <div class="p-2 border rounded bg-light small mb-3">
+                    <b>Lời dặn của bác sĩ:</b> Uống thuốc đúng liều lượng, nghỉ ngơi hợp lý, tránh thức khuya và tái khám đúng hẹn.
+                </div>
+
+                <div class="row pt-3">
+                    <div class="col-6 text-center">
+                        <i class="fa fa-qrcode" style="font-size: 50px;"></i>
+                        <div class="small text-muted mt-1">Quét mã QR để tra cứu đơn thuốc điện tử</div>
+                    </div>
+                    <div class="col-6 text-center">
+                        <div class="small text-muted mb-4">Ngày @DateTime.Now.ToString("dd/MM/yyyy")</div>
+                        <div class="font-weight-bold">Bác sĩ khám bệnh</div>
+                        <div class="text-success font-italic mt-2 mb-1" style="font-family: cursive; font-size:18px;">@Model.DoctorName</div>
+                        <div class="small text-muted">(Đã ký số điện tử)</div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-success font-weight-bold" onclick="window.print()"><i class="fa fa-print mr-1"></i> In đơn thuốc</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ================= MODAL ĐÁNH GIÁ BÁC SĨ ================= -->
+<div class="modal fade" id="rateModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content border-0 shadow-lg">
+            <form asp-action="Rate" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" value="@Model.AppointId" />
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title font-weight-bold"><i class="fa fa-star mr-2"></i> ĐÁNH GIÁ DỊCH VỤ &amp; BÁC SĨ</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body p-4 text-center">
+                    <h5>Đánh giá ca khám với @Model.DoctorName</h5>
+                    <div class="my-3" style="font-size: 32px; color: #ffc107; cursor: pointer;">
+                        <i class="fa fa-star star-btn" data-v="1"></i>
+                        <i class="fa fa-star star-btn" data-v="2"></i>
+                        <i class="fa fa-star star-btn" data-v="3"></i>
+                        <i class="fa fa-star star-btn" data-v="4"></i>
+                        <i class="fa fa-star star-btn" data-v="5"></i>
+                    </div>
+                    <input type="hidden" name="rating" id="ratingInput" value="5" />
+                    <div class="form-group text-left">
+                        <label class="small font-weight-bold">Nhận xét của bạn (tùy chọn):</label>
+                        <textarea name="comment" class="form-control" rows="3" placeholder="Bác sĩ khám thế nào? Bạn có hài lòng với phác đồ điều trị không?"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-success font-weight-bold">Gửi đánh giá</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- ================= MODAL HỦY LỊCH KHÁM ================= -->
+<div class="modal fade" id="cancelModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content border-0 shadow-lg">
+            <form asp-action="Cancel" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" value="@Model.AppointId" />
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title font-weight-bold"><i class="fa fa-exclamation-triangle mr-2"></i> HỦY CA KHÁM BỆNH</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body p-4">
+                    <p>Bạn có chắc muốn hủy lịch khám #TK-@Model.AppointId với <b>@Model.DoctorName</b> vào ngày <b>@Model.DateText lúc @Model.TimeText</b>?</p>
+                    <div class="form-group">
+                        <label class="small font-weight-bold">Lý do hủy lịch:</label>
+                        <textarea name="reason" class="form-control" rows="3" placeholder="Vui lòng cung cấp lý do hủy để bệnh viện cải thiện phục vụ..."></textarea>
+                    </div>
+                    <div class="alert alert-warning small mb-0">
+                        <i class="fa fa-info-circle"></i> Tiền cọc đã thanh toán sẽ được xét hoàn theo quy định hoàn hủy lịch hẹn của bệnh viện.
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Quay lại</button>
+                    <button type="submit" class="btn btn-danger font-weight-bold">Xác nhận hủy</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function downloadIcs() {
+            var icsData = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Telehealth//Patient Portal//VI\nBEGIN:VEVENT\n" +
+                "SUMMARY:Lich Kham Benh voi @Model.DoctorName\n" +
+                "DESCRIPTION:Chuyen khoa @Model.SpecName. Hinh thuc: @Model.HinhThuc\n" +
+                "LOCATION:Telehealth\n" +
+                "STATUS:CONFIRMED\nEND:VEVENT\nEND:VCALENDAR";
+            var blob = new Blob([icsData], { type: 'text/calendar;charset=utf-8;' });
+            var link = document.createElement('a');
+            link.href = window.URL.createObjectURL(blob);
+            link.setAttribute('download', 'LichKham_@(Model.AppointId).ics');
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        $('.star-btn').click(function() {
+            var v = parseInt($(this).data('v'));
+            $('#ratingInput').val(v);
+            $('.star-btn').each(function() {
+                var cur = parseInt($(this).data('v'));
+                if (cur <= v) {
+                    $(this).removeClass('fa-star-o').addClass('fa-star');
+                } else {
+                    $(this).removeClass('fa-star').addClass('fa-star-o');
+                }
+            });
+        });
+    </script>
+}

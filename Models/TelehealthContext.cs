@@ -112,7 +112,7 @@ public partial class TelehealthContext : DbContext
             entity.Property(e => e.ScheduleId).HasColumnName("ScheduleID");
             entity.Property(e => e.Status)
                 .HasMaxLength(50)
-                .HasDefaultValue("Pending");
+                .HasDefaultValue("Chờ xác nhận");
             entity.Property(e => e.TriageLevel).HasMaxLength(50);
 
             entity.HasOne(d => d.Clinic).WithMany(p => p.Appointments)
@@ -261,7 +261,7 @@ public partial class TelehealthContext : DbContext
                 .HasColumnType("datetime");
             entity.Property(e => e.Status)
                 .HasMaxLength(50)
-                .HasDefaultValue("Pending");
+                .HasDefaultValue("Chờ thanh toán");
 
             entity.HasOne(d => d.Appoint).WithMany(p => p.Payments)
                 .HasForeignKey(d => d.AppointId)

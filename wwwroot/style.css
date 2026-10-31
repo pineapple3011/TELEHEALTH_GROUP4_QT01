@@ -680,7 +680,7 @@ img {
 }
 
 .header-area .alazea-main-menu .classynav ul li a:hover, .header-area .alazea-main-menu .classynav ul li a:focus {
-    color: #1a78c2;
+    color: #4fc3f7;
 }
 
 .header-area .alazea-main-menu .classynav ul li a::after {
@@ -3885,3 +3885,4 @@ img {
         background-color: #fff;
         border-color: #fff;
     }
+

@@ -1,51 +1,73 @@
-@model PatientEditVm
+@model TELEHEALTH_GROUP4_QT01.Models.ViewModels.PatientEditVm
 @{
-    ViewData["Title"] = "Chỉnh sửa thông tin cá nhân";
+    ViewData["Title"] = "Cập nhật hồ sơ bệnh nhân";
 }
 
-<div class="container my-5" style="min-height:60vh; max-width:720px">
-    <a asp-action="Index" class="btn btn-link pl-0 mb-3">&larr; Quay lại hồ sơ</a>
-    <h2 class="mb-4">Chỉnh sửa thông tin cá nhân</h2>
+<div class="container my-4" style="min-height: 65vh;">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm rounded-lg p-4 bg-white">
+                <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+                    <div>
+                        <h4 class="font-weight-bold text-dark mb-1">
+                            <i class="fa fa-id-card-o text-success mr-2"></i> Cập Nhật Hồ Sơ Sức Khỏe
+                        </h4>
+                        <p class="text-muted small mb-0">Thông tin chính xác giúp các bác sĩ chẩn đoán và liên hệ kịp thời trong các tình huống khẩn cấp.</p>
+                    </div>
+                    <a asp-action="Index" class="btn btn-outline-secondary btn-sm">
+                        &larr; Quay lại
+                    </a>
+                </div>
 
-    <form asp-action="Edit" method="post" class="card p-4">
-        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <form asp-action="Edit" method="post">
+                    @Html.AntiForgeryToken()
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger small"></div>
 
-        <div class="form-group">
-            <label asp-for="FullName"></label>
-            <input asp-for="FullName" class="form-control" />
-            <span asp-validation-for="FullName" class="text-danger small"></span>
-        </div>
+                    <h6 class="font-weight-bold text-success mb-3">1. Thông tin cá nhân &amp; liên hệ</h6>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="FullName" class="font-weight-bold small text-dark"></label> <span class="text-danger">*</span>
+                            <input asp-for="FullName" class="form-control" />
+                            <span asp-validation-for="FullName" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="font-weight-bold small text-dark">Email đăng nhập (Định danh duy nhất)</label>
+                            <input value="@Model.Email" class="form-control bg-light" readonly />
+                            <small class="text-muted">Email tài khoản không thể thay đổi.</small>
+                        </div>
+                    </div>
 
-        <div class="form-group">
-            <label>Email</label>
-            <input value="@Model.Email" class="form-control" readonly />
-            <small class="form-text text-muted">Email dùng để đăng nhập nên không thể thay đổi tại đây.</small>
-        </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Phone" class="font-weight-bold small text-dark"></label> <span class="text-danger">*</span>
+                            <input asp-for="Phone" class="form-control" />
+                            <span asp-validation-for="Phone" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="EmergencyPhone" class="font-weight-bold small text-danger"></label>
+                            <input asp-for="EmergencyPhone" class="form-control border-danger" placeholder="SĐT bố mẹ, vợ/chồng..." />
+                            <span asp-validation-for="EmergencyPhone" class="text-danger small"></span>
+                        </div>
+                    </div>
 
-        <div class="form-row">
-            <div class="form-group col-md-6">
-                <label asp-for="Phone"></label>
-                <input asp-for="Phone" class="form-control" />
-                <span asp-validation-for="Phone" class="text-danger small"></span>
+                    <div class="form-group mb-4">
+                        <label asp-for="Address" class="font-weight-bold small text-dark"></label>
+                        <input asp-for="Address" class="form-control" placeholder="Số nhà, đường, phường/xã, quận/huyện, tỉnh/thành..." />
+                        <span asp-validation-for="Address" class="text-danger small"></span>
+                    </div>
+
+                    
+
+                    <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+                        <a asp-action="Index" class="btn btn-outline-secondary">Hủy bỏ</a>
+                        <button type="submit" class="btn btn-success px-4 font-weight-bold shadow-sm">
+                            <i class="fa fa-save mr-1"></i> Lưu thông tin hồ sơ
+                        </button>
+                    </div>
+                </form>
             </div>
-            <div class="form-group col-md-6">
-                <label asp-for="EmergencyPhone"></label>
-                <input asp-for="EmergencyPhone" class="form-control" />
-                <span asp-validation-for="EmergencyPhone" class="text-danger small"></span>
-            </div>
         </div>
-
-        <div class="form-group">
-            <label asp-for="Address"></label>
-            <input asp-for="Address" class="form-control" />
-            <span asp-validation-for="Address" class="text-danger small"></span>
-        </div>
-
-        <div class="d-flex justify-content-end">
-            <a asp-action="Index" class="btn btn-outline-secondary mr-2">Hủy</a>
-            <button type="submit" class="btn btn-success">Lưu thay đổi</button>
-        </div>
-    </form>
+    </div>
 </div>
 
 @section Scripts {

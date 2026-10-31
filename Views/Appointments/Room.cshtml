@@ -1,0 +1,85 @@
+﻿@model TELEHEALTH_GROUP4_QT01.Models.Appointment
+@{
+    ViewData["Title"] = $"Phòng khám trực tuyến #TK-{Model.AppointId:D5}";
+    var doctor = ViewBag.Doctor as TELEHEALTH_GROUP4_QT01.Models.Doctor;
+    var spec = ViewBag.Specialty as TELEHEALTH_GROUP4_QT01.Models.Specialty;
+
+    // Tên phòng: bác sĩ phải dùng đúng công thức này để vào cùng phòng
+    var roomName = $"telehealth-tk-{Model.AppointId:D5}-x7k2";
+    var roomUrl = $"https://meet.jit.si/{roomName}";
+}
+
+<style>
+    .video-room-container {
+        background: #111a24;
+        border-radius: 16px;
+        overflow: hidden;
+        color: #fff;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+    }
+
+    .room-info {
+        background: #0d151d;
+        padding: 14px 20px;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    #jitsiBox {
+        min-height: 520px;
+        background: #192734;
+    }
+</style>
+
+<div class="container my-4" style="min-height: 65vh;">
+    <!-- Thanh trên -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <a asp-action="Details" asp-route-id="@Model.AppointId" class="text-success font-weight-bold">
+            &larr; Rời phòng khám &amp; trở lại hồ sơ ca khám
+        </a>
+        <div class="badge badge-success px-3 py-2 font-weight-bold">
+            KẾT NỐI BẢO MẬT
+        </div>
+    </div>
+
+    <div class="video-room-container mb-3">
+        <!-- Thông tin bác sĩ -->
+        <div class="room-info">
+            <div>
+                <div class="font-weight-bold">@(doctor?.FullName ?? "Bác sĩ phụ trách")</div>
+                <div class="small text-light">@(spec?.SpecialtyName ?? "Đa khoa") &bull; @Model.AppointmentDate.ToString("dd/MM/yyyy") @Model.AppointmentTime.ToString("HH:mm")</div>
+            </div>
+            <div class="small text-light">Mã phòng: @roomName</div>
+        </div>
+
+        <!-- Khung video Jitsi -->
+        <div id="jitsiBox"></div>
+    </div>
+
+    <p class="small text-muted">
+        Cho phép trình duyệt sử dụng camera và micro khi được hỏi. Nếu bác sĩ chưa vào phòng, vui lòng chờ trong giây lát.
+        Link phòng dự phòng: <a href="@roomUrl" target="_blank" data-no-ajax>@roomUrl</a>
+    </p>
+</div>
+
+@section Scripts {
+    <script src="https://meet.jit.si/external_api.js"></script>
+    <script>
+        (function () {
+            var api = new JitsiMeetExternalAPI("meet.jit.si", {
+                roomName: "@roomName",
+                parentNode: document.querySelector('#jitsiBox'),
+                height: 520,
+                userInfo: { displayName: "@(ViewBag.PatientName ?? "Bệnh nhân")" },
+                configOverwrite: { prejoinPageEnabled: false },
+                interfaceConfigOverwrite: { SHOW_JITSI_WATERMARK: false }
+            });
+
+            api.addListener('readyToClose', function () {
+                window.location.href = '@Url.Action("Details", new { id = Model.AppointId })';
+            });
+        })();
+    </script>
+}
