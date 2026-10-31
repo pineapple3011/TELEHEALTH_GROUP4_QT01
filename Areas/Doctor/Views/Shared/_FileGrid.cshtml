@@ -1,0 +1,28 @@
+@model List<AppointmentFileVm>
+@if (!Model.Any())
+{
+    <p class="text-muted mb-0">Bệnh nhân không đính kèm tệp nào.</p>
+}
+else
+{
+    <div class="row">
+        @foreach (var f in Model)
+        {
+            var url = Url.Content("~" + f.FilePath);
+            <div class="col-6 col-md-4 mb-3">
+                <a href="@url" target="_blank" rel="noopener" class="dr-file-tile">
+                    @if (f.IsImage)
+                    {
+                        <img src="@url" alt="@f.FileType" class="dr-file-thumb" loading="lazy" />
+                    }
+                    else
+                    {
+                        <div class="dr-file-thumb d-flex align-items-center justify-content-center bg-light"><i class="fa fa-file-o text-muted" style="font-size:34px"></i></div>
+                    }
+                    <div class="small mt-1 text-dark text-truncate" title="@System.IO.Path.GetFileName(f.FilePath)">@System.IO.Path.GetFileName(f.FilePath)</div>
+                    <div class="small text-muted">@f.UploadDate.ToString("dd/MM/yyyy HH:mm")</div>
+                </a>
+            </div>
+        }
+    </div>
+}

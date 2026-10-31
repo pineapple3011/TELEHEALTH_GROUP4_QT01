@@ -1,0 +1,15 @@
+@model ExamVm
+<div class="dr-card">
+    <div class="dr-card-title"><i class="fa fa-file-text-o"></i> Cập nhật bệnh án</div>
+    <div class="form-group">
+        <label class="small font-weight-bold" for="Diagnosis">Chẩn đoán &amp; kết luận <span class="text-danger">*</span></label>
+        <textarea id="Diagnosis" name="Diagnosis" class="form-control" rows="6" maxlength="4000" required
+                  placeholder="Triệu chứng, kết quả thăm khám, chẩn đoán và lời dặn cho bệnh nhân...">@Model.Input.Diagnosis</textarea>
+    </div>
+    <div class="form-group mb-0" style="max-width:240px">
+        <label class="small font-weight-bold" for="FollowUpDate">Ngày tái khám (nếu có)</label>
+        <input id="FollowUpDate" type="date" name="FollowUpDate" class="form-control"
+               min="@Model.Appointment.Date.ToString("yyyy-MM-dd")"
+               value="@(Model.Input.FollowUpDate?.ToString("yyyy-MM-dd"))" />
+    </div>
+</div>

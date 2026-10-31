@@ -1,0 +1,154 @@
+@model List<AppointmentRowVm>
+@{
+    ViewData["Title"] = "Tổng số ca khám";
+    var status = (ViewBag.Status as string) ?? "all";
+
+    // Cần xác nhận lên đầu, rồi đã xác nhận, hoàn thành, đã hủy.
+    // Ca sắp tới xếp gần nhất trước; ca đã xong/hủy xếp mới nhất trước.
+    var rows = Model
+        .OrderBy(a => a.IsPending ? 0 : a.IsConfirmed ? 1 : a.IsCompleted ? 2 : 3)
+        .ThenBy(a => (a.IsPending || a.IsConfirmed ? 1L : -1L) * (a.Date + a.Time).Ticks)
+        .ToList();
+
+    int cAll = rows.Count,
+        cPending = rows.Count(r => r.IsPending),
+        cConfirmed = rows.Count(r => r.IsConfirmed),
+        cCompleted = rows.Count(r => r.IsCompleted),
+        cCancelled = rows.Count(r => r.IsCancelled);
+
+    var tabs = new[]
+    {
+        (Key: "all", Label: "Tất cả", Count: cAll),
+        (Key: "pending", Label: "Cần xác nhận", Count: cPending),
+        (Key: "confirmed", Label: "Đã xác nhận", Count: cConfirmed),
+        (Key: "completed", Label: "Đã hoàn thành", Count: cCompleted),
+        (Key: "cancelled", Label: "Đã hủy", Count: cCancelled)
+    };
+}
+
+<style>
+    .tab-bar { display: flex; flex-wrap: wrap; gap: 8px; }
+    .tab-btn { border: 1px solid #ced4da; background: #fff; border-radius: 999px; padding: 8px 16px; font-weight: 600; font-size: 14px; color: #495057; cursor: pointer; transition: all .15s; }
+    .tab-btn:hover { border-color: #007bff; color: #007bff; }
+    .tab-btn.active { background: #007bff; border-color: #007bff; color: #fff; }
+    .tab-btn .cnt { display: inline-block; min-width: 22px; padding: 0 7px; margin-left: 6px; border-radius: 999px; background: #e9ecef; color: #495057; font-size: 12px; line-height: 20px; }
+    .tab-btn.active .cnt { background: rgba(255,255,255,.25); color: #fff; }
+    .tab-btn.need .cnt { background: #fff3cd; color: #856404; }
+    .tab-btn.need.active .cnt { background: rgba(255,255,255,.25); color: #fff; }
+    .all-table td { vertical-align: middle; }
+</style>
+
+<div class="container my-4" style="min-height: 55vh;">
+    <div class="d-flex flex-wrap align-items-center justify-content-between mb-3">
+        <div>
+            <h3 class="font-weight-bold text-dark mb-1"><i class="fa fa-list-alt text-success mr-2"></i> Tổng số ca khám: @cAll</h3>
+            <p class="text-muted mb-0 small">Toàn bộ ca khám của bạn, phân loại theo trạng thái. Xác nhận hoặc từ chối ca chờ ngay tại đây.</p>
+        </div>
+        <input type="search" id="q" class="form-control form-control-sm mt-3 mt-md-0" style="max-width:260px" placeholder="Tìm tên, SĐT, mã ca..." />
+    </div>
+
+    @if (cPending > 0)
+    {
+        <div class="alert alert-warning small shadow-sm"><i class="fa fa-bell"></i> Bạn có <b>@cPending</b> ca đang chờ xác nhận.</div>
+    }
+
+    <div class="tab-bar mb-3">
+        @foreach (var t in tabs)
+        {
+            <button type="button" class="tab-btn @(t.Key == "pending" ? "need" : "") @(t.Key == status ? "active" : "")" data-tab="@t.Key">@t.Label<span class="cnt">@t.Count</span></button>
+        }
+    </div>
+
+    <div class="dr-card p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0 all-table">
+                <thead class="thead-light">
+                    <tr><th>Mã ca</th><th>Ngày giờ</th><th>Bệnh nhân</th><th>Hình thức</th><th>Trạng thái</th><th>Thanh toán</th><th class="text-right">Thao tác</th></tr>
+                </thead>
+                <tbody>
+                @foreach (var r in rows)
+                {
+                    var st = r.IsCancelled ? "cancelled" : r.IsCompleted ? "completed" : r.IsConfirmed ? "confirmed" : "pending";
+                    <tr class="case-row" data-status="@st" data-search="@((r.PatientName + " " + r.PatientPhone + " " + r.Code).ToLowerInvariant())">
+                        <td class="font-weight-bold">@r.Code</td>
+                        <td>
+                            <b>@r.Date.ToString("dd/MM/yyyy")</b>
+                            <div class="text-success font-weight-bold small">@r.TimeText</div>
+                        </td>
+                        <td>
+                            <div class="font-weight-bold">@r.PatientName</div>
+                            <div class="small text-muted"><i class="fa fa-phone"></i> @r.PatientPhone</div>
+                        </td>
+                        <td>
+                            @if (r.BookingType == "Online") { <span class="badge badge-soft-primary rounded-pill px-2"><i class="fa fa-video-camera"></i> Trực tuyến</span> }
+                            else if (r.BookingType == "Cấp cứu") { <span class="badge badge-soft-danger rounded-pill px-2"><i class="fa fa-ambulance"></i> Cấp cứu@(string.IsNullOrEmpty(r.TriageLevel) ? "" : " - mức " + r.TriageLevel)</span> }
+                            else { <span class="badge badge-soft-secondary rounded-pill px-2"><i class="fa fa-hospital-o"></i> Tại viện</span> }
+                            @if (r.FileCount > 0) { <span class="badge badge-soft-info rounded-pill px-2"><i class="fa fa-paperclip"></i> @r.FileCount</span> }
+                        </td>
+                        <td>
+                            @if (r.IsPending) { <span class="badge badge-soft-warning px-3 py-1 rounded-pill">Chờ xác nhận</span> }
+                            else if (r.IsConfirmed) { <span class="badge badge-soft-success px-3 py-1 rounded-pill">Đã xác nhận</span> }
+                            else if (r.IsCompleted) { <span class="badge badge-soft-turquoise px-3 py-1 rounded-pill">Đã khám xong</span> }
+                            else { <span class="badge badge-soft-danger px-3 py-1 rounded-pill">Đã hủy</span> }
+                        </td>
+                        <td class="small">@(string.IsNullOrEmpty(r.PaymentStatus) ? "-" : r.PaymentStatus)</td>
+                        <td class="text-right dr-btn-group" style="white-space:nowrap">
+                            @if (r.IsPending)
+                            {
+                                <form asp-action="Confirm" asp-route-id="@r.AppointId" method="post" class="d-inline">
+                                    <input type="hidden" name="back" value="all" />
+                                    <button type="submit" class="btn btn-sm btn-success">Xác nhận</button>
+                                </form>
+                            }
+                            @if (r.IsConfirmed)
+                            {
+                                if (r.BookingType == "Online") { <a asp-action="Room" asp-route-id="@r.AppointId" class="btn btn-sm btn-outline-primary"><i class="fa fa-video-camera"></i> Vào phòng</a> }
+                                <a asp-controller="Consultations" asp-action="Exam" asp-route-id="@r.AppointId" class="btn btn-sm btn-primary">Khám bệnh</a>
+                            }
+                            @if (r.IsCompleted)
+                            {
+                                <a asp-controller="Consultations" asp-action="Exam" asp-route-id="@r.AppointId" class="btn btn-sm btn-outline-turquoise">Xem bệnh án</a>
+                            }
+                            <a asp-action="Details" asp-route-id="@r.AppointId" class="btn btn-sm btn-outline-secondary">Chi tiết</a>
+                            @if (r.IsPending || r.IsConfirmed)
+                            {
+                                <form asp-action="Reject" asp-route-id="@r.AppointId" method="post" class="d-inline" onsubmit="return confirm('Hủy ca khám @r.Code của @r.PatientName?');">
+                                    <input type="hidden" name="back" value="all" />
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">Hủy</button>
+                                </form>
+                            }
+                        </td>
+                    </tr>
+                }
+                    <tr id="emptyRow" style="display:none"><td colspan="7" class="text-center text-muted py-4"><i class="fa fa-inbox" style="font-size:36px"></i><div class="mt-2">Không có ca khám nào trong mục này.</div></td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    (function () {
+        var current = '@status';
+        var tabs = document.querySelectorAll('.tab-btn');
+        var rows = document.querySelectorAll('.case-row');
+        var q = document.getElementById('q');
+        var empty = document.getElementById('emptyRow');
+
+        function apply() {
+            var term = (q.value || '').trim().toLowerCase(), shown = 0;
+            rows.forEach(function (r) {
+                var ok = (current === 'all' || r.dataset.status === current) && (!term || r.dataset.search.indexOf(term) >= 0);
+                r.style.display = ok ? '' : 'none';
+                if (ok) shown++;
+            });
+            empty.style.display = shown === 0 ? '' : 'none';
+            tabs.forEach(function (t) { t.classList.toggle('active', t.dataset.tab === current); });
+        }
+        tabs.forEach(function (t) { t.addEventListener('click', function () { current = t.dataset.tab; apply(); }); });
+        q.addEventListener('input', apply);
+        apply();
+    })();
+</script>
+}

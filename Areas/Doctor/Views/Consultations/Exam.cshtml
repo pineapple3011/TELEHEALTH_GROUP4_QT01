@@ -1,0 +1,127 @@
+@model ExamVm
+@{
+    ViewData["Title"] = "Khám bệnh & chẩn đoán";
+    var a = Model.Appointment;
+    var p = Model.Patient;
+    var readOnlyNote = a.IsCompleted;
+}
+
+<div class="container my-4" style="min-height: 55vh;">
+    <div class="d-flex flex-wrap align-items-center justify-content-between mb-3">
+        <a asp-controller="Appointments" asp-action="Index" asp-route-date="@a.Date.ToString("yyyy-MM-dd")" class="btn btn-outline-secondary btn-sm"><i class="fa fa-arrow-left"></i> Về ca khám trong ngày</a>
+        <div>
+            <span class="font-weight-bold mr-2">@a.Code</span>
+            @if (a.IsCompleted) { <span class="badge badge-soft-turquoise rounded-pill px-3 py-1">Đã khám xong</span> }
+            else { <span class="badge badge-soft-success rounded-pill px-3 py-1">Đang khám</span> }
+        </div>
+    </div>
+
+    @if (readOnlyNote)
+    {
+        <div class="alert alert-info small shadow-sm"><i class="fa fa-info-circle"></i> Ca này đã hoàn thành. Bạn vẫn có thể chỉnh sửa bệnh án và đơn thuốc, mọi thay đổi sẽ được lưu lại.</div>
+    }
+
+    <div class="row">
+        <!-- Cột trái: bệnh nhân + tệp đính kèm -->
+        <div class="col-lg-4">
+            <div class="dr-card">
+                <div class="dr-card-title"><i class="fa fa-user"></i> Bệnh nhân</div>
+                <div class="dr-meta">
+                    <div class="mb-2"><b style="font-size:16px">@p.FullName</b></div>
+                    <div class="mb-1"><span class="lbl">Điện thoại:</span> @p.Phone</div>
+                    <div class="mb-1"><span class="lbl">Email:</span> @p.Email</div>
+                    <div class="mb-1"><span class="lbl">Địa chỉ:</span> @(p.Address ?? "-")</div>
+                    <div class="mb-0"><span class="lbl">SĐT người thân:</span> @(p.EmergencyPhone ?? "-")</div>
+                </div>
+                <hr />
+                <div class="dr-meta">
+                    <div class="mb-1"><span class="lbl">Giờ hẹn:</span> <b class="text-success">@a.TimeText - @a.Date.ToString("dd/MM/yyyy")</b></div>
+                    <div class="mb-0"><span class="lbl">Hình thức:</span> <b>@a.BookingType</b>
+                        @if (a.BookingType == "Cấp cứu") { <span class="badge badge-soft-danger rounded-pill px-2 ml-1">Mức @(a.TriageLevel ?? "-")</span> }
+                    </div>
+                    @if (a.BookingType == "Cấp cứu" && !string.IsNullOrEmpty(a.EmergencyLocation))
+                    {
+                        <div class="mt-1"><span class="lbl">Vị trí:</span> @a.EmergencyLocation</div>
+                    }
+                </div>
+            </div>
+
+            <div class="dr-card">
+                <div class="dr-card-title"><i class="fa fa-paperclip"></i> Tệp bệnh nhân đính kèm (@Model.Files.Count)</div>
+                <partial name="_FileGrid" model="Model.Files" />
+            </div>
+        </div>
+
+        <!-- Cột phải: form khám -->
+        <div class="col-lg-8">
+            <form asp-action="Save" method="post" id="examForm">
+                <input type="hidden" name="AppointId" value="@a.AppointId" />
+
+                <partial name="_MedicalRecordForm" model="Model" />
+                <partial name="_PrescriptionTable" model="Model" />
+
+                <div class="d-flex flex-wrap justify-content-end">
+                    <button type="submit" name="mode" value="draft" class="btn btn-outline-secondary font-weight-bold mr-2 mb-2">
+                        <i class="fa fa-floppy-o"></i> Lưu nháp
+                    </button>
+                    <button type="submit" name="mode" value="complete" class="btn btn-success font-weight-bold mb-2" id="btnComplete">
+                        <i class="fa fa-check-circle"></i> @(a.IsCompleted ? "Lưu thay đổi" : "Hoàn thành ca khám")
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        (function () {
+            var $body = $('#rxBody');
+
+            function reindex() {
+                $body.find('tr.rx-row').each(function (i) {
+                    $(this).find('[data-f]').each(function () {
+                        $(this).attr('name', 'Items[' + i + '].' + $(this).data('f'));
+                    });
+                });
+                $('#rxEmpty').toggle($body.find('tr.rx-row').length === 0);
+                $('#rxCount').text($body.find('tr.rx-row').length);
+            }
+
+            function addRow(data) {
+                var $tr = $($.trim($('#rxRowTpl').html()));
+                if (data) {
+                    $tr.find('[data-f=MedicineId]').val(data.id);
+                    $tr.find('[data-f=Quantity]').val(data.qty);
+                    $tr.find('[data-f=Dosage]').val(data.dosage);
+                    $tr.find('[data-f=Hds]').val(data.hds);
+                }
+                $body.append($tr);
+                reindex();
+            }
+
+            $('#btnAddRx').on('click', function () {
+                var id = $('#rxPicker').val();
+                if (!id) { $('#rxPicker').focus(); return; }
+                if ($body.find('[data-f=MedicineId]').filter(function () { return $(this).val() === id; }).length) {
+                    alert('Thuốc này đã có trong đơn. Hãy tăng số lượng ở dòng hiện có.');
+                    return;
+                }
+                var opt = $('#rxPicker option:selected');
+                addRow({ id: id, qty: 1, dosage: '', hds: opt.data('hds') || '' });
+                $('#rxPicker').val('');
+            });
+
+            $body.on('click', '.rx-remove', function () { $(this).closest('tr').remove(); reindex(); });
+
+            // dòng thuốc có sẵn từ server
+            @foreach (var it in Model.Input.Items)
+            {
+                @:addRow({ id: '@it.MedicineId', qty: @it.Quantity, dosage: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(it.Dosage)), hds: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(it.Hds ?? "")) });
+            }
+            reindex();
+
+            $('#examForm').on('submit', function () { reindex(); });
+        })();
+    </script>
+}

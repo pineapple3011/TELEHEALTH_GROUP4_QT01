@@ -1,0 +1,143 @@
+@model DayPageVm
+@{
+    ViewData["Title"] = "Ca khám trong ngày";
+    var days = new[] { "Chủ nhật", "Thứ hai", "Thứ ba", "Thứ tư", "Thứ năm", "Thứ sáu", "Thứ bảy" };
+    var rows = Model.Rows;
+    var dateStr = Model.Date.ToString("yyyy-MM-dd");
+}
+
+<div class="container my-4" style="min-height: 55vh;">
+
+    <!-- Chọn ngày -->
+    <div class="d-flex flex-wrap align-items-center justify-content-between mb-4">
+        <div>
+            <h3 class="font-weight-bold text-dark mb-1">
+                <i class="fa fa-stethoscope text-success mr-2"></i>
+                @days[(int)Model.Date.DayOfWeek], @Model.Date.ToString("dd/MM/yyyy")
+                @if (Model.Date.Date == DateTime.Today) { <span class="badge badge-soft-turquoise rounded-pill ml-2" style="font-size:13px">Hôm nay</span> }
+            </h3>
+            <p class="text-muted mb-0 small">Xác nhận lịch hẹn, xem hồ sơ đính kèm của bệnh nhân và bắt đầu khám.</p>
+        </div>
+        <form method="get" asp-action="Index" class="form-inline mt-3 mt-md-0" id="dateForm">
+            <a asp-action="Index" asp-route-date="@Model.Date.AddDays(-1).ToString("yyyy-MM-dd")" class="btn btn-outline-secondary btn-sm mr-1" title="Ngày trước"><i class="fa fa-chevron-left"></i></a>
+            <input type="date" name="date" value="@dateStr" class="form-control form-control-sm" onchange="document.getElementById('dateForm').submit()" />
+            <a asp-action="Index" asp-route-date="@Model.Date.AddDays(1).ToString("yyyy-MM-dd")" class="btn btn-outline-secondary btn-sm ml-1" title="Ngày sau"><i class="fa fa-chevron-right"></i></a>
+            <a asp-action="Index" class="btn btn-outline-success btn-sm ml-2">Hôm nay</a>
+        </form>
+    </div>
+
+    @if (Model.PendingElsewhere > 0)
+    {
+        <div class="alert alert-warning small shadow-sm">
+            <i class="fa fa-bell"></i> Bạn còn <b>@Model.PendingElsewhere</b> ca đang chờ xác nhận ở các ngày khác.
+        </div>
+    }
+
+    <!-- Thống kê / lọc -->
+    <div class="row mb-4">
+        <div class="col-6 col-md-3 mb-3"><div class="dr-stat-card active-stat" onclick="filterBy('all', this)"><div class="dr-stat-num">@rows.Count</div><p class="dr-stat-label">Tất cả ca</p></div></div>
+        <div class="col-6 col-md-3 mb-3"><div class="dr-stat-card" onclick="filterBy('pending', this)"><div class="dr-stat-num">@rows.Count(r => r.IsPending)</div><p class="dr-stat-label">Chờ xác nhận</p></div></div>
+        <div class="col-6 col-md-3 mb-3"><div class="dr-stat-card" onclick="filterBy('confirmed', this)"><div class="dr-stat-num">@rows.Count(r => r.IsConfirmed)</div><p class="dr-stat-label">Đã xác nhận</p></div></div>
+        <div class="col-6 col-md-3 mb-3"><div class="dr-stat-card" onclick="filterBy('completed', this)"><div class="dr-stat-num">@rows.Count(r => r.IsCompleted)</div><p class="dr-stat-label">Đã khám xong</p></div></div>
+    </div>
+
+    @if (!rows.Any())
+    {
+        <div class="dr-card text-center py-5">
+            <i class="fa fa-calendar-times-o text-muted" style="font-size:52px"></i>
+            <h5 class="font-weight-bold text-dark mt-3">Không có ca khám nào trong ngày này</h5>
+            @if (Model.NextDateWithAppointments.HasValue)
+            {
+                <p class="text-muted mb-3">Ca khám gần nhất của bạn là ngày <b>@Model.NextDateWithAppointments.Value.ToString("dd/MM/yyyy")</b>.</p>
+                <a asp-action="Index" asp-route-date="@Model.NextDateWithAppointments.Value.ToString("yyyy-MM-dd")" class="btn btn-primary font-weight-bold">Xem ngày @Model.NextDateWithAppointments.Value.ToString("dd/MM")</a>
+            }
+            else
+            {
+                <p class="text-muted mb-0">Chưa có bệnh nhân nào đặt lịch với bạn từ ngày này trở đi.</p>
+            }
+        </div>
+    }
+    else
+    {
+        <div id="apptList">
+        @foreach (var r in rows)
+        {
+            var st = r.IsCancelled ? "cancelled" : r.IsCompleted ? "completed" : r.IsConfirmed ? "confirmed" : "pending";
+            <div class="appt-row" data-status="@st">
+                <div class="dr-card">
+                    <div class="row align-items-center">
+                        <div class="col-md-2 text-center mb-3 mb-md-0">
+                            <div class="dr-time">@r.TimeText</div>
+                            <div class="small text-muted mt-1">@r.Code</div>
+                        </div>
+
+                        <div class="col-md-5 mb-3 mb-md-0">
+                            <div class="d-flex align-items-center">
+                                <div class="dr-avatar mr-3">@(r.PatientName.Length > 0 ? r.PatientName.Split(' ').Last().Substring(0, 1).ToUpper() : "BN")</div>
+                                <div>
+                                    <h6 class="font-weight-bold mb-1 text-dark">@r.PatientName</h6>
+                                    <div class="small text-muted"><i class="fa fa-phone"></i> @r.PatientPhone</div>
+                                    <div class="mt-1">
+                                        @if (r.BookingType == "Online") { <span class="badge badge-soft-primary rounded-pill px-2"><i class="fa fa-video-camera"></i> Trực tuyến</span> }
+                                        else if (r.BookingType == "Cấp cứu") { <span class="badge badge-soft-danger rounded-pill px-2"><i class="fa fa-ambulance"></i> Cấp cứu@(string.IsNullOrEmpty(r.TriageLevel) ? "" : " - mức " + r.TriageLevel)</span> }
+                                        else { <span class="badge badge-soft-secondary rounded-pill px-2"><i class="fa fa-hospital-o"></i> Tại viện</span> }
+                                        @if (r.FileCount > 0) { <span class="badge badge-soft-info rounded-pill px-2"><i class="fa fa-paperclip"></i> @r.FileCount tệp</span> }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-2 mb-3 mb-md-0 text-md-center">
+                            @if (r.IsPending) { <span class="badge badge-soft-warning px-3 py-1 rounded-pill">Chờ xác nhận</span> }
+                            else if (r.IsConfirmed) { <span class="badge badge-soft-success px-3 py-1 rounded-pill">Đã xác nhận</span> }
+                            else if (r.IsCompleted) { <span class="badge badge-soft-turquoise px-3 py-1 rounded-pill">Đã khám xong</span> }
+                            else { <span class="badge badge-soft-danger px-3 py-1 rounded-pill">Đã hủy</span> }
+                        </div>
+
+                        <div class="col-md-3 text-md-right dr-btn-group">
+                            @if (r.IsPending)
+                            {
+                                <form asp-action="Confirm" asp-route-id="@r.AppointId" asp-route-date="@dateStr" method="post" class="d-inline">
+                                    <button type="submit" class="btn btn-success">Xác nhận</button>
+                                </form>
+                            }
+                            @if (r.IsConfirmed)
+                            {
+                                    @if (r.BookingType == "Online")
+                                    {
+                                        <a asp-action="Room" asp-route-id="@r.AppointId" class="btn btn-outline-primary"><i class="fa fa-video-camera"></i> Vào phòng</a>
+                                    }
+                                <a asp-controller="Consultations" asp-action="Exam" asp-route-id="@r.AppointId" class="btn btn-primary shadow-sm">Khám bệnh</a>
+                            }
+                            @if (r.IsCompleted)
+                            {
+                                <a asp-controller="Consultations" asp-action="Exam" asp-route-id="@r.AppointId" class="btn btn-outline-turquoise">Xem bệnh án</a>
+                            }
+                            <a asp-action="Details" asp-route-id="@r.AppointId" class="btn btn-outline-secondary">Chi tiết</a>
+                            @if (r.IsPending || r.IsConfirmed)
+                            {
+                                <form asp-action="Reject" asp-route-id="@r.AppointId" asp-route-date="@dateStr" method="post" class="d-inline" onsubmit="return confirm('Hủy ca khám @r.Code của @r.PatientName?');">
+                                    <button type="submit" class="btn btn-outline-danger">Hủy</button>
+                                </form>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        function filterBy(status, el) {
+            $('.dr-stat-card').removeClass('active-stat');
+            $(el).addClass('active-stat');
+            $('.appt-row').each(function () {
+                var ok = status === 'all' || $(this).data('status') === status;
+                $(this).toggle(ok);
+            });
+        }
+    </script>
+}

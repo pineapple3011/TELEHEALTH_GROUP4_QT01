@@ -1,0 +1,53 @@
+@model ProfilePageVm
+@{
+    ViewData["Title"] = "Hồ sơ cá nhân";
+    var d = Model.Doctor;
+    var s = Model.Stats;
+}
+
+<div class="container my-4" style="min-height: 55vh;">
+    <div class="row">
+        <div class="col-lg-4">
+            <div class="dr-card text-center">
+                <div class="dr-avatar lg mx-auto mb-3">
+                    @if (!string.IsNullOrEmpty(d.AvatarUrl)) { <img src="@Url.Content("~" + d.AvatarUrl)" alt="@d.FullName" onerror="this.remove()" /> }
+                    else { @d.Initials }
+                </div>
+                <h5 class="font-weight-bold text-dark mb-1">@d.FullName</h5>
+                <p class="text-muted mb-2">@d.SpecialtyName</p>
+                <span class="badge @(d.IsAvailable ? "badge-soft-turquoise" : "badge-soft-warning") rounded-pill px-3 py-1">@(d.IsAvailable ? "Sẵn sàng" : "Đang bận")</span>
+                <div class="mt-3">
+                    <a asp-action="Edit" class="btn btn-outline-primary btn-sm font-weight-bold"><i class="fa fa-pencil"></i> Chỉnh sửa hồ sơ</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-8">
+            <div class="row mb-2">
+                <div class="col-6 col-md-3 mb-3"><div class="dr-stat-card" style="cursor:default"><div class="dr-stat-num">@s.TotalAppointments</div><p class="dr-stat-label">Tổng ca khám</p></div></div>
+                <div class="col-6 col-md-3 mb-3"><div class="dr-stat-card" style="cursor:default"><div class="dr-stat-num">@s.Completed</div><p class="dr-stat-label">Đã hoàn thành</p></div></div>
+                <div class="col-6 col-md-3 mb-3"><div class="dr-stat-card" style="cursor:default"><div class="dr-stat-num">@s.Patients</div><p class="dr-stat-label">Bệnh nhân</p></div></div>
+                <div class="col-6 col-md-3 mb-3"><div class="dr-stat-card" style="cursor:default"><div class="dr-stat-num">@s.UpcomingShifts</div><p class="dr-stat-label">Ca trực sắp tới</p></div></div>
+            </div>
+
+            <div class="dr-card">
+                <div class="dr-card-title"><i class="fa fa-id-card-o"></i> Thông tin chuyên môn</div>
+                <div class="dr-meta">
+                    <div class="row">
+                        <div class="col-md-6 mb-2"><span class="lbl">Họ tên:</span> <b>@d.FullName</b></div>
+                        <div class="col-md-6 mb-2"><span class="lbl">Chuyên khoa:</span> <b>@d.SpecialtyName</b></div>
+                        <div class="col-md-6 mb-2"><span class="lbl">Kinh nghiệm:</span> <b>@d.Exp năm</b></div>
+                        <div class="col-md-6 mb-2"><span class="lbl">Phí khám cơ bản:</span> <b>@d.BasePrice.ToString("N0") đ</b></div>
+                        <div class="col-md-6 mb-2"><span class="lbl">Email:</span> <b>@d.Email</b></div>
+                        <div class="col-md-6 mb-2"><span class="lbl">Điện thoại:</span> <b>@d.Phone</b></div>
+                    </div>
+                    @if (!string.IsNullOrEmpty(d.SpecialtyDescription))
+                    {
+                        <hr />
+                        <div class="small text-muted">@d.SpecialtyDescription</div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

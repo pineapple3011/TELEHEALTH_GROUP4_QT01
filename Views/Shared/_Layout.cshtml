@@ -392,6 +392,7 @@
                                     <li><a asp-controller="Doctors" asp-action="Index" class="@(curCtrl == "Doctors" ? "active-nav" : "")">Tìm bác sĩ</a></li>
                                     <li><a asp-controller="Appointments" asp-action="Index" class="@(curCtrl == "Appointments" ? "active-nav" : "")">Lịch khám của tôi</a></li>
                                     <li><a asp-controller="Patients" asp-action="Index" class="@(curCtrl == "Patients" ? "active-nav" : "")">Hồ sơ của tôi</a></li>
+                                        <li><a asp-area="Doctor" asp-controller="Auth" asp-action="Login">Dành cho bác sĩ</a></li>
                                 </ul>
 
                                 <!-- Search Icon -->

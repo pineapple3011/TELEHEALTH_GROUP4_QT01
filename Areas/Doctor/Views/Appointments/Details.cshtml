@@ -1,0 +1,85 @@
+@model AppointmentDetailVm
+@{
+    ViewData["Title"] = "Chi tiết ca khám";
+    var a = Model.Appointment;
+    var p = Model.Patient;
+}
+
+<div class="container my-4" style="min-height: 55vh;">
+    <div class="d-flex flex-wrap align-items-center justify-content-between mb-3">
+        <a asp-action="Index" asp-route-date="@a.Date.ToString("yyyy-MM-dd")" class="btn btn-outline-secondary btn-sm"><i class="fa fa-arrow-left"></i> Quay lại danh sách</a>
+        <div class="dr-btn-group">
+            @if (a.IsPending)
+            {
+                <form asp-action="Confirm" asp-route-id="@a.AppointId" asp-route-date="@a.Date.ToString("yyyy-MM-dd")" method="post" class="d-inline"><button class="btn btn-success">Xác nhận ca</button></form>
+            }
+            @if (a.IsConfirmed && a.BookingType == "Online")
+            {
+                <a asp-action="Room" asp-route-id="@a.AppointId" class="btn btn-outline-primary"><i class="fa fa-video-camera"></i> Vào phòng khám online</a>
+            }
+            @if (a.IsConfirmed) { <a asp-controller="Consultations" asp-action="Exam" asp-route-id="@a.AppointId" class="btn btn-primary">Bắt đầu khám</a> }
+            @if (a.IsCompleted) { <a asp-controller="Consultations" asp-action="Exam" asp-route-id="@a.AppointId" class="btn btn-outline-turquoise">Xem / sửa bệnh án</a> }
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="dr-card">
+                <div class="dr-card-title"><i class="fa fa-ticket"></i> Thông tin ca khám @a.Code</div>
+                <div class="dr-meta">
+                    <div class="mb-2"><span class="lbl">Ngày khám:</span> <b>@a.Date.ToString("dd/MM/yyyy")</b></div>
+                    <div class="mb-2"><span class="lbl">Giờ hẹn:</span> <b class="text-success">@a.TimeText</b></div>
+                    <div class="mb-2"><span class="lbl">Hình thức:</span> <b>@a.BookingType</b></div>
+                    @if (!string.IsNullOrEmpty(a.ClinicName)) { <div class="mb-2"><span class="lbl">Phòng khám:</span> <b>@a.ClinicName</b></div> }
+                    @if (a.BookingType == "Cấp cứu")
+                    {
+                        <div class="mb-2"><span class="lbl">Vị trí cấp cứu:</span> <b>@(a.EmergencyLocation ?? "-")</b></div>
+                        <div class="mb-2"><span class="lbl">Phân loại:</span> <b class="text-danger">Mức @(a.TriageLevel ?? "-")</b></div>
+                    }
+                    <div class="mb-0"><span class="lbl">Trạng thái:</span>
+                        @if (a.IsPending) { <span class="badge badge-soft-warning rounded-pill px-3">Chờ xác nhận</span> }
+                        else if (a.IsConfirmed) { <span class="badge badge-soft-success rounded-pill px-3">Đã xác nhận</span> }
+                        else if (a.IsCompleted) { <span class="badge badge-soft-turquoise rounded-pill px-3">Đã khám xong</span> }
+                        else { <span class="badge badge-soft-danger rounded-pill px-3">Đã hủy</span> }
+                    </div>
+                </div>
+            </div>
+
+            <div class="dr-card">
+                <div class="dr-card-title"><i class="fa fa-money"></i> Thanh toán</div>
+                @if (Model.Payment == null)
+                {
+                    <p class="text-muted mb-0">Chưa có giao dịch cho ca khám này.</p>
+                }
+                else
+                {
+                    <div class="dr-meta">
+                        <div class="mb-2"><span class="lbl">Số tiền:</span> <b>@Model.Payment.Amount.ToString("N0") đ</b></div>
+                        <div class="mb-2"><span class="lbl">Phương thức:</span> <b>@Model.Payment.Method</b></div>
+                        <div class="mb-0"><span class="lbl">Trạng thái:</span>
+                            <span class="badge @(Model.Payment.Status == "Đã thanh toán" ? "badge-soft-success" : "badge-soft-warning") rounded-pill px-3">@Model.Payment.Status</span>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="dr-card">
+                <div class="dr-card-title"><i class="fa fa-user"></i> Bệnh nhân</div>
+                <div class="dr-meta">
+                    <div class="mb-2"><span class="lbl">Họ tên:</span> <b>@p.FullName</b></div>
+                    <div class="mb-2"><span class="lbl">Điện thoại:</span> <b>@p.Phone</b></div>
+                    <div class="mb-2"><span class="lbl">Email:</span> <b>@p.Email</b></div>
+                    <div class="mb-2"><span class="lbl">Địa chỉ:</span> <b>@(p.Address ?? "-")</b></div>
+                    <div class="mb-0"><span class="lbl">SĐT người thân:</span> <b>@(p.EmergencyPhone ?? "-")</b></div>
+                </div>
+            </div>
+
+            <div class="dr-card">
+                <div class="dr-card-title"><i class="fa fa-paperclip"></i> Tệp bệnh nhân đính kèm (@Model.Files.Count)</div>
+                <partial name="_FileGrid" model="Model.Files" />
+            </div>
+        </div>
+    </div>
+</div>

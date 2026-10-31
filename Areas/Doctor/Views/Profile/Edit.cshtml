@@ -1,0 +1,69 @@
+@model ProfileEditVm
+@{
+    ViewData["Title"] = "Chỉnh sửa hồ sơ";
+    var d = Model.Doctor;
+}
+
+<div class="container my-4" style="min-height: 55vh;">
+    <a asp-action="Index" class="btn btn-outline-secondary btn-sm mb-3"><i class="fa fa-arrow-left"></i> Quay lại hồ sơ</a>
+
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="dr-card">
+                <div class="dr-card-title"><i class="fa fa-pencil"></i> Thông tin liên hệ</div>
+                <form asp-action="Edit" method="post" enctype="multipart/form-data">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="dr-avatar mr-3">
+                            @if (!string.IsNullOrEmpty(d.AvatarUrl)) { <img src="@Url.Content("~" + d.AvatarUrl)" alt="@d.FullName" onerror="this.remove()" /> }
+                            else { @d.Initials }
+                        </div>
+                        <div class="flex-grow-1">
+                            <label class="small font-weight-bold mb-1" for="avatar">Ảnh đại diện (jpg, png, webp - tối đa 2MB)</label>
+                            <input id="avatar" type="file" name="Input.Avatar" accept=".jpg,.jpeg,.png,.webp" class="form-control-file" />
+                            @if (ViewData.ModelState["Input.Avatar"]?.Errors.Count > 0)
+                            {
+                                <div class="text-danger small">@ViewData.ModelState["Input.Avatar"]!.Errors[0].ErrorMessage</div>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="small font-weight-bold">Họ tên</label>
+                        <input class="form-control" value="@d.FullName" disabled />
+                        <small class="text-muted">Họ tên, email và chuyên khoa do quản trị viên quản lý.</small>
+                    </div>
+                    <div class="form-group">
+                        <label class="small font-weight-bold" for="Phone">Số điện thoại</label>
+                        <input id="Phone" name="Input.Phone" value="@Model.Input.Phone" class="form-control" maxlength="11" required />
+                        @if (ViewData.ModelState["Input.Phone"]?.Errors.Count > 0)
+                        {
+                            <div class="text-danger small">@ViewData.ModelState["Input.Phone"]!.Errors[0].ErrorMessage</div>
+                        }
+                    </div>
+                    <button type="submit" class="btn btn-primary font-weight-bold"><i class="fa fa-save"></i> Lưu thay đổi</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="dr-card">
+                <div class="dr-card-title"><i class="fa fa-lock"></i> Đổi mật khẩu</div>
+                <form asp-action="ChangePassword" method="post" autocomplete="off">
+                    <div class="form-group">
+                        <label class="small font-weight-bold" for="cur">Mật khẩu hiện tại</label>
+                        <input id="cur" type="password" name="CurrentPassword" class="form-control" required />
+                    </div>
+                    <div class="form-group">
+                        <label class="small font-weight-bold" for="nw">Mật khẩu mới (tối thiểu 6 ký tự)</label>
+                        <input id="nw" type="password" name="NewPassword" class="form-control" minlength="6" required />
+                    </div>
+                    <div class="form-group">
+                        <label class="small font-weight-bold" for="cf">Nhập lại mật khẩu mới</label>
+                        <input id="cf" type="password" name="ConfirmPassword" class="form-control" minlength="6" required />
+                    </div>
+                    <button type="submit" class="btn btn-outline-primary font-weight-bold"><i class="fa fa-key"></i> Đổi mật khẩu</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

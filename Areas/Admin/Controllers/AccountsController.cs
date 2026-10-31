@@ -1,4 +1,5 @@
-using Microsoft.AspNetCore.Identity;
+using System.Security.Cryptography;
+using System.Text;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -14,9 +15,10 @@ namespace TELEHEALTH_GROUP4_QT01.Areas.Admin.Controllers
         private readonly TelehealthContext _context;
         private readonly IWebHostEnvironment _env;
 
-        // !!! Nếu nhóm đã có cách băm mật khẩu cho đăng nhập thì thay hàm HashPassword bên dưới cho khớp
-        private static readonly PasswordHasher<Account> Hasher = new();
-        private static string HashPassword(string plain) => Hasher.HashPassword(new Account(), plain);
+        // Băm mật khẩu bằng SHA256, xuất chuỗi hex chữ HOA (64 ký tự).
+        // Phải trùng với DoctorDb.Hash ở phân hệ bác sĩ và dữ liệu có sẵn trong bảng Accounts.
+        private static string HashPassword(string plain) =>
+            Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(plain)));
 
         public AccountsController(TelehealthContext context, IWebHostEnvironment env)
         {
@@ -129,8 +131,12 @@ namespace TELEHEALTH_GROUP4_QT01.Areas.Admin.Controllers
             {
                 _context.Accounts.Add(new Account
                 {
-                    Email = p.Email, PasswordHash = HashPassword(vm.Password!), Role = VaiTro.Patient,
-                    PatientId = p.PatientId, IsActive = vm.IsActive, CreatedAt = DateTime.Now
+                    Email = p.Email,
+                    PasswordHash = HashPassword(vm.Password!),
+                    Role = VaiTro.Patient,
+                    PatientId = p.PatientId,
+                    IsActive = vm.IsActive,
+                    CreatedAt = DateTime.Now
                 });
             }
             else
@@ -224,7 +230,7 @@ namespace TELEHEALTH_GROUP4_QT01.Areas.Admin.Controllers
             string? avatar = null;   // chỉ nhận ảnh từ file tải lên, không tin đường dẫn gửi từ form
             if (vm.AvatarFile is { Length: > 0 }) avatar = await SaveAvatarAsync(vm.AvatarFile);
 
-            var doctor = new Doctor
+            var doctor = new TELEHEALTH_GROUP4_QT01.Models.Doctor
             {
                 FullName = vm.FullName.Trim(),
                 Email = vm.Email.Trim(),
@@ -299,8 +305,12 @@ namespace TELEHEALTH_GROUP4_QT01.Areas.Admin.Controllers
             {
                 _context.Accounts.Add(new Account
                 {
-                    Email = d.Email, PasswordHash = HashPassword(vm.Password!), Role = VaiTro.Doctor,
-                    DoctorId = d.DoctorId, IsActive = vm.IsActive, CreatedAt = DateTime.Now
+                    Email = d.Email,
+                    PasswordHash = HashPassword(vm.Password!),
+                    Role = VaiTro.Doctor,
+                    DoctorId = d.DoctorId,
+                    IsActive = vm.IsActive,
+                    CreatedAt = DateTime.Now
                 });
             }
             else

@@ -1,0 +1,53 @@
+@model ExamVm
+<div class="dr-card">
+    <div class="dr-card-title"><i class="fa fa-medkit"></i> Bảng kê đơn thuốc (<span id="rxCount">0</span> thuốc)</div>
+
+    <div class="form-row align-items-end mb-3">
+        <div class="col-md-9 mb-2 mb-md-0">
+            <label class="small font-weight-bold" for="rxPicker">Chọn thuốc từ danh mục</label>
+            <select id="rxPicker" class="form-control">
+                <option value="">-- Chọn thuốc --</option>
+                @foreach (var m in Model.Medicines)
+                {
+                    <option value="@m.MedicineId" data-hds="@m.Hds">@m.Name</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-3">
+            <button type="button" id="btnAddRx" class="btn btn-outline-primary btn-block font-weight-bold"><i class="fa fa-plus"></i> Thêm thuốc</button>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-bordered mb-0">
+            <thead class="thead-light">
+                <tr>
+                    <th style="min-width:180px">Thuốc</th>
+                    <th style="width:90px">Số lượng</th>
+                    <th style="min-width:150px">Liều dùng</th>
+                    <th style="min-width:200px">Hướng dẫn sử dụng</th>
+                    <th style="width:44px"></th>
+                </tr>
+            </thead>
+            <tbody id="rxBody"></tbody>
+        </table>
+    </div>
+    <p id="rxEmpty" class="text-muted small text-center mt-3 mb-0">Chưa kê thuốc nào. Chọn thuốc ở trên rồi bấm "Thêm thuốc". Để trống nếu ca này không cần đơn.</p>
+
+    <template id="rxRowTpl">
+        <tr class="rx-row">
+            <td>
+                <select data-f="MedicineId" class="form-control form-control-sm" tabindex="-1" style="pointer-events:none;background:#f8f9fa">
+                    @foreach (var m in Model.Medicines)
+                    {
+                        <option value="@m.MedicineId">@m.Name</option>
+                    }
+                </select>
+            </td>
+            <td><input data-f="Quantity" type="number" min="1" max="999" value="1" class="form-control form-control-sm" required /></td>
+            <td><input data-f="Dosage" type="text" maxlength="100" class="form-control form-control-sm" placeholder="VD: 1 viên x 2 lần/ngày" required /></td>
+            <td><input data-f="Hds" type="text" maxlength="255" class="form-control form-control-sm" placeholder="VD: Uống sau ăn" /></td>
+            <td class="text-center"><button type="button" class="btn btn-sm btn-outline-danger rx-remove" title="Bỏ thuốc này"><i class="fa fa-times"></i></button></td>
+        </tr>
+    </template>
+</div>

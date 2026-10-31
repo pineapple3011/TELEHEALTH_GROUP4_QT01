@@ -1,0 +1,43 @@
+@using TELEHEALTH_GROUP4_QT01.Areas.Doctor.Controllers
+@model DoctorLoginVm
+@{
+    ViewData["Title"] = "Đăng nhập dành cho bác sĩ";
+}
+
+<div class="container my-5" style="min-height: 50vh;">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="dr-card">
+                <div class="text-center mb-4">
+                    <div class="dr-avatar mx-auto mb-3"><i class="fa fa-user-md"></i></div>
+                    <h4 class="font-weight-bold text-dark mb-1">Cổng làm việc của bác sĩ</h4>
+                    <p class="text-muted small mb-0">Đăng nhập bằng tài khoản bác sĩ do quản trị viên cấp.</p>
+                </div>
+
+                @if (!ViewData.ModelState.IsValid && ViewData.ModelState.ContainsKey(""))
+                {
+                    <div class="alert alert-danger small">@ViewData.ModelState[""]!.Errors[0].ErrorMessage</div>
+                }
+
+                <form asp-action="Login" method="post" autocomplete="on">
+                    <input type="hidden" asp-for="ReturnUrl" />
+                    <div class="form-group">
+                        <label class="small font-weight-bold" for="Email">Email</label>
+                        <input asp-for="Email" class="form-control" placeholder="ten.bacsi@telehealth.com" autofocus />
+                        <span asp-validation-for="Email" class="text-danger small"></span>
+                    </div>
+                    <div class="form-group">
+                        <label class="small font-weight-bold" for="Password">Mật khẩu</label>
+                        <input asp-for="Password" type="password" class="form-control" />
+                        <span asp-validation-for="Password" class="text-danger small"></span>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block font-weight-bold py-2"><i class="fa fa-sign-in"></i> Đăng nhập</button>
+                </form>
+
+                <div class="text-center mt-3">
+                    <a asp-area="" asp-controller="Home" asp-action="Index" class="small">&larr; Về trang bệnh nhân</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

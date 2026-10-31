@@ -1,0 +1,110 @@
+@model AppointmentRowVm
+@{
+    ViewData["Title"] = $"Phòng khám trực tuyến {Model.Code}";
+    var me = ViewBag.Doctor as DoctorProfile;
+
+    // Tên phòng: PHẢI giống hệt công thức bên phân hệ bệnh nhân để hai bên vào cùng một phòng
+    var roomName = $"telehealth-tk-{Model.AppointId:D5}-x7k2";
+    var roomUrl = $"https://meet.jit.si/{roomName}";
+    var examUrl = Url.Action("Exam", "Consultations", new { id = Model.AppointId });
+}
+
+<style>
+    .video-room-container { background: #111a24; border-radius: 16px; overflow: hidden; color: #fff; box-shadow: 0 10px 40px rgba(0,0,0,0.4); }
+    .room-info { background: #0d151d; padding: 14px 20px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; }
+    #jitsiBox { min-height: 600px; background: #192734; }
+    .exam-frame-wrap { background: #fff; border: 1px solid #e7ebef; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 14px rgba(0,0,0,0.04); }
+    .exam-frame-head { padding: 10px 16px; border-bottom: 1px solid #e7ebef; font-weight: 700; color: #1a2f23; display: flex; justify-content: space-between; align-items: center; }
+    #examFrame { width: 100%; height: 600px; border: 0; display: block; }
+    @@media (max-width: 991px) { #examFrame { height: 700px; } }
+</style>
+
+<div class="container-fluid px-lg-5 my-4" style="min-height: 65vh;">
+    <!-- Thanh trên -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+        <a asp-action="Details" asp-route-id="@Model.AppointId" class="btn btn-outline-secondary btn-sm">
+            <i class="fa fa-arrow-left"></i> Rời phòng &amp; về chi tiết ca khám
+        </a>
+        <div>
+            <button type="button" id="toggleExam" class="btn btn-primary btn-sm mr-2">
+                <i class="fa fa-stethoscope"></i> <span>Ẩn bệnh án</span>
+            </button>
+            <a href="@examUrl" target="_blank" class="btn btn-outline-secondary btn-sm mr-2" title="Mở bệnh án ở tab riêng">
+                <i class="fa fa-external-link"></i>
+            </a>
+            <span class="badge badge-success px-3 py-2 font-weight-bold">KẾT NỐI BẢO MẬT</span>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Cột video -->
+        <div class="col-xl-7" id="videoCol">
+            <div class="video-room-container mb-3">
+                <div class="room-info">
+                    <div>
+                        <div class="font-weight-bold">Bệnh nhân: @Model.PatientName</div>
+                        <div class="small text-light">@Model.Code &bull; @Model.Date.ToString("dd/MM/yyyy") @Model.TimeText</div>
+                    </div>
+                    <div class="small text-light">Mã phòng: @roomName</div>
+                </div>
+                <div id="jitsiBox"></div>
+            </div>
+            <p class="small text-muted">
+                Cho phép trình duyệt sử dụng camera và micro khi được hỏi. Nếu bệnh nhân chưa vào phòng, vui lòng chờ trong giây lát.
+                Link phòng dự phòng: <a href="@roomUrl" target="_blank">@roomUrl</a>
+            </p>
+        </div>
+
+        <!-- Cột bệnh án (nhúng ngay cạnh video) -->
+        <div class="col-xl-5" id="examCol">
+            <div class="exam-frame-wrap mb-3">
+                <div class="exam-frame-head"><span><i class="fa fa-stethoscope text-primary"></i> Bệnh án &amp; đơn thuốc</span></div>
+                <iframe id="examFrame" src="@examUrl" title="Bệnh án"></iframe>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://meet.jit.si/external_api.js"></script>
+    <script>
+        (function () {
+            var api = new JitsiMeetExternalAPI("meet.jit.si", {
+                roomName: "@roomName",
+                parentNode: document.querySelector('#jitsiBox'),
+                height: 600,
+                userInfo: { displayName: "@(me?.FullName ?? "Bác sĩ")" },
+                configOverwrite: { prejoinPageEnabled: false },
+                interfaceConfigOverwrite: { SHOW_JITSI_WATERMARK: false }
+            });
+
+            api.addListener('readyToClose', function () {
+                window.location.href = '@Url.Action("Details", new { id = Model.AppointId })';
+            });
+
+            // Trang bệnh án nhúng trong khung: ẩn phần đầu trang, banner, chân trang cho gọn
+            var frame = document.getElementById('examFrame');
+            frame.addEventListener('load', function () {
+                try {
+                    var d = frame.contentDocument;
+                    var st = d.createElement('style');
+                    st.textContent = '.preloader,.header-area,.subpage-banner,.footer-area{display:none !important}' +
+                                     'body{padding-top:0 !important;background:#fff}' +
+                                     '#main-content{min-height:0 !important}' +
+                                     '#main-content > .container{max-width:100% !important;margin-top:12px !important}';
+                    d.head.appendChild(st);
+                } catch (e) { /* khác origin thì bỏ qua */ }
+            });
+
+            // Nút ẩn/hiện bệnh án: ẩn thì video rộng toàn màn hình
+            var examCol = document.getElementById('examCol'), videoCol = document.getElementById('videoCol');
+            var btn = document.getElementById('toggleExam');
+            btn.addEventListener('click', function () {
+                var hide = examCol.style.display !== 'none';
+                examCol.style.display = hide ? 'none' : '';
+                videoCol.className = hide ? 'col-12' : 'col-xl-7';
+                btn.querySelector('span').textContent = hide ? 'Hiện bệnh án' : 'Ẩn bệnh án';
+            });
+        })();
+    </script>
+}

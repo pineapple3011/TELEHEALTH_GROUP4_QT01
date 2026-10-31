@@ -1,0 +1,300 @@
+@{
+    var doc = ViewBag.Doctor as DoctorProfile;
+    var curCtrl = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
+    var curAct = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
+}
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="description" content="TELEHEALTH - Cổng làm việc dành cho bác sĩ">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>@ViewData["Title"] - TELEHEALTH | Phân hệ Bác sĩ</title>
+
+    <link rel="icon" href="~/img/core-img/favicon.ico">
+    <link rel="stylesheet" href="~/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <style>
+        :root {
+            --medical-blue: #0056b3;
+            --medical-teal: #2c9d8f;
+            --medical-navy: #1f3a6e;
+        }
+
+        body { color: #495057; background-color: #fbfdfc; }
+
+        /* ===== Top header ===== */
+        .top-header-area { background-color: #1a2f23; border-bottom: 1px solid rgba(255,255,255,0.08); font-size: 13px; }
+        .top-header-meta a { color: #d1e7dd !important; margin-right: 20px; text-decoration: none; transition: color .2s; }
+        .top-header-meta a:hover { color: #fff !important; }
+        .top-header-meta a i { color: var(--medical-blue); margin-right: 6px; }
+
+        .top-doctor-badge {
+            background: rgba(44, 157, 143, 0.22); color: #fff !important; padding: 4px 14px; border-radius: 20px;
+            border: 1px solid rgba(44, 157, 143, 0.5); font-weight: 600; display: inline-flex; align-items: center; gap: 8px;
+        }
+        .top-doctor-badge .dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+        .dot-available { background: #2ee6a6; }
+        .dot-busy { background: #ffb020; }
+        .top-logout { color: #ffb3b3 !important; margin-left: 14px; font-weight: 600; text-decoration: none; }
+        .top-logout:hover { color: #fff !important; }
+
+        /* ===== Active nav ===== */
+        .classynav ul li a.active-nav { color: #81d4fa !important; font-weight: 700; position: relative; }
+        .classynav ul li a.active-nav::after {
+            content: ''; position: absolute; bottom: -6px; left: 12px; right: 12px; height: 3px; background: #81d4fa; border-radius: 3px;
+        }
+
+        /* ===== Subpage banner ===== */
+        .subpage-banner { position: relative; background-color: #1a2f23; background-size: cover; background-position: center; padding: 150px 0 50px; color: #fff; margin-bottom: 30px; }
+        .subpage-banner h2 { color: #fff; font-weight: 700; margin-bottom: 8px; font-size: 28px; }
+        .subpage-banner .breadcrumb { background: transparent; padding: 0; margin: 0; font-size: 14px; }
+        .subpage-banner .breadcrumb a { color: rgba(255,255,255,0.8); text-decoration: none; }
+        .subpage-banner .breadcrumb-item.active { color: #fff; font-weight: 600; }
+        .subpage-banner .breadcrumb-item + .breadcrumb-item::before { color: rgba(255,255,255,.6); }
+
+        /* ===== Badges (đồng bộ với phân hệ bệnh nhân) ===== */
+        .badge-soft-success { background: #e8f5e9; color: #2e7d32; font-weight: 600; border: 1px solid #c8e6c9; }
+
+            .badge-soft-warning {
+                background: #eceff1;
+                color: #546e7a;
+                font-weight: 600;
+                border: 1px solid #cfd8dc;
+            }
+        .badge-soft-info { background: #e1f5fe; color: #0277bd; font-weight: 600; border: 1px solid #b3e5fc; }
+        .badge-soft-danger { background: #ffebee; color: #c62828; font-weight: 600; border: 1px solid #ffcdd2; }
+        .badge-soft-primary { background: #e8eaf6; color: #283593; font-weight: 600; border: 1px solid #c5cae9; }
+        .badge-soft-secondary { background: #f5f5f5; color: #616161; font-weight: 600; border: 1px solid #e0e0e0; }
+        .badge-soft-turquoise { background: #d9f5ef; color: #0f8f7e; font-weight: 600; border: 1px solid #a8e6da; }
+
+        .btn-outline-turquoise { color: #0f8f7e; border-color: #2c9d8f; }
+        .btn-outline-turquoise:hover { background-color: #2c9d8f; border-color: #2c9d8f; color: #fff; }
+
+        /* ===== Thành phần dùng chung trong phân hệ bác sĩ ===== */
+        .dr-stat-card {
+            border-radius: 12px; padding: 16px 12px; background: #fff; border: 1px solid #e9ecef; box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+            text-align: center; height: 100%; cursor: pointer; transition: transform .2s, box-shadow .2s;
+        }
+        .dr-stat-card:hover { transform: translateY(-3px); box-shadow: 0 6px 18px rgba(0,0,0,0.08); }
+        .dr-stat-card.active-stat { border-color: #0056b3; background: #f4f9ff; }
+        .dr-stat-num { font-size: 26px; font-weight: 800; line-height: 1.1; color: #0056b3; }
+        .dr-stat-label { font-size: 13px; color: #6c757d; font-weight: 600; margin: 0; }
+
+        .dr-card { background: #fff; border-radius: 14px; border: 1px solid #e7ebef; padding: 22px; margin-bottom: 20px; box-shadow: 0 4px 14px rgba(0,0,0,0.02); }
+        .dr-card-title { font-size: 16px; font-weight: 700; color: #1a2f23; margin-bottom: 14px; }
+        .dr-card-title i { color: #0056b3; margin-right: 8px; }
+
+        .dr-avatar {
+            width: 60px; height: 60px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+            color: #fff; font-weight: 700; font-size: 20px; background: linear-gradient(135deg, #0056b3, #2c9d8f); overflow: hidden;
+        }
+        .dr-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .dr-avatar.lg { width: 96px; height: 96px; font-size: 34px; border-radius: 18px; }
+
+        .dr-btn-group .btn { margin: 3px 2px; font-size: 13px; font-weight: 600; border-radius: 6px; padding: 6px 12px; }
+        .dr-meta { font-size: 14px; color: #495057; }
+        .dr-meta .lbl { color: #6c757d; }
+        .dr-file-thumb { width: 100%; height: 110px; object-fit: cover; border-radius: 8px; border: 1px solid #e7ebef; }
+        .dr-file-tile { display: block; text-decoration: none !important; color: inherit; }
+
+        .dr-time { font-size: 22px; font-weight: 800; color: #0056b3; line-height: 1; }
+    </style>
+</head>
+
+<body>
+    <div class="preloader d-flex align-items-center justify-content-center">
+        <div class="preloader-circle"></div>
+        <div class="preloader-img">
+            <img src="~/img/core-img/leaf.png" alt="Leaf">
+        </div>
+    </div>
+
+    <header class="header-area">
+        <!-- Top header -->
+        <div class="top-header-area">
+            <div class="container">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="top-header-content d-flex align-items-center justify-content-between">
+                            <div class="top-header-meta">
+                                <a href="mailto:hotline@telehealth.vn" title="hotline@telehealth.vn">
+                                    <i class="fa fa-envelope-o" aria-hidden="true"></i> <span>Hỗ trợ kỹ thuật: hotline@telehealth.vn</span>
+                                </a>
+                                <a asp-area="" asp-controller="Home" asp-action="Index" title="Về trang bệnh nhân">
+                                    <i class="fa fa-home" aria-hidden="true"></i> <span>Về trang bệnh nhân</span>
+                                </a>
+                                <a href="tel:19001234" title="Tổng đài y tế">
+                                    <i class="fa fa-phone" aria-hidden="true"></i> <span>Tổng đài: <b>1900 1234</b></span>
+                                </a>
+                            </div>
+                            @if (doc != null)
+                            {
+                                <div>
+                                    <a asp-area="Doctor" asp-controller="Schedules" asp-action="Index" class="top-doctor-badge" title="Đổi trạng thái làm việc">
+                                        <span class="dot @(doc.IsAvailable ? "dot-available" : "dot-busy")"></span>
+                                        @doc.FullName · @(doc.IsAvailable ? "Sẵn sàng" : "Đang bận")
+                                    </a>
+                                    <a asp-area="Doctor" asp-controller="Auth" asp-action="Logout" class="top-logout"><i class="fa fa-sign-out"></i> Đăng xuất</a>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navbar -->
+        <div class="alazea-main-menu">
+            <div class="classy-nav-container breakpoint-off">
+                <div class="container">
+                    <nav class="classy-navbar justify-content-between" id="alazeaNav">
+                        <a asp-area="Doctor" asp-controller="Appointments" asp-action="Index" class="nav-brand">
+                            <img src="~/img/core-img/logo.png" alt="Telehealth Logo" style="max-height:48px;">
+                        </a>
+
+                        <div class="classy-navbar-toggler">
+                            <span class="navbarToggler"><span></span><span></span><span></span></span>
+                        </div>
+
+                        <div class="classy-menu">
+                            <div class="classycloseIcon">
+                                <div class="cross-wrap"><span class="top"></span><span class="bottom"></span></div>
+                            </div>
+
+                            <div class="classynav">
+                                <ul>
+                                    @if (doc != null)
+                                    {
+                                    <li><a asp-area="Doctor" asp-controller="Appointments" asp-action="Index" class="@(((curCtrl == "Appointments" && curAct != "All") || curCtrl == "Consultations") ? "active-nav" : "")">Ca khám trong ngày</a></li>
+                                    <li><a asp-area="Doctor" asp-controller="Appointments" asp-action="All" class="@((curCtrl == "Appointments" && curAct == "All") ? "active-nav" : "")">Tổng số ca khám</a></li>
+                                    <li><a asp-area="Doctor" asp-controller="Schedules" asp-action="Index" class="@(curCtrl == "Schedules" ? "active-nav" : "")">Lịch trực &amp; trạng thái</a></li>
+                                    <li><a asp-area="Doctor" asp-controller="Profile" asp-action="Index" class="@(curCtrl == "Profile" ? "active-nav" : "")">Hồ sơ của tôi</a></li>
+                                    }
+                                </ul>
+                            </div>
+                        </div>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Banner -->
+    <div class="subpage-banner" style="background-image: linear-gradient(rgba(17,17,17,.55), rgba(17,17,17,.55)), url(@Url.Content("~/img/bg-img/1.jpg"));">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-7">
+                    <h2>@ViewData["Title"]</h2>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a asp-area="Doctor" asp-controller="Appointments" asp-action="Index"><i class="fa fa-home"></i> Cổng bác sĩ</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">@ViewData["Title"]</li>
+                        </ol>
+                    </nav>
+                </div>
+                <div class="col-md-5 text-md-right mt-3 mt-md-0">
+                    @if (doc != null)
+                    {
+                    <a asp-area="Doctor" asp-controller="Appointments" asp-action="Index" class="btn btn-light btn-sm font-weight-bold text-success mr-2">
+                        <i class="fa fa-calendar-check-o"></i> Ca khám hôm nay
+                    </a>
+                    <a asp-area="Doctor" asp-controller="Schedules" asp-action="Index" class="btn btn-outline-light btn-sm font-weight-bold">
+                        <i class="fa fa-clock-o"></i> Lịch trực
+                    </a>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Nội dung -->
+    <div class="container mt-3" style="max-width:1140px">
+        @if (TempData["Msg"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+                <i class="fa fa-check-circle mr-2"></i> @TempData["Msg"]
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            </div>
+        }
+        @if (TempData["Err"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+                <i class="fa fa-exclamation-circle mr-2"></i> @TempData["Err"]
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            </div>
+        }
+    </div>
+
+    <div id="main-content" style="min-height: 65vh; transition: opacity .15s">
+        @RenderBody()
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer-area bg-img" style="background-image: url(@Url.Content("~/img/bg-img/3.jpg"));">
+        <div class="main-footer-area">
+            <div class="container">
+                <div class="row">
+                    <div class="col-12 col-md-6">
+                        <div class="single-footer-widget">
+                            <div class="footer-logo mb-30">
+                                <a asp-area="Doctor" asp-controller="Appointments" asp-action="Index">
+                                    <img src="~/img/core-img/logo.png" alt="Telehealth" style="max-height:48px;">
+                                </a>
+                            </div>
+                            <p>Cổng làm việc dành cho bác sĩ: quản lý lịch trực, tiếp nhận ca khám, chẩn đoán và kê đơn điện tử.</p>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <div class="single-footer-widget">
+                            <div class="widget-title"><h5>TRUNG TÂM Y TẾ</h5></div>
+                            <div class="contact-information">
+                                <p><span>Cơ sở chính:</span> 2 Cầu Giấy, Quận Cầu Giấy, Hà Nội</p>
+                                <p><span>Hỗ trợ bác sĩ:</span> hotline@telehealth.vn / 1900 1234</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom-area">
+            <div class="container">
+                <div class="row">
+                    <div class="col-12"><div class="border-line"></div></div>
+                    <div class="col-12 col-md-6">
+                        <div class="copywrite-text">
+                            <p>Copyright &copy; @DateTime.Now.Year All rights reserved | TELEHEALTH GROUP 4 - Phân hệ Bác sĩ.</p>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <div class="footer-nav">
+                            <nav>
+                                <ul>
+                                    @if (doc != null)
+                                    {
+                                    <li><a asp-area="Doctor" asp-controller="Appointments" asp-action="Index">Ca khám</a></li>
+                                    <li><a asp-area="Doctor" asp-controller="Schedules" asp-action="Index">Lịch trực</a></li>
+                                    <li><a asp-area="Doctor" asp-controller="Profile" asp-action="Index">Hồ sơ</a></li>
+                                    }
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="~/js/jquery/jquery-2.2.4.min.js"></script>
+    <script src="~/js/bootstrap/popper.min.js"></script>
+    <script src="~/js/bootstrap/bootstrap.min.js"></script>
+    <script src="~/js/plugins/plugins.js"></script>
+    <script src="~/js/active.js"></script>
+    <script src="~/js/ajax-nav.js"></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
