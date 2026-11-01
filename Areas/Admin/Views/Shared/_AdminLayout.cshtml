@@ -30,6 +30,57 @@
                 <b>TELEHEALTH</b>
                 <span>Quản trị hệ thống</span>
             </div>
+
+            <!-- Chuyển ngôn ngữ VI | EN (kế thừa màu chữ của sidebar; nếu sidebar nền tối mà chữ khó đọc, đổi "light" thành "dark") -->
+            <div class="px-3 pb-2" style="margin-top:-4px">
+                <!-- ===== Nút dịch VI | EN (Google Translate) ===== -->
+<span class="th-lang notranslate" translate="no">
+    <a href="#" data-lang="vi">VI</a> <span class="th-sep">|</span> <a href="#" data-lang="en">EN</a>
+</span>
+<div id="google_translate_element" style="display:none"></div>
+<style>
+    .th-lang { display: inline-flex; align-items: center; gap: 8px; margin-right: 18px; font-size: 13px; font-weight: 600; line-height: 1; vertical-align: middle; }
+    .th-lang a { color: inherit !important; text-decoration: none; opacity: .6; }
+    .th-lang a:hover, .th-lang a.active { opacity: 1; }
+    .th-lang a.active { text-decoration: underline; text-underline-offset: 4px; }
+    .th-lang .th-sep { opacity: .4; }
+    .goog-te-banner-frame, .goog-te-banner-frame.skiptranslate, body > .skiptranslate, #goog-gt-tt, .goog-tooltip { display: none !important; }
+    body { top: 0 !important; }
+    .goog-text-highlight { background: none !important; box-shadow: none !important; }
+</style>
+<script>
+    (function () {
+        var m = document.cookie.match(/(?:^|; )googtrans=([^;]*)/);
+        var cur = (m && decodeURIComponent(m[1]).split('/')[2] === 'en') ? 'en' : 'vi';
+
+        function setLang(c) {
+            var past = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/', h = location.hostname;
+            document.cookie = past; document.cookie = past + '; domain=' + h; document.cookie = past + '; domain=.' + h;
+            if (c === 'en') document.cookie = 'googtrans=/vi/en; path=/';
+            location.reload();
+        }
+        document.querySelectorAll('.th-lang a').forEach(function (a) {
+            var c = a.getAttribute('data-lang');
+            if (c === cur) a.classList.add('active');
+            a.addEventListener('click', function (e) {
+                e.preventDefault(); e.stopPropagation();   // tránh ajax-nav.js chặn click
+                if (c !== cur) setLang(c);
+            });
+        });
+
+        if (cur === 'en') {   // chỉ tải Google khi đang xem bản tiếng Anh
+            window.googleTranslateElementInit = function () {
+                new google.translate.TranslateElement({ pageLanguage: 'vi', includedLanguages: 'en', autoDisplay: false }, 'google_translate_element');
+            };
+            var s = document.createElement('script');
+            s.src = 'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
+            document.head.appendChild(s);
+        }
+    })();
+</script>
+<!-- ===== Hết nút dịch ===== -->
+            </div>
+
             <nav>
                 <a class="ad-link @(On("Dashboard") ? "active" : "")" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">Tổng quan</a>
 

@@ -1,4 +1,8 @@
-﻿<!DOCTYPE html>
+@{
+    var curCtrl = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
+    var curAct = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
+}
+<!DOCTYPE html>
 <html lang="vi">
 
 <head>
@@ -270,32 +274,8 @@
                 opacity: 1;
             }
 
-            /* Language Switch */
-            .lang-switch {
-                display: inline-flex !important;
-                align-items: center;
-                gap: 8px;
-                line-height: 1;
-                vertical-align: middle;
-                margin-right: 18px;
-                font-size: inherit;
-            }
+            /* (CSS của thanh VI | EN nằm trong Views/Shared/_LangSwitch.cshtml) */
 
-                .lang-switch a {
-                    color: #fff !important;
-                    font-weight: 600;
-                    text-decoration: none;
-                    opacity: .65;
-                }
-
-                    .lang-switch a:hover {
-                        opacity: 1;
-                    }
-
-                    .lang-switch a.active {
-                        opacity: 1;
-                        text-decoration: underline;
-                    }
             @@media (min-width: 992px) {
                 .classy-navbar .classynav ul {
                     display: flex;
@@ -303,7 +283,7 @@
                     align-items: center;
                 }
 
-                    .classy-navbar .classynav   ul li {
+                    .classy-navbar .classynav ul li {
                         white-space: nowrap;
                     }
 
@@ -348,14 +328,64 @@
                                 <a href="#" data-toggle="modal" data-target="#emergencyModal" class="top-emergency-btn">
                                     <i class="fa fa-ambulance text-white" aria-hidden="true"></i> CẤP CỨU 115
                                 </a>
+                            </div>
 
+                            <!-- Top Header Content Right: chuyển ngôn ngữ -->
+                            <div class="d-flex align-items-center">
+                                <!-- ===== Nút dịch VI | EN (Google Translate) ===== -->
+<span class="th-lang notranslate" translate="no">
+    <a href="#" data-lang="vi">VI</a> <span class="th-sep">|</span> <a href="#" data-lang="en">EN</a>
+</span>
+<div id="google_translate_element" style="display:none"></div>
+<style>
+    .th-lang { display: inline-flex; align-items: center; gap: 8px; margin-right: 18px; font-size: 13px; font-weight: 600; line-height: 1; vertical-align: middle; }
+    .th-lang a { color: #fff !important; text-decoration: none; opacity: .6; }
+    .th-lang a:hover, .th-lang a.active { opacity: 1; }
+    .th-lang a.active { text-decoration: underline; text-underline-offset: 4px; }
+    .th-lang .th-sep { opacity: .4; }
+    .goog-te-banner-frame, .goog-te-banner-frame.skiptranslate, body > .skiptranslate, #goog-gt-tt, .goog-tooltip { display: none !important; }
+    body { top: 0 !important; }
+    .goog-text-highlight { background: none !important; box-shadow: none !important; }
+</style>
+<script>
+    (function () {
+        var m = document.cookie.match(/(?:^|; )googtrans=([^;]*)/);
+        var cur = (m && decodeURIComponent(m[1]).split('/')[2] === 'en') ? 'en' : 'vi';
+
+        function setLang(c) {
+            var past = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/', h = location.hostname;
+            document.cookie = past; document.cookie = past + '; domain=' + h; document.cookie = past + '; domain=.' + h;
+            if (c === 'en') document.cookie = 'googtrans=/vi/en; path=/';
+            location.reload();
+        }
+        document.querySelectorAll('.th-lang a').forEach(function (a) {
+            var c = a.getAttribute('data-lang');
+            if (c === cur) a.classList.add('active');
+            a.addEventListener('click', function (e) {
+                e.preventDefault(); e.stopPropagation();   // tránh ajax-nav.js chặn click
+                if (c !== cur) setLang(c);
+            });
+        });
+
+        if (cur === 'en') {   // chỉ tải Google khi đang xem bản tiếng Anh
+            window.googleTranslateElementInit = function () {
+                new google.translate.TranslateElement({ pageLanguage: 'vi', includedLanguages: 'en', autoDisplay: false }, 'google_translate_element');
+            };
+            var s = document.createElement('script');
+            s.src = 'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
+            document.head.appendChild(s);
+        }
+    })();
+</script>
+<!-- ===== Hết nút dịch ===== -->
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- ***** Navbar Area (Giữ nguyên cấu trúc 5 menu phân hệ bệnh nhân) ***** -->
+        <!-- ***** Navbar Area ***** -->
         <div class="alazea-main-menu">
             <div class="classy-nav-container breakpoint-off">
                 <div class="container">
@@ -379,12 +409,7 @@
                                 <div class="cross-wrap"><span class="top"></span><span class="bottom"></span></div>
                             </div>
 
-                            @{
-                                var curCtrl = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
-                                var curAct = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
-                            }
-
-                            <!-- Navbar Start (Đúng 5 Menus của Phân hệ Bệnh nhân) -->
+                            <!-- Navbar Start -->
                             <div class="classynav">
                                 <ul>
                                     <li><a asp-controller="Home" asp-action="Index">Trang chủ</a></li>
@@ -392,7 +417,7 @@
                                     <li><a asp-controller="Doctors" asp-action="Index" class="@(curCtrl == "Doctors" ? "active-nav" : "")">Tìm bác sĩ</a></li>
                                     <li><a asp-controller="Appointments" asp-action="Index" class="@(curCtrl == "Appointments" ? "active-nav" : "")">Lịch khám của tôi</a></li>
                                     <li><a asp-controller="Patients" asp-action="Index" class="@(curCtrl == "Patients" ? "active-nav" : "")">Hồ sơ của tôi</a></li>
-                                        <li><a asp-area="Doctor" asp-controller="Auth" asp-action="Login">Dành cho bác sĩ</a></li>
+                                    <li><a asp-area="Doctor" asp-controller="Auth" asp-action="Login">Dành cho bác sĩ</a></li>
                                 </ul>
 
                                 <!-- Search Icon -->
@@ -574,7 +599,7 @@
                             <b class="text-success d-block mb-1"><i class="fa fa-stethoscope"></i> Gợi ý chuyên khoa:</b>
                             Với triệu chứng sốt kèm đau đầu, bạn nên đăng ký khám <b>Nội tổng quát</b> hoặc <b>Nhi khoa</b> (nếu là trẻ nhỏ). Bạn có thể bấm nút bên dưới để xem danh sách bác sĩ đang trực!
                             <div class="mt-2">
-                                <a asp-controller="Doctors" asp-action="Index" class="btn btn-outline-success btn-sm">Xem bác sĩ Nội tổng quát &rarr;</a>
+                                <a asp-controller="Doctors" asp-action="Index" class="btn btn-outline-success btn-sm">Xem bác sĩ Nội tổng quát →</a>
                             </div>
                         </div>
                     </div>
@@ -591,7 +616,7 @@
         </div>
     </div>
 
-    <!-- ##### Footer Area Start (Giữ nguyên giao diện chuẩn Alazea) ##### -->
+    <!-- ##### Footer Area Start ##### -->
     <footer class="footer-area bg-img" style="background-image: url(@Url.Content("~/img/bg-img/3.jpg"));">
         <div class="main-footer-area">
             <div class="container">
@@ -638,7 +663,7 @@
                         </div>
                     </div>
 
-                    <!-- Widget 3: Chuyên khoa nổi bật -->
+                    <!-- Widget 3: (trống) -->
                     <div class="col-12 col-sm-6 col-lg-3">
 
                     </div>
@@ -692,6 +717,7 @@
         </div>
     </footer>
     <!-- ##### Footer Area End ##### -->
+
     <!-- ##### All Javascript Files (Giữ nguyên của template Alazea) ##### -->
     <script src="~/js/jquery/jquery-2.2.4.min.js"></script>
     <script src="~/js/bootstrap/popper.min.js"></script>
