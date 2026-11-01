@@ -91,11 +91,15 @@
         border-bottom: 1px solid #f1f3f5;
         font-weight: 700;
         font-size: 15px;
-        color: #2c9d8f;
+        color: #0056b3;
         display: flex;
         align-items: center;
         justify-content: space-between;
     }
+
+        .detail-card-head .text-success {
+            color: #0056b3 !important;
+        }
 
     .detail-card-body {
         padding: 20px;
@@ -386,7 +390,7 @@
             <!-- Thẻ Thanh toán & Biên lai -->
             <div class="detail-card">
                 <div class="detail-card-head">
-                    <span><i class="fa fa-credit-card text-warning mr-2"></i> Thanh Toán &amp; Hóa Đơn</span>
+                    <span> <i class="fa fa-info-circle text-info mr-2"></i> Thanh Toán &amp; Hóa Đơn</span>
                     @if (Model.CanPay)
                     {
                         <span class="badge badge-warning text-dark font-weight-bold">Chờ thanh toán</span>
@@ -439,7 +443,7 @@
             <!-- Thẻ Kết quả khám & Đơn thuốc -->
             <div class="detail-card">
                 <div class="detail-card-head">
-                    <span><i class="fa fa-medkit text-danger mr-2"></i> Hồ Sơ Bệnh Án &amp; Đơn Thuốc</span>
+                    <span> <i class="fa fa-info-circle text-info mr-2"></i> Hồ Sơ Bệnh Án &amp; Đơn Thuốc</span>
                     @if (Model.HasRecord)
                     {
                         <button type="button" class="btn btn-outline-success btn-sm font-weight-bold" onclick="$('#rxModal').modal('show')">

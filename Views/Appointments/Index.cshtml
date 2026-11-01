@@ -111,6 +111,28 @@
         border-radius: 6px;
         padding: 6px 12px;
     }
+
+    /* Badge trạng thái */
+    /* Đã khám xong: xanh ngọc ngả xanh dương */
+    .badge-status-done {
+        background: #e0f4f1;
+        color: #1f8a7d;
+        border: 1px solid #a9ddd5;
+    }
+
+    /* Đã xác nhận: tím indigo */
+    .badge-status-confirmed {
+        background: #ece9fb;
+        color: #5b45c9;
+        border: 1px solid #cfc8f3;
+    }
+
+    /* Chờ bác sĩ xác nhận: xám nhạt */
+    .badge-status-pending {
+        background: #f1f3f5;
+        color: #6c757d;
+        border: 1px solid #dee2e6;
+    }
 </style>
 
 <div class="container my-4" style="min-height: 65vh;">
@@ -144,19 +166,19 @@
     <div class="row mb-4">
         <div class="col-6 col-md-3 col-lg-2 mb-3">
             <div class="appt-stat-card active-stat" onclick="filterByStatus('all', this)">
-                <div class="appt-stat-num stat-blue">@total</div>          @* trước: text-dark *@
+                <div class="appt-stat-num stat-blue">@total</div>
                 <div class="appt-stat-label">Tất cả ca khám</div>
             </div>
         </div>
         <div class="col-6 col-md-3 col-lg-2 mb-3">
             <div class="appt-stat-card" onclick="filterByStatus('upcoming', this)">
-                <div class="appt-stat-num stat-blue">@upcoming</div>       @* trước: text-info *@
+                <div class="appt-stat-num stat-blue">@upcoming</div>
                 <div class="appt-stat-label">Sắp diễn ra</div>
             </div>
         </div>
         <div class="col-6 col-md-3 col-lg-2 mb-3">
             <div class="appt-stat-card" onclick="filterByStatus('pending', this)">
-                <div class="appt-stat-num stat-blue">@pendingConfirm</div> @* trước: text-warning *@
+                <div class="appt-stat-num stat-blue">@pendingConfirm</div>
                 <div class="appt-stat-label">Chờ xác nhận</div>
             </div>
         </div>
@@ -237,15 +259,15 @@
                                 <span class="appt-code mr-3">TK-@r.AppointId.ToString("D5")</span>
                                 @if (r.TrangThai == "Đã xác nhận")
                                 {
-                                    <span class="badge badge-soft-success px-3 py-1 rounded-pill">Đã xác nhận lịch</span>
+                                    <span class="badge badge-status-confirmed px-3 py-1 rounded-pill">Đã xác nhận lịch</span>
                                 }
                                 else if (r.TrangThai == "Chờ xác nhận")
                                 {
-                                    <span class="badge badge-soft-warning px-3 py-1 rounded-pill">Chờ bác sĩ xác nhận</span>
+                                    <span class="badge badge-status-pending px-3 py-1 rounded-pill">Chờ bác sĩ xác nhận</span>
                                 }
                                 else if (isCompleted)
                                 {
-                                    <span class="badge badge-soft-info px-3 py-1 rounded-pill">Đã khám xong</span>
+                                    <span class="badge badge-status-done px-3 py-1 rounded-pill">Đã khám xong</span>
                                 }
                                 else if (isCancelled)
                                 {
@@ -285,8 +307,7 @@
                                     </div>
                                     <div>
                                         <h6 class="font-weight-bold mb-1 text-dark">@r.DoctorName</h6>
-                                        <p class="text-muted small mb-0">
-                                            <p class="text-muted small mb-0">Bác sĩ chuyên khoa Telehealth</p>                                        </p>
+                                        <p class="text-muted small mb-0">Bác sĩ chuyên khoa Telehealth</p>
                                     </div>
                                 </div>
                             </div>

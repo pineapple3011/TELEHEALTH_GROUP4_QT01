@@ -5,6 +5,17 @@
     var initials = words.Length == 0 ? "BN"
         : string.Concat(words.Skip(Math.Max(0, words.Length - 2)).Select(w => char.ToUpperInvariant(w[0])));
     var completedApps = Model.RecentList.Where(x => x.TrangThai == "Hoàn thành").ToList();
+
+    // Chọn class badge theo trạng thái (đồng bộ với trang Lịch khám của tôi)
+    string StatusBadge(string s) => s switch
+    {
+        "Chờ xác nhận" => "badge-status-pending",
+        "Đã xác nhận" or "Sắp diễn ra" => "badge-status-confirmed",
+        "Hoàn thành" => "badge-status-done",
+        "Đã hủy" => "badge-soft-danger",
+        "Chờ thanh toán" => "badge-soft-warning",
+        _ => "badge-soft-secondary"
+    };
 }
 
 <style>
@@ -47,6 +58,28 @@
             border-bottom: 3px solid #0056b3;
             background: transparent;
         }
+
+    /* Badge trạng thái */
+    /* Đã khám xong: xanh ngọc ngả xanh dương */
+    .badge-status-done {
+        background: #e0f4f1;
+        color: #1f8a7d;
+        border: 1px solid #a9ddd5;
+    }
+
+    /* Đã xác nhận: tím indigo */
+    .badge-status-confirmed {
+        background: #ece9fb;
+        color: #5b45c9;
+        border: 1px solid #cfc8f3;
+    }
+
+    /* Chờ bác sĩ xác nhận: xám nhạt */
+    .badge-status-pending {
+        background: #f1f3f5;
+        color: #6c757d;
+        border: 1px solid #dee2e6;
+    }
 </style>
 
 <div class="container my-4" style="min-height: 65vh;">
@@ -172,7 +205,7 @@
                                                 <td>@r.DateText lúc <b>@r.TimeText</b></td>
                                                 <td>@r.DoctorName</td>
                                                 <td><span class="badge badge-soft-primary">@r.HinhThuc</span></td>
-                                                <td><span class="badge badge-soft-success">@r.TrangThai</span></td>
+                                                <td><span class="badge @StatusBadge(r.TrangThai)">@r.TrangThai</span></td>
                                                 <td class="text-right">
                                                     @if (r.TrangThai == "Chờ thanh toán")
                                                     {
@@ -226,7 +259,7 @@
                                                 <td>@r.DoctorName</td>
                                                 <td>@r.HinhThuc</td>
                                                 <td>
-                                                    <span class="badge @(r.TrangThai == "Hoàn thành" ? "badge-soft-info" : "badge-soft-danger")">
+                                                    <span class="badge @StatusBadge(r.TrangThai)">
                                                         @r.TrangThai
                                                     </span>
                                                 </td>

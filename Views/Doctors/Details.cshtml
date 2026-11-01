@@ -243,17 +243,8 @@
                 </div>
 
                 <div class="text-center mb-3">
-                    <span class="badge badge-soft-success font-weight-bold px-3 py-1 mb-2">
-                        <i class="fa fa-check-circle"></i> Đang nhận lịch khám
-                    </span>
-                    <h4 class="font-weight-bold text-dark mb-1">@Model.HoTen</h4>
-                    <p class="text-muted small mb-1">Bác sĩ Chuyên khoa</p>
+                    <h4 class="font-weight-bold text-dark mb-2">@Model.HoTen</h4>
                     <p class="text-success font-weight-bold small mb-2"><i class="fa fa-stethoscope"></i> Chuyên khoa: @Model.TenKhoa</p>
-
-                    <div class="rating-stars mb-2" style="color: #f39c12;">
-                        <i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i>
-                        <b class="text-dark ml-1">4.9</b> <span class="text-muted small">(128 đánh giá)</span>
-                    </div>
                 </div>
 
                 <div class="p-3 bg-light rounded mb-3 small">
@@ -261,32 +252,18 @@
                         <span class="text-muted">Kinh nghiệm chuyên môn:</span>
                         <b>@Cv.Years(Model.KinhNghiem)</b>
                     </div>
-                    <div class="d-flex justify-content-between mb-2">
-                        <span class="text-muted">Bệnh nhân đã khám:</span>
-                        <b>500+ ca</b>
-                    </div>
-                    <div class="d-flex justify-content-between mb-2">
-                        <span class="text-muted">Nơi công tác:</span>
-                        <b class="text-right">Bệnh viện Telehealth</b>
-                    </div>
                     <div class="d-flex justify-content-between pt-2 border-top">
                         <span class="text-muted">Phí khám cơ bản:</span>
                         <b class="text-success" style="font-size:15px;">@Cv.Money(Model.Fee)</b>
                     </div>
                 </div>
 
-                <div class="small text-muted mb-3">
-                    <i class="fa fa-quote-left text-success mr-1"></i> @Model.MoTa
-                </div>
-
-                <div class="border-top pt-3">
-                    <div class="small font-weight-bold text-dark mb-2">Cam kết dịch vụ:</div>
-                    <ul class="list-unstyled small text-muted mb-0">
-                        <li class="mb-1"><i class="fa fa-check text-success mr-2"></i> Tư vấn đúng giờ hẹn theo lịch</li>
-                        <li class="mb-1"><i class="fa fa-check text-success mr-2"></i> Cấp đơn thuốc điện tử hợp chuẩn</li>
-                        <li><i class="fa fa-check text-success mr-2"></i> Miễn phí tư vấn tái khám trong 7 ngày</li>
-                    </ul>
-                </div>
+                @if (!string.IsNullOrWhiteSpace(Model.MoTa))
+                {
+                    <div class="small text-muted mb-3">
+                        <i class="fa fa-quote-left text-success mr-1"></i> @Model.MoTa
+                    </div>
+                }
             </div>
         </div>
 
@@ -366,40 +343,6 @@
                         </div>
                     </div>
                 }
-
-                <!-- THÔNG TIN ĐÁNH GIÁ CỦA BỆNH NHÂN -->
-                <div class="border-top pt-4 mt-2">
-                    <h5 class="font-weight-bold text-dark mb-3"><i class="fa fa-comments-o text-success mr-2"></i> Đánh Giá Từ Bệnh Nhân Đã Khám</h5>
-                    <div class="row">
-                        @{
-                            var mockReviews = new[]
-                            {
-                                new { PatientName = "Nguyễn Văn H.", BookingType = "Khám trực tuyến", Rating = 5, DateText = "2 ngày trước", Comment = "Bác sĩ tư vấn rất tận tâm, giải thích phác đồ điều trị rõ ràng, tôi rất yên tâm!" },
-                                new { PatientName = "Trần Thị M.", BookingType = "Khám tại phòng khám", Rating = 5, DateText = "1 tuần trước", Comment = "Thủ tục nhanh, bác sĩ khám kỹ và dặn dò chu đáo." },
-                                new { PatientName = "Lê Hoàng K.", BookingType = "Khám trực tuyến", Rating = 5, DateText = "2 tuần trước", Comment = "Ứng dụng rất tiện lợi, video call mượt và nhận đơn thuốc điện tử ngay sau khi khám." }
-                            };
-                        }
-                        @foreach (var r in mockReviews)
-                        {
-                            <div class="col-md-4 mb-3">
-                                <div class="p-3 border rounded bg-light h-100">
-                                    <div class="d-flex justify-content-between align-items-center mb-1">
-                                        <b class="text-dark small">@r.PatientName</b>
-                                        <span class="badge badge-soft-success small">@r.BookingType</span>
-                                    </div>
-                                    <div class="rating-stars small mb-2" style="color: #f39c12;">
-                                        @for (int i = 0; i < r.Rating; i++)
-                                        {
-                                            <i class="fa fa-star"></i>
-                                        }
-                                        <span class="text-muted small ml-1">@r.DateText</span>
-                                    </div>
-                                    <p class="small text-muted mb-0">"@r.Comment"</p>
-                                </div>
-                            </div>
-                        }
-                    </div>
-                </div>
             </div>
         </div>
     </div>
