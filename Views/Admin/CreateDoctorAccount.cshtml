@@ -1,0 +1,31 @@
+@model CreateDoctorAccountVm
+@{
+    ViewData["Title"] = "Tạo tài khoản bác sĩ";
+}
+
+<div class="container my-5" style="min-height:60vh; max-width:640px">
+    <a asp-action="Users" class="btn btn-link pl-0 mb-3">&larr; Quay lại danh sách</a>
+    <h2 class="mb-4">Tạo tài khoản bác sĩ</h2>
+
+    <form asp-action="CreateDoctorAccount" method="post">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+        <div class="form-group">
+            <label asp-for="DoctorId">Bác sĩ (chưa có tài khoản)</label>
+            <select asp-for="DoctorId" asp-items="Model.Doctors" class="form-control">
+                <option value="">-- Chọn bác sĩ --</option>
+            </select>
+            <span asp-validation-for="DoctorId" class="text-danger"></span>
+            <small class="form-text text-muted">Email đăng nhập chính là email trong hồ sơ bác sĩ.</small>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Password">Mật khẩu ban đầu</label>
+            <input asp-for="Password" type="password" class="form-control" autocomplete="new-password" maxlength="128" />
+            <span asp-validation-for="Password" class="text-danger"></span>
+            <small class="form-text text-muted">Tối thiểu 10 ký tự, gồm chữ và số. Hãy gửi cho bác sĩ qua kênh riêng.</small>
+        </div>
+
+        <button type="submit" class="btn btn-success">Tạo tài khoản</button>
+    </form>
+</div>

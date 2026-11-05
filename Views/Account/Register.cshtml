@@ -1,0 +1,61 @@
+@model RegisterVm
+@{
+    ViewData["Title"] = "Đăng ký";
+    ViewData["MainClass"] = "auth-main--register";
+    Layout = "_AuthLayout";
+}
+
+<h1 class="auth-heading">Tạo tài khoản bệnh nhân để đặt lịch khám trực tuyến.</h1>
+
+<form asp-action="Register" method="post" autocomplete="on">
+    <div asp-validation-summary="ModelOnly" role="alert"></div>
+
+    <div class="auth-grid">
+        <div class="auth-field auth-field--full">
+            <label asp-for="FullName">Họ và tên</label>
+            <input asp-for="FullName" autocomplete="name" maxlength="100" placeholder="Nguyễn Văn A" />
+            <span asp-validation-for="FullName" class="auth-error"></span>
+        </div>
+
+        <div class="auth-field">
+            <label asp-for="Email">Email</label>
+            <input asp-for="Email" type="email" autocomplete="email" maxlength="100" placeholder="your.email@domain.com" />
+            <span asp-validation-for="Email" class="auth-error"></span>
+        </div>
+
+        <div class="auth-field">
+            <label asp-for="Phone">Số điện thoại</label>
+            <input asp-for="Phone" type="tel" autocomplete="tel" maxlength="13" placeholder="0912345678" />
+            <span asp-validation-for="Phone" class="auth-error"></span>
+        </div>
+
+        <div class="auth-field auth-field--full">
+            <label asp-for="Address">Địa chỉ (không bắt buộc)</label>
+            <input asp-for="Address" autocomplete="street-address" maxlength="255" />
+            <span asp-validation-for="Address" class="auth-error"></span>
+        </div>
+
+        <div class="auth-field auth-field--full">
+            <label asp-for="EmergencyPhone">SĐT người thân khi khẩn cấp (không bắt buộc)</label>
+            <input asp-for="EmergencyPhone" type="tel" maxlength="13" />
+            <span asp-validation-for="EmergencyPhone" class="auth-error"></span>
+        </div>
+
+        <div class="auth-field">
+            <label asp-for="Password">Mật khẩu</label>
+            <input asp-for="Password" type="password" autocomplete="new-password" maxlength="128" />
+            <div class="hint">Tối thiểu 10 ký tự, gồm chữ và số.</div>
+            <span asp-validation-for="Password" class="auth-error"></span>
+        </div>
+
+        <div class="auth-field">
+            <label asp-for="ConfirmPassword">Nhập lại mật khẩu</label>
+            <input asp-for="ConfirmPassword" type="password" autocomplete="new-password" maxlength="128" />
+            <span asp-validation-for="ConfirmPassword" class="auth-error"></span>
+        </div>
+    </div>
+
+    <button type="submit" class="auth-btn">Đăng ký</button>
+</form>
+
+<p class="auth-switch">Đã có tài khoản? <a asp-action="Login">Đăng nhập</a></p>

@@ -1,0 +1,59 @@
+@model List<UserRowVm>
+@{
+    ViewData["Title"] = "Quản trị tài khoản";
+}
+
+<div class="container my-5" style="min-height:60vh">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">Quản trị tài khoản</h2>
+        <a asp-action="CreateDoctorAccount" class="btn btn-success btn-sm">+ Tạo tài khoản bác sĩ</a>
+    </div>
+
+    @if (TempData["Msg"] != null)
+    {
+        <div class="alert alert-success">@TempData["Msg"]</div>
+    }
+    @if (TempData["Err"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Err"]</div>
+    }
+
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Email</th>
+                    <th>Họ tên</th>
+                    <th>Vai trò</th>
+                    <th>Trạng thái</th>
+                    <th>Đăng nhập gần nhất</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var u in Model)
+                {
+                    <tr>
+                        <td>@u.Email</td>
+                        <td>@u.DisplayName</td>
+                        <td>@u.Role</td>
+                        <td>
+                            @if (!u.IsActive) { <span class="text-danger">Đã khoá</span> }
+                            else if (u.IsLocked) { <span class="text-warning">Khoá tạm (đăng nhập sai)</span> }
+                            else { <span class="text-success">Hoạt động</span> }
+                        </td>
+                        <td>@u.LastLogin</td>
+                        <td>
+                            @if (!u.IsSelf)
+                            {
+                                <form asp-action="ToggleActive" asp-route-id="@u.UserId" method="post" class="d-inline">
+                                    <button type="submit" class="btn btn-sm @(u.IsActive ? "btn-outline-danger" : "btn-outline-success")">@(u.IsActive ? "Khoá" : "Mở khoá")</button>
+                                </form>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

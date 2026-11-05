@@ -1,0 +1,10 @@
+@{
+    ViewData["Title"] = "Không có quyền truy cập";
+    Layout = "_AuthLayout";
+}
+
+<div class="auth-center">
+    <h1 class="auth-heading">Bạn không có quyền truy cập trang này.</h1>
+    <p>Tài khoản hiện tại không được phép thực hiện chức năng bạn vừa chọn. Nếu cho rằng đây là nhầm lẫn, hãy liên hệ quản trị viên.</p>
+    <a class="auth-btn" asp-controller="Home" asp-action="Index">Về trang chủ</a>
+</div>
