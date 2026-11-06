@@ -361,3 +361,6 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# Telehealth: file bệnh nhân tải lên (dữ liệu nhạy cảm) – KHÔNG commit
+PrivateUploads/

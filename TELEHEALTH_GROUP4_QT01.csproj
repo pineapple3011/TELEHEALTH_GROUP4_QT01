@@ -5,6 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
 	  <NuGetAudit>false</NuGetAudit>
+	  <UserSecretsId>telehealth-group4-qt01-7c1f3a52-9b0e-4d57-8a41-5e2d6f9b1c30</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>

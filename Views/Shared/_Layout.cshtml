@@ -71,7 +71,7 @@
                                     else
                                     {
                                         <a asp-controller="Account" asp-action="Login"><i class="fa fa-user" aria-hidden="true"></i> <span>Đăng nhập</span></a>
-                                        <a asp-controller="Account" asp-action="Register" class="ml-2"><span>Đăng ký</span></a>
+                                        <a asp-controller="Account" asp-action="Register" class="ml-2 mr-3"><span>Đăng ký</span></a>
                                     }
                                 </div>
                                 <!-- Cart -->
@@ -113,7 +113,15 @@
                                 <ul>
                                     <li><a asp-controller="Home" asp-action="Index">Trang chủ</a></li>
                                     <li><a asp-controller="Doctors" asp-action="Index">Tìm bác sĩ</a></li>
-                                    <li><a asp-controller="Appointments" asp-action="Index">Lịch khám của tôi</a></li>
+                                    @* Ẩn/hiện menu chỉ để cho gọn giao diện – quyền thật sự được kiểm tra ở server (xem [Authorize]) *@
+                                    @if (User.IsInRole("Patient"))
+                                    {
+                                        <li><a asp-controller="Appointments" asp-action="Index">Lịch khám của tôi</a></li>
+                                    }
+                                    @if (User.IsInRole("Admin"))
+                                    {
+                                        <li><a asp-controller="Admin" asp-action="Users">Quản trị tài khoản</a></li>
+                                    }
                                 </ul>
 
                                 <!-- Search Icon -->
@@ -580,7 +588,7 @@
                     <div class="col-12 col-md-6">
                         <div class="copywrite-text">
                             <p>&copy; <!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
-Copyright &copy;<script>document.write(new Date().getFullYear());</script> All rights reserved | This template is made with <i class="fa fa-heart-o" aria-hidden="true"></i> by <a href="https://colorlib.com" target="_blank">Colorlib</a>
+Copyright &copy;@DateTime.Now.Year All rights reserved | This template is made with <i class="fa fa-heart-o" aria-hidden="true"></i> by <a href="https://colorlib.com" target="_blank">Colorlib</a>
 <!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
 </p>
                         </div>
