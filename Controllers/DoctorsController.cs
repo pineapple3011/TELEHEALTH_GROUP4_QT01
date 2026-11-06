@@ -1,4 +1,5 @@
 using System.Globalization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -8,7 +9,10 @@ using TELEHEALTH_GROUP4_QT01.Models.ViewModels;
 
 namespace TELEHEALTH_GROUP4_QT01.Controllers
 {
-    public class DoctorsController : PatientBaseController
+    // Danh sách / lịch bác sĩ là thông tin công khai => cho phép xem khi chưa đăng nhập.
+    // Muốn ĐẶT LỊCH thì phải đăng nhập (AppointmentsController yêu cầu vai trò Patient).
+    [AllowAnonymous]
+    public class DoctorsController : Controller
     {
         private readonly TelehealthContext _context;   // đổi tên nếu DbContext của bạn khác
 

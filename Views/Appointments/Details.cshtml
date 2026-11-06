@@ -62,7 +62,7 @@
                         <ul class="mb-0">
                             @foreach (var f in Model.Files)
                             {
-                                <li><a href="@f.Url" target="_blank">@f.Loai</a> <span class="text-muted">(@f.Ngay)</span></li>
+                                <a asp-controller="Files" asp-action="Download" asp-route-id="@f.Id" target="\\\_blank" rel="noopener">@f.Loai</a>
                             }
                         </ul>
                     }

@@ -61,7 +61,18 @@
                                 </div>
                                 <!-- Login -->
                                 <div class="login">
-                                    <a href="#"><i class="fa fa-user" aria-hidden="true"></i> <span>Login</span></a>
+                                    @if (User.Identity?.IsAuthenticated == true)
+                                    {
+                                        <span><i class="fa fa-user" aria-hidden="true"></i> @User.Identity.Name</span>
+                                        <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline ml-2">
+                                            <button type="submit" class="btn btn-link p-0" style="color:inherit">Đăng xuất</button>
+                                        </form>
+                                    }
+                                    else
+                                    {
+                                        <a asp-controller="Account" asp-action="Login"><i class="fa fa-user" aria-hidden="true"></i> <span>Đăng nhập</span></a>
+                                        <a asp-controller="Account" asp-action="Register" class="ml-2"><span>Đăng ký</span></a>
+                                    }
                                 </div>
                                 <!-- Cart -->
                                 <div class="cart">

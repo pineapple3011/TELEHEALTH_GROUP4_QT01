@@ -49,13 +49,16 @@ namespace TELEHEALTH_GROUP4_QT01.Models.ViewModels
         public string Time { get; set; } = "";               // dạng "08:30"
 
         [Required(ErrorMessage = "Vui lòng chọn hình thức khám")]
+        [StringLength(20)]
         public string HinhThuc { get; set; } = "Online";
 
         public int? ClinicId { get; set; }
         public int? MucDoKhanCap { get; set; }
+        [StringLength(255, ErrorMessage = "Vị trí tối đa 255 ký tự")]
         public string? ViTriKhanCap { get; set; }
 
         [Required(ErrorMessage = "Vui lòng nhập lý do khám / triệu chứng")]
+        [StringLength(1000, ErrorMessage = "Lý do khám tối đa 1000 ký tự")]
         public string LyDo { get; set; } = "";
 
         public List<IFormFile>? Files { get; set; }
@@ -83,7 +86,7 @@ namespace TELEHEALTH_GROUP4_QT01.Models.ViewModels
 
     public class FileLine
     {
-        public string Url { get; set; } = "";
+        public int Id { get; set; }
         public string Loai { get; set; } = "";
         public string Ngay { get; set; } = "";
     }
