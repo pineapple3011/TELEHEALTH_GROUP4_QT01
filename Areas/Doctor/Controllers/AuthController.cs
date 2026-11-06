@@ -1,67 +1,32 @@
-using System;
 using System.ComponentModel.DataAnnotations;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
-using TELEHEALTH_GROUP4_QT01.Areas.Doctor.Helpers;
-using TELEHEALTH_GROUP4_QT01.Areas.Doctor.Models;
 
 namespace TELEHEALTH_GROUP4_QT01.Areas.Doctor.Controllers;
 
-/// <summary>Đăng nhập / đăng xuất cho phân hệ bác sĩ (không kế thừa DoctorBaseController vì chưa có phiên đăng nhập).</summary>
+/// <summary>
+/// Trước đây là đăng nhập Session riêng cho bác sĩ (so sánh SHA-256, không giới hạn số lần thử).
+/// Nay cả 3 vai trò dùng CHUNG trang đăng nhập /Account/Login; controller này chỉ còn chuyển hướng
+/// để các đường dẫn cũ (/Doctor/Auth/Login) vẫn hoạt động.
+/// </summary>
 [Area("Doctor")]
+[AllowAnonymous]
 public class AuthController : Controller
 {
-    private readonly DoctorDb _db;
-    public AuthController(IConfiguration cfg) => _db = new DoctorDb(cfg);
-
     [HttpGet]
-    public IActionResult Login(string? returnUrl)
-    {
-        if (CurrentDoctorId() != null) return RedirectToAction("Index", "Appointments");
-        return View(new DoctorLoginVm { ReturnUrl = returnUrl });
-    }
+    public IActionResult Login(string? returnUrl) =>
+        RedirectToAction("Login", "Account", new { area = "", returnUrl });
 
-    [HttpPost, ValidateAntiForgeryToken]
-    public IActionResult Login(DoctorLoginVm vm)
-    {
-        if (!ModelState.IsValid) return View(vm);
-
-        var id = _db.Authenticate(vm.Email, vm.Password);
-        if (id == null)
-        {
-            ModelState.AddModelError("", "Email hoặc mật khẩu không đúng, hoặc tài khoản không phải của bác sĩ.");
-            vm.Password = "";
-            return View(vm);
-        }
-
-        try { HttpContext.Session.SetInt32("DoctorID", id.Value); }
-        catch (InvalidOperationException)
-        {
-            ModelState.AddModelError("", "Ứng dụng chưa bật Session. Thêm builder.Services.AddSession() và app.UseSession() vào Program.cs.");
-            return View(vm);
-        }
-
-        if (!string.IsNullOrEmpty(vm.ReturnUrl) && Url.IsLocalUrl(vm.ReturnUrl)) return Redirect(vm.ReturnUrl);
-        return RedirectToAction("Index", "Appointments");
-    }
-
+    // Đăng xuất phải là POST (có token CSRF) – dùng nút "Đăng xuất" (form POST tới /Account/Logout).
     [HttpGet]
-    public IActionResult Logout()
-    {
-        try { HttpContext.Session.Remove("DoctorID"); } catch (InvalidOperationException) { }
-        return RedirectToAction(nameof(Login));
-    }
-
-    private int? CurrentDoctorId()
-    {
-        try { return HttpContext.Session.GetInt32("DoctorID"); } catch (InvalidOperationException) { return null; }
-    }
+    public IActionResult Logout() => RedirectToAction("Index", "Home", new { area = "" });
 }
 
+// Giữ lại class này vì view cũ Areas/Doctor/Views/Auth/Login.cshtml còn khai báo @model DoctorLoginVm.
+// Có thể xoá cả view đó lẫn class này khi nhóm đã dọn dẹp.
 public class DoctorLoginVm
 {
-    [Required(ErrorMessage = "Nhập email")] [EmailAddress(ErrorMessage = "Email không hợp lệ")] public string Email { get; set; } = "";
+    [Required(ErrorMessage = "Nhập email")][EmailAddress(ErrorMessage = "Email không hợp lệ")] public string Email { get; set; } = "";
     [Required(ErrorMessage = "Nhập mật khẩu")] public string Password { get; set; } = "";
     public string? ReturnUrl { get; set; }
 }
