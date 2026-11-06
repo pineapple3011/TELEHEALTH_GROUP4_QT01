@@ -1,0 +1,106 @@
+using System.Security.Cryptography;
+using System.Text;
+
+namespace TELEHEALTH_GROUP4_QT01.Security
+{
+    public enum PasswordVerifyResult { Failed, Success, SuccessRehashNeeded }
+
+    public interface IPasswordService
+    {
+        string Hash(string password);
+        PasswordVerifyResult Verify(string storedHash, string password);
+
+        /// <summary>
+        /// Tốn thời gian tương đương một lần Verify – dùng khi email không tồn tại
+        /// (chống dò tài khoản qua thời gian phản hồi).
+        /// </summary>
+        void BurnTime(string password);
+    }
+
+    /// <summary>
+    /// Băm mật khẩu bằng PBKDF2-HMAC-SHA256 (có sẵn trong .NET, không cần thêm NuGet).
+    /// Định dạng lưu: PBKDF2-SHA256$[số vòng lặp]$[salt base64]$[hash base64]
+    ///
+    /// TƯƠNG THÍCH HASH CŨ: dữ liệu có sẵn trong bảng Accounts dùng SHA-256 hex (64 ký tự, không salt).
+    /// Verify vẫn chấp nhận hash cũ và trả về SuccessRehashNeeded để AccountController tự nâng cấp
+    /// lên PBKDF2 ngay lần đăng nhập thành công đầu tiên.
+    /// </summary>
+    public sealed class Pbkdf2PasswordService : IPasswordService
+    {
+        private const string Prefix = "PBKDF2-SHA256";
+        private const int Iterations = 600_000;   // khuyến nghị OWASP cho PBKDF2-HMAC-SHA256
+        private const int SaltSize = 16;          // 128 bit
+        private const int KeySize = 32;           // 256 bit
+
+        private static readonly byte[] DummySalt = new byte[SaltSize];
+        private static readonly string DummyHash = HashCore("dummy-password-for-timing-only");
+
+        public string Hash(string password) => HashCore(password);
+
+        public PasswordVerifyResult Verify(string storedHash, string password)
+        {
+            if (string.IsNullOrEmpty(storedHash) || password is null) return PasswordVerifyResult.Failed;
+
+            // Hash cũ (SHA-256 hex) không chứa ký tự '$'
+            if (!storedHash.Contains('$')) return VerifyLegacySha256(storedHash, password);
+
+            var parts = storedHash.Split('$');
+            if (parts.Length != 4 || parts[0] != Prefix) return PasswordVerifyResult.Failed;
+            if (!int.TryParse(parts[1], out var iterations) || iterations < 1 || iterations > 10_000_000)
+                return PasswordVerifyResult.Failed;
+
+            byte[] salt, expected;
+            try
+            {
+                salt = Convert.FromBase64String(parts[2]);
+                expected = Convert.FromBase64String(parts[3]);
+            }
+            catch (FormatException)
+            {
+                return PasswordVerifyResult.Failed;
+            }
+
+            var actual = Rfc2898DeriveBytes.Pbkdf2(password, salt, iterations, HashAlgorithmName.SHA256, expected.Length);
+
+            // So sánh thời gian cố định, không để lộ vị trí byte đầu tiên khác nhau
+            if (!CryptographicOperations.FixedTimeEquals(actual, expected))
+                return PasswordVerifyResult.Failed;
+
+            return iterations < Iterations
+                ? PasswordVerifyResult.SuccessRehashNeeded
+                : PasswordVerifyResult.Success;
+        }
+
+        public void BurnTime(string password) => Verify(DummyHash, password ?? "");
+
+        private static PasswordVerifyResult VerifyLegacySha256(string storedHash, string password)
+        {
+            // Chạy thêm một lần PBKDF2 (kết quả bỏ đi) để thời gian phản hồi giống tài khoản đã nâng cấp
+            _ = Rfc2898DeriveBytes.Pbkdf2(password, DummySalt, Iterations, HashAlgorithmName.SHA256, KeySize);
+
+            if (storedHash.Length != 64) return PasswordVerifyResult.Failed;
+
+            byte[] expected;
+            try
+            {
+                expected = Convert.FromHexString(storedHash);   // chấp nhận cả chữ hoa lẫn chữ thường
+            }
+            catch (FormatException)
+            {
+                return PasswordVerifyResult.Failed;
+            }
+
+            var actual = SHA256.HashData(Encoding.UTF8.GetBytes(password));
+            return CryptographicOperations.FixedTimeEquals(actual, expected)
+                ? PasswordVerifyResult.SuccessRehashNeeded
+                : PasswordVerifyResult.Failed;
+        }
+
+        private static string HashCore(string password)
+        {
+            var salt = RandomNumberGenerator.GetBytes(SaltSize);   // salt ngẫu nhiên riêng cho từng người dùng
+            var key = Rfc2898DeriveBytes.Pbkdf2(password, salt, Iterations, HashAlgorithmName.SHA256, KeySize);
+            return $"{Prefix}${Iterations}${Convert.ToBase64String(salt)}${Convert.ToBase64String(key)}";
+        }
+    }
+}

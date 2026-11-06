@@ -1,0 +1,33 @@
+@model LoginVm
+@{
+    ViewData["Title"] = "Đăng nhập";
+    Layout = "_AuthLayout";
+}
+
+<h1 class="auth-heading">Kết nối bác sĩ, chăm sóc sức khỏe<br />và quản lý lịch khám của bạn.</h1>
+
+@if (TempData["Msg"] is string msg)
+{
+    <div class="auth-alert auth-alert--ok" role="status">@msg</div>
+}
+
+<form asp-action="Login" method="post" autocomplete="on">
+    <input type="hidden" asp-for="ReturnUrl" />
+    <div asp-validation-summary="ModelOnly" role="alert"></div>
+
+    <div class="auth-field">
+        <label asp-for="Email">Email</label>
+        <input asp-for="Email" type="email" autocomplete="username" maxlength="100" placeholder="your.email@domain.com" />
+        <span asp-validation-for="Email" class="auth-error"></span>
+    </div>
+
+    <div class="auth-field">
+        <label asp-for="Password">Mật khẩu</label>
+        <input asp-for="Password" type="password" autocomplete="current-password" maxlength="128" placeholder="••••••••" />
+        <span asp-validation-for="Password" class="auth-error"></span>
+    </div>
+
+    <button type="submit" class="auth-btn">Đăng nhập</button>
+</form>
+
+<p class="auth-switch">Chưa có tài khoản? <a asp-action="Register">Đăng ký</a></p>
