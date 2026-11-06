@@ -582,35 +582,23 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <div class="modal-body p-3" style="max-height: 420px; overflow-y: auto;">
+                <div class="modal-body p-3" id="chatBody" style="max-height: 460px; overflow-y: auto; font-size: 16px;">
                     <div class="d-flex mb-3">
-                        <div class="bg-light p-3 rounded" style="max-width: 85%;">
-                            <b class="text-success d-block mb-1"><i class="fa fa-stethoscope"></i> Trợ lý Y tế:</b>
-                            Xin chào! Tôi có thể hỗ trợ gì cho bạn hôm nay? Bạn có thể hỏi về triệu chứng, hướng dẫn chọn chuyên khoa, hoặc hỗ trợ tra cứu lịch khám.
-                        </div>
-                    </div>
-                    <div class="d-flex justify-content-end mb-3">
-                        <div class="bg-success text-white p-3 rounded" style="max-width: 85%;">
-                            Tôi muốn tìm bác sĩ khám triệu chứng đau đầu và sốt cao.
-                        </div>
-                    </div>
-                    <div class="d-flex mb-3">
-                        <div class="bg-light p-3 rounded" style="max-width: 85%;">
-                            <b class="text-success d-block mb-1"><i class="fa fa-stethoscope"></i> Gợi ý chuyên khoa:</b>
-                            Với triệu chứng sốt kèm đau đầu, bạn nên đăng ký khám <b>Nội tổng quát</b> hoặc <b>Nhi khoa</b> (nếu là trẻ nhỏ). Bạn có thể bấm nút bên dưới để xem danh sách bác sĩ đang trực!
-                            <div class="mt-2">
-                                <a asp-controller="Doctors" asp-action="Index" class="btn btn-outline-success btn-sm">Xem bác sĩ Nội tổng quát →</a>
-                            </div>
+                        <div class="bg-light p-3 rounded" style="max-width: 85%; font-size: 16px; line-height: 1.6;">
+                            <b class="text-success d-block mb-1" style="font-size: 16px;"><i class="fa fa-stethoscope"></i> Trợ lý Y tế:</b>
+                            Xin chào! Hãy mô tả triệu chứng của bạn, tôi sẽ gợi ý chuyên khoa phù hợp trong hệ thống. Bạn cũng có thể hỏi về giá khám hoặc cách đặt lịch.
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer bg-light p-2">
-                    <div class="input-group">
-                        <input type="text" class="form-control form-control-sm" placeholder="Nhập triệu chứng hoặc câu hỏi của bạn...">
-                        <div class="input-group-append">
-                            <button class="btn btn-success btn-sm" type="button"><i class="fa fa-paper-plane"></i> Gửi</button>
+                    <form id="chatForm" class="w-100" autocomplete="off">
+                        <div class="input-group">
+                            <input type="text" id="chatInput" class="form-control" maxlength="500" style="font-size: 16px;" placeholder="Nhập triệu chứng hoặc câu hỏi của bạn...">
+                            <div class="input-group-append">
+                                <button class="btn btn-success font-weight-bold" type="submit" id="chatSend" style="font-size: 16px;"><i class="fa fa-paper-plane"></i> Gửi</button>
+                            </div>
                         </div>
-                    </div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -725,6 +713,92 @@
     <script src="~/js/plugins/plugins.js"></script>
     <script src="~/js/active.js"></script>
     <script src="~/js/ajax-nav.js"></script>
+
+    <script>
+        (function () {
+            var body = document.getElementById('chatBody'),
+                form = document.getElementById('chatForm'),
+                input = document.getElementById('chatInput'),
+                send = document.getElementById('chatSend');
+            if (!form) return;
+            var askUrl = '@Url.Action("Ask", "Chat")';
+
+            // Tạo 1 tin nhắn: who = 'me' (bệnh nhân) hoặc 'bot' (trợ lý). Trả về { wrap, b }
+            function bubble(text, who) {
+                var row = document.createElement('div');
+                row.className = 'd-flex mb-3' + (who === 'me' ? ' justify-content-end' : '');
+                var wrap = document.createElement('div');
+                wrap.style.maxWidth = '85%';
+                var b = document.createElement('div');
+                b.className = (who === 'me' ? 'bg-success text-white' : 'bg-light') + ' p-3 rounded';
+                b.style.fontSize = '16px';
+                b.style.lineHeight = '1.6';
+                b.style.whiteSpace = 'pre-line';
+                b.textContent = text;
+                wrap.appendChild(b);
+                row.appendChild(wrap);
+                body.appendChild(row);
+                body.scrollTop = body.scrollHeight;
+                return { wrap: wrap, b: b };
+            }
+
+            function addLinks(msg, items) {
+                if (!items || !items.length) return;
+                items.forEach(function (it) {
+                    var a = document.createElement('a');
+                    var sos = it.url.indexOf('tel:') === 0;
+                    a.href = it.url;
+                    a.className = 'btn btn-block text-left mt-2 ' + (sos ? 'btn-outline-danger' : 'btn-outline-success');
+                    a.style.fontSize = '16px';
+                    var n = document.createElement('span');
+                    n.className = 'd-block font-weight-bold';
+                    n.textContent = it.name;
+                    a.appendChild(n);
+                    if (it.detail) {
+                        var d = document.createElement('span');
+                        d.className = 'd-block';
+                        d.style.fontSize = '14px';
+                        d.textContent = it.detail;
+                        a.appendChild(d);
+                    }
+                    a.addEventListener('click', function () {
+                        if (window.jQuery) jQuery('#assistantModal').modal('hide');
+                    });
+                    msg.wrap.appendChild(a);
+                });
+                body.scrollTop = body.scrollHeight;
+            }
+
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+                var text = input.value.trim();
+                if (!text) return;
+                bubble(text, 'me');
+                input.value = '';
+                send.disabled = true;
+                var wait = bubble('Đang trả lời...', 'bot');
+
+                fetch(askUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: text })
+                })
+                .then(function (r) { if (!r.ok) throw new Error('http'); return r.json(); })
+                .then(function (data) {
+                    wait.b.textContent = data.reply;
+                    addLinks(wait, data.suggestions);
+                })
+                .catch(function () {
+                    wait.b.textContent = 'Xin lỗi, hệ thống đang bận. Bạn vui lòng thử lại sau ít phút.';
+                })
+                .then(function () { send.disabled = false; input.focus(); });
+            });
+
+            if (window.jQuery) {
+                jQuery('#assistantModal').on('shown.bs.modal', function () { input.focus(); });
+            }
+        })();
+    </script>
 
     @await RenderSectionAsync("Scripts", required: false)
 </body>
