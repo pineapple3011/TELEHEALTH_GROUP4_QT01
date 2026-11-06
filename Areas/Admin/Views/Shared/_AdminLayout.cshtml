@@ -98,6 +98,9 @@
 
                 <div class="ad-back">
                     <a class="ad-link" asp-area="" asp-controller="Home" asp-action="Index">Về trang bệnh nhân</a>
+                    <form asp-area="" asp-controller="Account" asp-action="Logout" method="post">
+                        <button type="submit" class="ad-link" style="background:none;border:0;width:100%;text-align:left;cursor:pointer">Đăng xuất (@User.Identity?.Name)</button>
+                    </form>
                 </div>
             </nav>
         </aside>

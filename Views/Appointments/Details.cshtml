@@ -649,7 +649,7 @@
                             @foreach (var f in Model.Files)
                             {
                                 <div class="col-sm-6 mb-2">
-                                    <a href="@f.Url" target="_blank" class="file-row">
+                                    <a href="@Url.Action("Download", "Files", new { id = f.Id })" target="_blank" rel="noopener" class="file-row">
                                         <div class="font-weight-bold text-truncate">@f.Loai</div>
                                         <div class="d">@f.Ngay</div>
                                     </a>
@@ -693,8 +693,8 @@
                         @if (receiptFile != null)
                         {
                             <div class="sub-title">Ảnh biên lai đã gửi</div>
-                            <a href="@receiptFile.Url" target="_blank" class="d-inline-flex align-items-center">
-                                <img src="@receiptFile.Url" alt="Biên lai" style="max-height: 90px; border-radius: 10px;" class="border" />
+                            <a href="@Url.Action("Download", "Files", new { id = receiptFile.Id })" target="_blank" rel="noopener" class="d-inline-flex align-items-center">
+                                <img src="@Url.Action("Download", "Files", new { id = receiptFile.Id })" alt="Biên lai" style="max-height: 90px; border-radius: 10px;" class="border" />
                                 <span class="small ml-3" style="color:var(--ap-blue)">Xem ảnh lớn</span>
                             </a>
                         }

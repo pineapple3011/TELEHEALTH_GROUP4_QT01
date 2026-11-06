@@ -188,7 +188,9 @@
                                             <span class="dot @(doc.IsAvailable ? "dot-available" : "dot-busy")"></span>
                                             <span class="notranslate">@doc.FullName</span> · @(doc.IsAvailable ? "Sẵn sàng" : "Đang bận")
                                         </a>
-                                        <a asp-area="Doctor" asp-controller="Auth" asp-action="Logout" class="top-logout"><i class="fa fa-sign-out"></i> Đăng xuất</a>
+                                        <form asp-area="" asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                                            <button type="submit" class="top-logout" style="background:none;border:0;cursor:pointer;padding:0"><i class="fa fa-sign-out"></i> Đăng xuất</button>
+                                        </form>
                                     </div>
                                 }
                             </div>

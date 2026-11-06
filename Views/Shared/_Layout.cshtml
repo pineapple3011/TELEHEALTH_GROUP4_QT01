@@ -333,51 +333,100 @@
                             <!-- Top Header Content Right: chuyển ngôn ngữ -->
                             <div class="d-flex align-items-center">
                                 <!-- ===== Nút dịch VI | EN (Google Translate) ===== -->
-<span class="th-lang notranslate" translate="no">
-    <a href="#" data-lang="vi">VI</a> <span class="th-sep">|</span> <a href="#" data-lang="en">EN</a>
-</span>
-<div id="google_translate_element" style="display:none"></div>
-<style>
-    .th-lang { display: inline-flex; align-items: center; gap: 8px; margin-right: 18px; font-size: 13px; font-weight: 600; line-height: 1; vertical-align: middle; }
-    .th-lang a { color: #fff !important; text-decoration: none; opacity: .6; }
-    .th-lang a:hover, .th-lang a.active { opacity: 1; }
-    .th-lang a.active { text-decoration: underline; text-underline-offset: 4px; }
-    .th-lang .th-sep { opacity: .4; }
-    .goog-te-banner-frame, .goog-te-banner-frame.skiptranslate, body > .skiptranslate, #goog-gt-tt, .goog-tooltip { display: none !important; }
-    body { top: 0 !important; }
-    .goog-text-highlight { background: none !important; box-shadow: none !important; }
-</style>
-<script>
-    (function () {
-        var m = document.cookie.match(/(?:^|; )googtrans=([^;]*)/);
-        var cur = (m && decodeURIComponent(m[1]).split('/')[2] === 'en') ? 'en' : 'vi';
+                                <span class="th-lang notranslate" translate="no">
+                                    <a href="#" data-lang="vi">VI</a> <span class="th-sep">|</span> <a href="#" data-lang="en">EN</a>
+                                </span>
+                                <div id="google_translate_element" style="display:none"></div>
+                                <style>
+                                                                    .th-lang {
+                                                                        display: inline-flex;
+                                                                        align-items: center;
+                                                                        gap: 8px;
+                                                                        margin-right: 18px;
+                                                                        font-size: 13px;
+                                                                        font-weight: 600;
+                                                                        line-height: 1;
+                                                                        vertical-align: middle;
+                                                                    }
 
-        function setLang(c) {
-            var past = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/', h = location.hostname;
-            document.cookie = past; document.cookie = past + '; domain=' + h; document.cookie = past + '; domain=.' + h;
-            if (c === 'en') document.cookie = 'googtrans=/vi/en; path=/';
-            location.reload();
-        }
-        document.querySelectorAll('.th-lang a').forEach(function (a) {
-            var c = a.getAttribute('data-lang');
-            if (c === cur) a.classList.add('active');
-            a.addEventListener('click', function (e) {
-                e.preventDefault(); e.stopPropagation();   // tránh ajax-nav.js chặn click
-                if (c !== cur) setLang(c);
-            });
-        });
+                                                                        .th-lang a {
+                                                                            color: #fff !important;
+                                                                            text-decoration: none;
+                                                                            opacity: .6;
+                                                                        }
 
-        if (cur === 'en') {   // chỉ tải Google khi đang xem bản tiếng Anh
-            window.googleTranslateElementInit = function () {
-                new google.translate.TranslateElement({ pageLanguage: 'vi', includedLanguages: 'en', autoDisplay: false }, 'google_translate_element');
-            };
-            var s = document.createElement('script');
-            s.src = 'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
-            document.head.appendChild(s);
-        }
-    })();
-</script>
-<!-- ===== Hết nút dịch ===== -->
+                                                                            .th-lang a:hover, .th-lang a.active {
+                                                                                opacity: 1;
+                                                                            }
+
+                                                                            .th-lang a.active {
+                                                                                text-decoration: underline;
+                                                                                text-underline-offset: 4px;
+                                                                            }
+
+                                                                        .th-lang .th-sep {
+                                                                            opacity: .4;
+                                                                        }
+
+                                                                    .goog-te-banner-frame, .goog-te-banner-frame.skiptranslate, body > .skiptranslate, #goog-gt-tt, .goog-tooltip {
+                                                                        display: none !important;
+                                                                    }
+
+                                                                    body {
+                                                                        top: 0 !important;
+                                                                    }
+
+                                                                    .goog-text-highlight {
+                                                                        background: none !important;
+                                                                        box-shadow: none !important;
+                                                                    }
+                                </style>
+                                <script>
+                                                                    (function () {
+                                                                        var m = document.cookie.match(/(?:^|; )googtrans=([^;]*)/);
+                                                                        var cur = (m && decodeURIComponent(m[1]).split('/')[2] === 'en') ? 'en' : 'vi';
+
+                                                                        function setLang(c) {
+                                                                            var past = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/', h = location.hostname;
+                                                                            document.cookie = past; document.cookie = past + '; domain=' + h; document.cookie = past + '; domain=.' + h;
+                                                                            if (c === 'en') document.cookie = 'googtrans=/vi/en; path=/';
+                                                                            location.reload();
+                                                                        }
+                                                                        document.querySelectorAll('.th-lang a').forEach(function (a) {
+                                                                            var c = a.getAttribute('data-lang');
+                                                                            if (c === cur) a.classList.add('active');
+                                                                            a.addEventListener('click', function (e) {
+                                                                                e.preventDefault(); e.stopPropagation();   // tránh ajax-nav.js chặn click
+                                                                                if (c !== cur) setLang(c);
+                                                                            });
+                                                                        });
+
+                                                                        if (cur === 'en') {   // chỉ tải Google khi đang xem bản tiếng Anh
+                                                                            window.googleTranslateElementInit = function () {
+                                                                                new google.translate.TranslateElement({ pageLanguage: 'vi', includedLanguages: 'en', autoDisplay: false }, 'google_translate_element');
+                                                                            };
+                                                                            var s = document.createElement('script');
+                                                                            s.src = 'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
+                                                                            document.head.appendChild(s);
+                                                                        }
+                                                                    })();
+                                </script>
+                                <!-- ===== Hết nút dịch ===== -->
+                                <!-- ===== Đăng nhập / Đăng ký / Đăng xuất ===== -->
+                                <div class="th-auth" style="margin-left:6px;font-size:13px;font-weight:600;line-height:1">
+                                    @if (User.Identity?.IsAuthenticated == true)
+                                    {
+                                        <span style="color:#fff"><i class="fa fa-user" aria-hidden="true"></i> @User.Identity.Name</span>
+                                        <form asp-area="" asp-controller="Account" asp-action="Logout" method="post" class="d-inline" style="margin-left:12px">
+                                            <button type="submit" class="btn btn-link p-0" style="color:#ffb3b3;font-size:13px;font-weight:600;text-decoration:none">Đăng xuất</button>
+                                        </form>
+                                    }
+                                    else
+                                    {
+                                        <a asp-area="" asp-controller="Account" asp-action="Login" data-no-ajax style="color:#fff;text-decoration:none">Đăng nhập</a>
+                                        <a asp-area="" asp-controller="Account" asp-action="Register" data-no-ajax style="color:#fff;text-decoration:none;margin-left:14px">Đăng ký</a>
+                                    }
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -415,9 +464,20 @@
                                     <li><a asp-controller="Home" asp-action="Index">Trang chủ</a></li>
                                     <li><a asp-controller="About" asp-action="Index" class="@(curCtrl == "About" ? "active-nav" : "")">Giới thiệu</a></li>
                                     <li><a asp-controller="Doctors" asp-action="Index" class="@(curCtrl == "Doctors" ? "active-nav" : "")">Tìm bác sĩ</a></li>
-                                    <li><a asp-controller="Appointments" asp-action="Index" class="@(curCtrl == "Appointments" ? "active-nav" : "")">Lịch khám của tôi</a></li>
-                                    <li><a asp-controller="Patients" asp-action="Index" class="@(curCtrl == "Patients" ? "active-nav" : "")">Hồ sơ của tôi</a></li>
-                                    <li><a asp-area="Doctor" asp-controller="Auth" asp-action="Login">Dành cho bác sĩ</a></li>
+                                    @* Ẩn/hiện menu chỉ để gọn giao diện – quyền thật sự được kiểm tra ở server (xem [Authorize]) *@
+                                    @if (User.IsInRole("Patient"))
+                                    {
+                                        <li><a asp-controller="Appointments" asp-action="Index" class="@(curCtrl == "Appointments" ? "active-nav" : "")">Lịch khám của tôi</a></li>
+                                        <li><a asp-controller="Patients" asp-action="Index" class="@(curCtrl == "Patients" ? "active-nav" : "")">Hồ sơ của tôi</a></li>
+                                    }
+                                    @if (User.IsInRole("Doctor"))
+                                    {
+                                        <li><a asp-area="Doctor" asp-controller="Appointments" asp-action="Index" data-no-ajax>Khu vực bác sĩ</a></li>
+                                    }
+                                    @if (User.IsInRole("Admin"))
+                                    {
+                                        <li><a asp-area="Admin" asp-controller="Dashboard" asp-action="Index" data-no-ajax>Quản trị</a></li>
+                                    }
                                 </ul>
 
                                 <!-- Search Icon -->
@@ -653,7 +713,6 @@
 
                     <!-- Widget 3: (trống) -->
                     <div class="col-12 col-sm-6 col-lg-3">
-
                     </div>
 
                     <!-- Widget 4: Thông tin liên hệ cơ sở y tế -->
@@ -705,7 +764,6 @@
         </div>
     </footer>
     <!-- ##### Footer Area End ##### -->
-
     <!-- ##### All Javascript Files (Giữ nguyên của template Alazea) ##### -->
     <script src="~/js/jquery/jquery-2.2.4.min.js"></script>
     <script src="~/js/bootstrap/popper.min.js"></script>
@@ -715,89 +773,89 @@
     <script src="~/js/ajax-nav.js"></script>
 
     <script>
-        (function () {
-            var body = document.getElementById('chatBody'),
-                form = document.getElementById('chatForm'),
-                input = document.getElementById('chatInput'),
-                send = document.getElementById('chatSend');
-            if (!form) return;
-            var askUrl = '@Url.Action("Ask", "Chat")';
+            (function () {
+                var body = document.getElementById('chatBody'),
+                    form = document.getElementById('chatForm'),
+                    input = document.getElementById('chatInput'),
+                    send = document.getElementById('chatSend');
+                if (!form) return;
+                var askUrl = '@Url.Action("Ask", "Chat")';
 
-            // Tạo 1 tin nhắn: who = 'me' (bệnh nhân) hoặc 'bot' (trợ lý). Trả về { wrap, b }
-            function bubble(text, who) {
-                var row = document.createElement('div');
-                row.className = 'd-flex mb-3' + (who === 'me' ? ' justify-content-end' : '');
-                var wrap = document.createElement('div');
-                wrap.style.maxWidth = '85%';
-                var b = document.createElement('div');
-                b.className = (who === 'me' ? 'bg-success text-white' : 'bg-light') + ' p-3 rounded';
-                b.style.fontSize = '16px';
-                b.style.lineHeight = '1.6';
-                b.style.whiteSpace = 'pre-line';
-                b.textContent = text;
-                wrap.appendChild(b);
-                row.appendChild(wrap);
-                body.appendChild(row);
-                body.scrollTop = body.scrollHeight;
-                return { wrap: wrap, b: b };
-            }
+                // Tạo 1 tin nhắn: who = 'me' (bệnh nhân) hoặc 'bot' (trợ lý). Trả về { wrap, b }
+                function bubble(text, who) {
+                    var row = document.createElement('div');
+                    row.className = 'd-flex mb-3' + (who === 'me' ? ' justify-content-end' : '');
+                    var wrap = document.createElement('div');
+                    wrap.style.maxWidth = '85%';
+                    var b = document.createElement('div');
+                    b.className = (who === 'me' ? 'bg-success text-white' : 'bg-light') + ' p-3 rounded';
+                    b.style.fontSize = '16px';
+                    b.style.lineHeight = '1.6';
+                    b.style.whiteSpace = 'pre-line';
+                    b.textContent = text;
+                    wrap.appendChild(b);
+                    row.appendChild(wrap);
+                    body.appendChild(row);
+                    body.scrollTop = body.scrollHeight;
+                    return { wrap: wrap, b: b };
+                }
 
-            function addLinks(msg, items) {
-                if (!items || !items.length) return;
-                items.forEach(function (it) {
-                    var a = document.createElement('a');
-                    var sos = it.url.indexOf('tel:') === 0;
-                    a.href = it.url;
-                    a.className = 'btn btn-block text-left mt-2 ' + (sos ? 'btn-outline-danger' : 'btn-outline-success');
-                    a.style.fontSize = '16px';
-                    var n = document.createElement('span');
-                    n.className = 'd-block font-weight-bold';
-                    n.textContent = it.name;
-                    a.appendChild(n);
-                    if (it.detail) {
-                        var d = document.createElement('span');
-                        d.className = 'd-block';
-                        d.style.fontSize = '14px';
-                        d.textContent = it.detail;
-                        a.appendChild(d);
-                    }
-                    a.addEventListener('click', function () {
-                        if (window.jQuery) jQuery('#assistantModal').modal('hide');
+                function addLinks(msg, items) {
+                    if (!items || !items.length) return;
+                    items.forEach(function (it) {
+                        var a = document.createElement('a');
+                        var sos = it.url.indexOf('tel:') === 0;
+                        a.href = it.url;
+                        a.className = 'btn btn-block text-left mt-2 ' + (sos ? 'btn-outline-danger' : 'btn-outline-success');
+                        a.style.fontSize = '16px';
+                        var n = document.createElement('span');
+                        n.className = 'd-block font-weight-bold';
+                        n.textContent = it.name;
+                        a.appendChild(n);
+                        if (it.detail) {
+                            var d = document.createElement('span');
+                            d.className = 'd-block';
+                            d.style.fontSize = '14px';
+                            d.textContent = it.detail;
+                            a.appendChild(d);
+                        }
+                        a.addEventListener('click', function () {
+                            if (window.jQuery) jQuery('#assistantModal').modal('hide');
+                        });
+                        msg.wrap.appendChild(a);
                     });
-                    msg.wrap.appendChild(a);
+                    body.scrollTop = body.scrollHeight;
+                }
+
+                form.addEventListener('submit', function (e) {
+                    e.preventDefault();
+                    var text = input.value.trim();
+                    if (!text) return;
+                    bubble(text, 'me');
+                    input.value = '';
+                    send.disabled = true;
+                    var wait = bubble('Đang trả lời...', 'bot');
+
+                    fetch(askUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ message: text })
+                    })
+                    .then(function (r) { if (!r.ok) throw new Error('http'); return r.json(); })
+                    .then(function (data) {
+                        wait.b.textContent = data.reply;
+                        addLinks(wait, data.suggestions);
+                    })
+                    .catch(function () {
+                        wait.b.textContent = 'Xin lỗi, hệ thống đang bận. Bạn vui lòng thử lại sau ít phút.';
+                    })
+                    .then(function () { send.disabled = false; input.focus(); });
                 });
-                body.scrollTop = body.scrollHeight;
-            }
 
-            form.addEventListener('submit', function (e) {
-                e.preventDefault();
-                var text = input.value.trim();
-                if (!text) return;
-                bubble(text, 'me');
-                input.value = '';
-                send.disabled = true;
-                var wait = bubble('Đang trả lời...', 'bot');
-
-                fetch(askUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ message: text })
-                })
-                .then(function (r) { if (!r.ok) throw new Error('http'); return r.json(); })
-                .then(function (data) {
-                    wait.b.textContent = data.reply;
-                    addLinks(wait, data.suggestions);
-                })
-                .catch(function () {
-                    wait.b.textContent = 'Xin lỗi, hệ thống đang bận. Bạn vui lòng thử lại sau ít phút.';
-                })
-                .then(function () { send.disabled = false; input.focus(); });
-            });
-
-            if (window.jQuery) {
-                jQuery('#assistantModal').on('shown.bs.modal', function () { input.focus(); });
-            }
-        })();
+                if (window.jQuery) {
+                    jQuery('#assistantModal').on('shown.bs.modal', function () { input.focus(); });
+                }
+            })();
     </script>
 
     @await RenderSectionAsync("Scripts", required: false)

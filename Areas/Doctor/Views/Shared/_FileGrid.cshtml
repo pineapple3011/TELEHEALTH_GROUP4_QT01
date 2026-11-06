@@ -8,7 +8,7 @@ else
     <div class="row">
         @foreach (var f in Model)
         {
-            var url = Url.Content("~" + f.FilePath);
+            var url = Url.Action("Download", "Files", new { area = "", id = f.FileId });
             <div class="col-6 col-md-4 mb-3">
                 <a href="@url" target="_blank" rel="noopener" class="dr-file-tile">
                     @if (f.IsImage)

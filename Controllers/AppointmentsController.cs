@@ -1,29 +1,29 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using TELEHEALTH_GROUP4_QT01.Helpers;
 using TELEHEALTH_GROUP4_QT01.Models;
 using TELEHEALTH_GROUP4_QT01.Models.ViewModels;
+using TELEHEALTH_GROUP4_QT01.Services;
 
 namespace TELEHEALTH_GROUP4_QT01.Controllers
 {
     public class AppointmentsController : PatientBaseController
     {
-        // ====== THÔNG TIN NGÂN HÀNG (đổi thành của nhóm; BankId theo danh sách của VietQR, vd: MB, VCB, ACB) ======
-        private const string BankId = "NCB";
-        private const string AccountNo = "100013747808";
-        private const string AccountName = "DUONG LINH CHI";
-
-        private static readonly string[] AllowedExt = { ".jpg", ".jpeg", ".png", ".pdf" };
-        private const long MaxFileSize = 5 * 1024 * 1024;   // 5 MB
+        // Giới hạn kích thước request (5 file x 5 MB + dữ liệu form). Giới hạn từng file được kiểm tra trong IFileStorageService.
+        private const long MaxCreateRequestBytes = 26 * 1024 * 1024;
+        private const long MaxReceiptRequestBytes = 6 * 1024 * 1024;
 
         private readonly TelehealthContext _context;        // đổi tên nếu DbContext của bạn khác
-        private readonly IWebHostEnvironment _env;
+        private readonly IFileStorageService _files;
+        private readonly BankOptions _bank;                 // thông tin ngân hàng đọc từ cấu hình, không gán cứng
 
-        public AppointmentsController(TelehealthContext context, IWebHostEnvironment env)
+        public AppointmentsController(TelehealthContext context, IFileStorageService files, IOptions<BankOptions> bank)
         {
             _context = context;
-            _env = env;
+            _files = files;
+            _bank = bank.Value;
         }
 
         // =====================================================================
@@ -99,7 +99,7 @@ namespace TELEHEALTH_GROUP4_QT01.Controllers
                 ViTriKhanCap = Convert.ToString(ca.EmergencyLocation) ?? "",
                 Files = files.Select(f => new FileLine
                 {
-                    Url = f.FilePath ?? "",
+                    Id = f.FileId,                       // link tải file đi qua FilesController (có kiểm tra quyền)
                     Loai = f.FileType ?? "",
                     Ngay = Cv.F(f.UploadDate, "dd/MM/yyyy HH:mm")
                 }).ToList(),
@@ -133,6 +133,8 @@ namespace TELEHEALTH_GROUP4_QT01.Controllers
         }
 
         [HttpPost, ValidateAntiForgeryToken]
+        [RequestSizeLimit(MaxCreateRequestBytes)]
+        [RequestFormLimits(MultipartBodyLengthLimit = MaxCreateRequestBytes)]
         public async Task<IActionResult> Create(AppointmentCreateVm vm)
         {
             var ctx = await LoadAsync(vm.DoctorId, vm.ScheduleId);
@@ -148,6 +150,12 @@ namespace TELEHEALTH_GROUP4_QT01.Controllers
             }
             else
             {
+                // Không cho đặt vào thời điểm đã qua
+                var today = DateOnly.FromDateTime(DateTime.Today);
+                var workDate = Cv.D(lich.WorkDate);
+                if (workDate < today || (workDate == today && gio <= TimeOnly.FromDateTime(DateTime.Now)))
+                    ModelState.AddModelError("", "Không thể đặt lịch cho thời điểm đã qua.");
+
                 var booked = await _context.Appointments.Where(c => c.DoctorId == doctor.DoctorId).ToListAsync();
                 var inSchedule = booked.Where(c => Cv.I(c.ScheduleId) == lich.ScheduleId);
                 if (!SlotHelper.FreeSlots(lich, inSchedule).Contains(gio))
@@ -160,8 +168,13 @@ namespace TELEHEALTH_GROUP4_QT01.Controllers
 
             if (vm.HinhThuc is not (HinhThucKham.Online or HinhThucKham.Offline or HinhThucKham.CapCuu))
                 ModelState.AddModelError("HinhThuc", "Hình thức khám không hợp lệ.");
-            if (offline && vm.ClinicId == null)
-                ModelState.AddModelError("ClinicId", "Vui lòng chọn phòng khám.");
+            if (offline)
+            {
+                if (vm.ClinicId == null)
+                    ModelState.AddModelError("ClinicId", "Vui lòng chọn phòng khám.");
+                else if (!await _context.Clinics.AnyAsync(c => c.ClinicId == vm.ClinicId && c.SpecId == doctor.SpecId))
+                    ModelState.AddModelError("ClinicId", "Phòng khám không hợp lệ.");   // không tin ClinicId do client gửi
+            }
             if (capCuu)
             {
                 if (vm.MucDoKhanCap is null or < 1 or > 5)
@@ -170,12 +183,15 @@ namespace TELEHEALTH_GROUP4_QT01.Controllers
                     ModelState.AddModelError("ViTriKhanCap", "Vui lòng nhập vị trí hiện tại của bạn.");
             }
 
-            // --- kiểm tra file đính kèm ---
-            if (vm.Files != null)
+            // --- kiểm tra file đính kèm: số lượng, kích thước, đuôi file, nội dung thật (magic bytes) ---
+            var uploads = vm.Files?.Where(x => x.Length > 0).ToList() ?? new List<IFormFile>();
+            if (uploads.Count > _files.MaxFilesPerRequest)
+                ModelState.AddModelError("Files", $"Chỉ được đính kèm tối đa {_files.MaxFilesPerRequest} file.");
+            else
             {
-                foreach (var f in vm.Files.Where(x => x.Length > 0))
+                foreach (var f in uploads)
                 {
-                    var err = ValidateFile(f);
+                    var err = await _files.ValidateAsync(f);
                     if (err != null) ModelState.AddModelError("Files", err);
                 }
             }
@@ -204,20 +220,17 @@ namespace TELEHEALTH_GROUP4_QT01.Controllers
             _context.Appointments.Add(ca);
             await _context.SaveChangesAsync();          // để có ca.AppointId
 
-            // --- lưu file triệu chứng ---
-            if (vm.Files != null)
+            // --- lưu file triệu chứng (ngoài wwwroot, tên ngẫu nhiên) ---
+            foreach (var f in uploads)
             {
-                foreach (var f in vm.Files.Where(x => x.Length > 0))
+                var path = await _files.SaveAsync(f, "symptoms");
+                _context.AppointmentFiles.Add(new AppointmentFile
                 {
-                    var url = await SaveFileAsync(f, "symptoms");
-                    _context.AppointmentFiles.Add(new AppointmentFile
-                    {
-                        AppointId = ca.AppointId,
-                        FilePath = url,
-                        FileType = "Triệu chứng",
-                        UploadDate = DateTime.Now
-                    });
-                }
+                    AppointId = ca.AppointId,
+                    FilePath = path,
+                    FileType = "Triệu chứng",
+                    UploadDate = DateTime.Now
+                });
             }
 
             // --- tạo giao dịch thanh toán (nếu có phí) ---
@@ -255,6 +268,10 @@ namespace TELEHEALTH_GROUP4_QT01.Controllers
                                     .OrderByDescending(g => g.PaymentId).FirstOrDefaultAsync();
             if (pay == null) return RedirectToAction(nameof(Details), new { id });
 
+            if (!_bank.IsConfigured)
+                return StatusCode(StatusCodes.Status503ServiceUnavailable,
+                    "Hệ thống chưa cấu hình tài khoản ngân hàng nhận thanh toán. Vui lòng liên hệ quản trị viên.");
+
             var doctor = await _context.Doctors.FindAsync(Cv.I(ca.DoctorId));
             var amount = Cv.M(pay.Amount);
             var note = $"TELEHEALTH {id}";
@@ -270,18 +287,20 @@ namespace TELEHEALTH_GROUP4_QT01.Controllers
                 Amount = amount,
                 TrangThaiGiaoDich = pay.Status ?? "",
                 CanUpload = pay.Status == TtGiaoDich.ChoThanhToan,
-                BankId = BankId,
-                AccountNo = AccountNo,
-                AccountName = AccountName,
+                BankId = _bank.BankId,
+                AccountNo = _bank.AccountNo,
+                AccountName = _bank.AccountName,
                 TransferNote = note,
-                QrUrl = $"https://img.vietqr.io/image/{BankId}-{AccountNo}-compact2.png" +
+                QrUrl = $"https://img.vietqr.io/image/{Uri.EscapeDataString(_bank.BankId)}-{Uri.EscapeDataString(_bank.AccountNo)}-compact2.png" +
                         $"?amount={(long)amount}&addInfo={Uri.EscapeDataString(note)}" +
-                        $"&accountName={Uri.EscapeDataString(AccountName)}"
+                        $"&accountName={Uri.EscapeDataString(_bank.AccountName)}"
             };
             return View(vm);
         }
 
         [HttpPost, ValidateAntiForgeryToken]
+        [RequestSizeLimit(MaxReceiptRequestBytes)]
+        [RequestFormLimits(MultipartBodyLengthLimit = MaxReceiptRequestBytes)]
         public async Task<IActionResult> Pay(int id, IFormFile? receipt)
         {
             var ca = await GetOwnedAsync(id);
@@ -291,19 +310,26 @@ namespace TELEHEALTH_GROUP4_QT01.Controllers
                                     .OrderByDescending(g => g.PaymentId).FirstOrDefaultAsync();
             if (pay == null) return NotFound();
 
+            // Chỉ cho gửi biên lai khi giao dịch đang chờ thanh toán (không cho gửi lặp / ghi đè trạng thái)
+            if (pay.Status != TtGiaoDich.ChoThanhToan)
+            {
+                TempData["Err"] = "Giao dịch này không còn ở trạng thái chờ thanh toán.";
+                return RedirectToAction(nameof(Pay), new { id });
+            }
+
             if (receipt == null || receipt.Length == 0)
             {
                 TempData["Err"] = "Vui lòng chọn ảnh biên lai chuyển khoản.";
                 return RedirectToAction(nameof(Pay), new { id });
             }
-            var err = ValidateFile(receipt);
+            var err = await _files.ValidateAsync(receipt);
             if (err != null)
             {
                 TempData["Err"] = err;
                 return RedirectToAction(nameof(Pay), new { id });
             }
 
-            var url = await SaveFileAsync(receipt, "receipts");
+            var url = await _files.SaveAsync(receipt, "receipts");
             _context.AppointmentFiles.Add(new AppointmentFile
             {
                 AppointId = id,
@@ -409,24 +435,5 @@ namespace TELEHEALTH_GROUP4_QT01.Controllers
             HinhThucKham.Offline => Math.Round(basePrice * PhiKham.TyLeDatCoc),
             _ => 0m      // Cấp cứu: không thu trước
         };
-
-        private static string? ValidateFile(IFormFile f)
-        {
-            var ext = Path.GetExtension(f.FileName).ToLowerInvariant();
-            if (!AllowedExt.Contains(ext)) return $"File \"{f.FileName}\" không hợp lệ. Chỉ nhận .jpg, .png, .pdf.";
-            if (f.Length > MaxFileSize) return $"File \"{f.FileName}\" vượt quá 5 MB.";
-            return null;
-        }
-
-        private async Task<string> SaveFileAsync(IFormFile file, string folder)
-        {
-            var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
-            var dir = Path.Combine(_env.WebRootPath, "uploads", folder);
-            Directory.CreateDirectory(dir);
-            var name = $"{Guid.NewGuid():N}{ext}";
-            using var stream = new FileStream(Path.Combine(dir, name), FileMode.Create);
-            await file.CopyToAsync(stream);
-            return $"/uploads/{folder}/{name}";
-        }
     }
 }

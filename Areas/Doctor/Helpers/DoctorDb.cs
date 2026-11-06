@@ -10,6 +10,7 @@ using System.Security.Cryptography;
 using System.Text;
 using Microsoft.Data.SqlClient;
 using TELEHEALTH_GROUP4_QT01.Areas.Doctor.Models;
+using TELEHEALTH_GROUP4_QT01.Security;
 
 namespace TELEHEALTH_GROUP4_QT01.Areas.Doctor.Helpers;
 
@@ -29,7 +30,8 @@ public class DoctorDb
 
     public DoctorDb(IConfiguration cfg)
     {
-        _cs = cfg.GetConnectionString("DefaultConnection")
+        _cs = cfg.GetConnectionString("TelehealthContext")
+              ?? cfg.GetConnectionString("DefaultConnection")
               ?? cfg.GetSection("ConnectionStrings").GetChildren().FirstOrDefault()?.Value
               ?? throw new InvalidOperationException("Chưa cấu hình ConnectionStrings trong appsettings.json");
     }
@@ -77,9 +79,6 @@ public class DoctorDb
 
     private static SqlParameter P(string name, object? v) => new(name, v ?? DBNull.Value);
 
-    public static string Hash(string plain) =>
-        Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(plain)));   // chữ HOA, khớp dữ liệu trong bảng Accounts
-
     // ---------- đăng nhập / hồ sơ ----------
     public int? FindDoctorIdByEmail(string email) =>
         Scalar("SELECT DoctorID FROM Accounts WHERE Email=@e AND Role='Doctor' AND IsActive=1 AND DoctorID IS NOT NULL", P("@e", email)) is int id ? id : null;
@@ -115,8 +114,9 @@ public class DoctorDb
     public bool ChangePassword(int doctorId, string current, string next)
     {
         var stored = Scalar("SELECT PasswordHash FROM Accounts WHERE DoctorID=@d AND Role='Doctor'", P("@d", doctorId)) as string;
-        if (stored == null || !string.Equals(stored, Hash(current), StringComparison.OrdinalIgnoreCase)) return false;
-        Exec("UPDATE Accounts SET PasswordHash=@h WHERE DoctorID=@d AND Role='Doctor'", P("@h", Hash(next)), P("@d", doctorId));
+        var passwords = new Pbkdf2PasswordService();
+        if (stored == null || passwords.Verify(stored, current) == PasswordVerifyResult.Failed) return false;
+        Exec("UPDATE Accounts SET PasswordHash=@h WHERE DoctorID=@d AND Role='Doctor'", P("@h", passwords.Hash(next)), P("@d", doctorId));
         return true;
     }
 
@@ -343,14 +343,4 @@ public class DoctorDb
         }
     }
 
-    /// <summary>Kiểm tra email + mật khẩu của tài khoản bác sĩ. Trả về DoctorID nếu đúng.</summary>
-    public int? Authenticate(string email, string password)
-    {
-        var rows = Query("SELECT AccountID, DoctorID, PasswordHash FROM Accounts WHERE Email=@e AND Role='Doctor' AND IsActive=1 AND DoctorID IS NOT NULL",
-            r => (Account: I(r, "AccountID"), Doctor: I(r, "DoctorID"), Hash: S(r, "PasswordHash") ?? ""), P("@e", email.Trim()));
-        var row = rows.FirstOrDefault();
-        if (rows.Count == 0 || !string.Equals(row.Hash, Hash(password), StringComparison.OrdinalIgnoreCase)) return null;
-        Exec("UPDATE Accounts SET LastLogin=GETDATE() WHERE AccountID=@a", P("@a", row.Account));
-        return row.Doctor;
-    }
 }

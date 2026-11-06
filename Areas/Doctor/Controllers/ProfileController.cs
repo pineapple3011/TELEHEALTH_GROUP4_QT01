@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Mvc;
 using TELEHEALTH_GROUP4_QT01.Areas.Doctor.Models;
+using TELEHEALTH_GROUP4_QT01.Security;
+using TELEHEALTH_GROUP4_QT01.Services;
 
 namespace TELEHEALTH_GROUP4_QT01.Areas.Doctor.Controllers;
 
@@ -16,8 +18,13 @@ public class ProfileController : DoctorBaseController
 {
     private static readonly string[] AllowedExt = { ".jpg", ".jpeg", ".png", ".webp" };
     private readonly IWebHostEnvironment _env;
+    private readonly IFileStorageService _files;
 
-    public ProfileController(IConfiguration cfg, IWebHostEnvironment env) : base(cfg) => _env = env;
+    public ProfileController(IConfiguration cfg, IWebHostEnvironment env, IFileStorageService files) : base(cfg)
+    {
+        _env = env;
+        _files = files;
+    }
 
     public IActionResult Index() => View(new ProfilePageVm { Doctor = Me, Stats = Db.GetStats(DoctorId) });
 
@@ -29,9 +36,8 @@ public class ProfileController : DoctorBaseController
         string? avatarUrl = null;
         if (input.Avatar is { Length: > 0 })
         {
-            var ext = Path.GetExtension(input.Avatar.FileName).ToLowerInvariant();
-            if (!AllowedExt.Contains(ext)) ModelState.AddModelError("Input.Avatar", "Chỉ nhận ảnh .jpg, .png, .webp");
-            else if (input.Avatar.Length > 2 * 1024 * 1024) ModelState.AddModelError("Input.Avatar", "Ảnh tối đa 2MB");
+            var avatarError = await _files.ValidateAvatarAsync(input.Avatar);
+            if (avatarError != null) ModelState.AddModelError("Input.Avatar", avatarError);
         }
         if (!ModelState.IsValid) return View(new ProfileEditVm { Doctor = Me, Input = input });
 
@@ -57,6 +63,12 @@ public class ProfileController : DoctorBaseController
         if (!ModelState.IsValid)
         {
             Fail(string.Join(" ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)));
+            return RedirectToAction(nameof(Edit));
+        }
+        var policyError = PasswordPolicy.Validate(pw.NewPassword, Me.Email);
+        if (policyError != null)
+        {
+            Fail(policyError);
             return RedirectToAction(nameof(Edit));
         }
         if (Db.ChangePassword(DoctorId, pw.CurrentPassword, pw.NewPassword)) Success("Đã đổi mật khẩu.");

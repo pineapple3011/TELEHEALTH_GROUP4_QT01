@@ -22,7 +22,8 @@ namespace TELEHEALTH_GROUP4_QT01.Areas.Admin.Controllers
 
             var vm = new RevenueVm
             {
-                From = f, To = t,
+                From = f,
+                To = t,
                 Total = paid.Sum(x => x.Amount),
                 Count = paid.Count
             };
@@ -56,10 +57,10 @@ namespace TELEHEALTH_GROUP4_QT01.Areas.Admin.Controllers
                     Method = p.PaymentMethod,
                     Patient = p.Appoint.Patient.FullName,
                     Doctor = p.Appoint.Doctor.FullName,
-                    ReceiptUrl = _context.AppointmentFiles
+                    ReceiptFileId = _context.AppointmentFiles
                         .Where(x => x.AppointId == p.AppointId && x.FileType == "Biên lai")
                         .OrderByDescending(x => x.FileId)
-                        .Select(x => x.FilePath).FirstOrDefault()
+                        .Select(x => (int?)x.FileId).FirstOrDefault()
                 }).ToListAsync();
             vm.PendingAmount = vm.Pending.Sum(x => x.Amount);
 

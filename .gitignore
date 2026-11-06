@@ -6,3 +6,5 @@
 *.user
 *.userosscache
 *.sln.docstates
+# Telehealth: file bệnh nhân tải lên (dữ liệu nhạy cảm) – KHÔNG commit
+PrivateUploads/

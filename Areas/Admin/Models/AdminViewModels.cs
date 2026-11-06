@@ -195,7 +195,7 @@ namespace TELEHEALTH_GROUP4_QT01.Areas.Admin.Models
         public string Patient { get; set; } = "";
         public string Doctor { get; set; } = "";
         public string Method { get; set; } = "";
-        public string? ReceiptUrl { get; set; }
+        public int? ReceiptFileId { get; set; }
     }
 
     public class RevenueItem

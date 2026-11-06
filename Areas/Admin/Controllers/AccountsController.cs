@@ -6,6 +6,8 @@ using Microsoft.EntityFrameworkCore;
 using TELEHEALTH_GROUP4_QT01.Areas.Admin.Models;
 using TELEHEALTH_GROUP4_QT01.Helpers;
 using TELEHEALTH_GROUP4_QT01.Models;
+using TELEHEALTH_GROUP4_QT01.Security;
+using TELEHEALTH_GROUP4_QT01.Services;
 
 namespace TELEHEALTH_GROUP4_QT01.Areas.Admin.Controllers
 {
@@ -15,15 +17,26 @@ namespace TELEHEALTH_GROUP4_QT01.Areas.Admin.Controllers
         private readonly TelehealthContext _context;
         private readonly IWebHostEnvironment _env;
 
-        // Băm mật khẩu bằng SHA256, xuất chuỗi hex chữ HOA (64 ký tự).
-        // Phải trùng với DoctorDb.Hash ở phân hệ bác sĩ và dữ liệu có sẵn trong bảng Accounts.
-        private static string HashPassword(string plain) =>
-            Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(plain)));
+        private readonly IPasswordService _passwords;
+        private readonly IFileStorageService _files;
 
-        public AccountsController(TelehealthContext context, IWebHostEnvironment env)
+        // Mật khẩu băm bằng PBKDF2 (có salt) qua IPasswordService – thay cho SHA-256 không salt trước đây.
+        private string HashPassword(string plain) => _passwords.Hash(plain);
+
+        public AccountsController(TelehealthContext context, IWebHostEnvironment env, IPasswordService passwords, IFileStorageService files)
         {
             _context = context;
             _env = env;
+            _passwords = passwords;
+            _files = files;
+        }
+
+        // Kiểm tra chính sách mật khẩu ở server khi admin tạo / đặt lại mật khẩu (bỏ qua nếu để trống = giữ mật khẩu cũ)
+        private void CheckPassword(string? password, string? email)
+        {
+            if (string.IsNullOrWhiteSpace(password)) return;
+            var err = PasswordPolicy.Validate(password, email?.Trim().ToLowerInvariant());
+            if (err != null) ModelState.AddModelError("Password", err);
         }
 
         public IActionResult Index() => RedirectToAction(nameof(Patients));
@@ -65,6 +78,7 @@ namespace TELEHEALTH_GROUP4_QT01.Areas.Admin.Controllers
             if (string.IsNullOrWhiteSpace(vm.Password))
                 ModelState.AddModelError(nameof(vm.Password), "Vui lòng nhập mật khẩu cho tài khoản mới");
             await CheckPatientEmailAsync(vm);
+            CheckPassword(vm.Password, vm.Email);
             if (!ModelState.IsValid) return View("PatientForm", vm);
 
             var patient = new Patient
@@ -116,6 +130,7 @@ namespace TELEHEALTH_GROUP4_QT01.Areas.Admin.Controllers
             if (p == null) return NotFound();
 
             await CheckPatientEmailAsync(vm);
+            CheckPassword(vm.Password, vm.Email);
             var acc = p.Accounts.FirstOrDefault();
             if (acc == null && string.IsNullOrWhiteSpace(vm.Password))
                 ModelState.AddModelError(nameof(vm.Password), "Bệnh nhân này chưa có tài khoản đăng nhập, vui lòng nhập mật khẩu để tạo");
@@ -142,8 +157,16 @@ namespace TELEHEALTH_GROUP4_QT01.Areas.Admin.Controllers
             else
             {
                 acc.Email = p.Email;
-                acc.IsActive = vm.IsActive;
-                if (!string.IsNullOrWhiteSpace(vm.Password)) acc.PasswordHash = HashPassword(vm.Password);
+                if (acc.IsActive != vm.IsActive)
+                {
+                    acc.IsActive = vm.IsActive;
+                    acc.SecurityStamp = Guid.NewGuid().ToString("N");   // khoá/mở khoá => vô hiệu mọi phiên cũ
+                }
+                if (!string.IsNullOrWhiteSpace(vm.Password))
+                {
+                    acc.PasswordHash = HashPassword(vm.Password);
+                    acc.SecurityStamp = Guid.NewGuid().ToString("N");   // đăng xuất mọi phiên đang mở của tài khoản này
+                }
             }
             await _context.SaveChangesAsync();
 
@@ -221,6 +244,7 @@ namespace TELEHEALTH_GROUP4_QT01.Areas.Admin.Controllers
             if (string.IsNullOrWhiteSpace(vm.Password))
                 ModelState.AddModelError(nameof(vm.Password), "Vui lòng nhập mật khẩu cho tài khoản mới");
             await CheckDoctorAsync(vm);
+            CheckPassword(vm.Password, vm.Email);
             if (!ModelState.IsValid)
             {
                 vm.Specs = await SpecItemsAsync(vm.SpecId);
@@ -284,6 +308,7 @@ namespace TELEHEALTH_GROUP4_QT01.Areas.Admin.Controllers
             if (d == null) return NotFound();
 
             await CheckDoctorAsync(vm);
+            CheckPassword(vm.Password, vm.Email);
             var acc = d.Accounts.FirstOrDefault();
             if (acc == null && string.IsNullOrWhiteSpace(vm.Password))
                 ModelState.AddModelError(nameof(vm.Password), "Bác sĩ này chưa có tài khoản đăng nhập, vui lòng nhập mật khẩu để tạo");
@@ -316,8 +341,16 @@ namespace TELEHEALTH_GROUP4_QT01.Areas.Admin.Controllers
             else
             {
                 acc.Email = d.Email;
-                acc.IsActive = vm.IsActive;
-                if (!string.IsNullOrWhiteSpace(vm.Password)) acc.PasswordHash = HashPassword(vm.Password);
+                if (acc.IsActive != vm.IsActive)
+                {
+                    acc.IsActive = vm.IsActive;
+                    acc.SecurityStamp = Guid.NewGuid().ToString("N");   // khoá/mở khoá => vô hiệu mọi phiên cũ
+                }
+                if (!string.IsNullOrWhiteSpace(vm.Password))
+                {
+                    acc.PasswordHash = HashPassword(vm.Password);
+                    acc.SecurityStamp = Guid.NewGuid().ToString("N");   // đăng xuất mọi phiên đang mở của tài khoản này
+                }
             }
             await _context.SaveChangesAsync();
 
@@ -358,9 +391,9 @@ namespace TELEHEALTH_GROUP4_QT01.Areas.Admin.Controllers
                 ModelState.AddModelError(nameof(vm.SpecId), "Chuyên khoa không tồn tại");
             if (vm.AvatarFile is { Length: > 0 })
             {
-                var ext = Path.GetExtension(vm.AvatarFile.FileName).ToLowerInvariant();
-                if (!AvatarExt.Contains(ext)) ModelState.AddModelError(nameof(vm.AvatarFile), "Ảnh phải là JPG, PNG hoặc WEBP");
-                else if (vm.AvatarFile.Length > 2 * 1024 * 1024) ModelState.AddModelError(nameof(vm.AvatarFile), "Ảnh tối đa 2MB");
+                // Kiểm tra cả nội dung thật của ảnh (magic bytes), không chỉ đuôi file
+                var avatarError = await _files.ValidateAvatarAsync(vm.AvatarFile);
+                if (avatarError != null) ModelState.AddModelError(nameof(vm.AvatarFile), avatarError);
             }
         }
 

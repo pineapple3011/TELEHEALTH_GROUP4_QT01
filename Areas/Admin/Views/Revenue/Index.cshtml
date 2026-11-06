@@ -121,7 +121,7 @@
                         <td>@p.Doctor</td>
                         <td class="num">@Cv.Money(p.Amount)</td>
                         <td>
-                            @if (!string.IsNullOrWhiteSpace(p.ReceiptUrl)) { <a href="@p.ReceiptUrl" target="_blank" rel="noopener">Xem biên lai</a> }
+                            @if (p.ReceiptFileId != null) { <a href="@Url.Action("Download", "Files", new { area = "", id = p.ReceiptFileId })" target="_blank" rel="noopener">Xem biên lai</a> }
                             else { <span class="ad-hint">Chưa có ảnh</span> }
                         </td>
                         <td class="act">
