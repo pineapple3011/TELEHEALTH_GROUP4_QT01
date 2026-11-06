@@ -22,6 +22,8 @@
     :root {
         --ap-navy: #1d2b4f;
         --ap-bar: #2b4c7e;
+        --ap-head: #dce8f7;        /* nền tiêu đề 4 khối (xanh nhạt) */
+        --ap-head-text: #1d2b4f;   /* chữ tiêu đề 4 khối */
         --ap-blue: #0056b3;
         --ap-teal: #2c9d8f;
         --ap-line: #e6ecf2;
@@ -183,8 +185,9 @@
         justify-content: space-between;
         gap: 10px;
         padding: 14px 22px;
-        background: var(--ap-bar);
-        color: #fff;
+        background: var(--ap-head);
+        color: var(--ap-head-text);
+        border-bottom: 1px solid #c8d9ee;
         font-weight: 700;
         font-size: 15px;
         letter-spacing: .5px;
@@ -196,28 +199,28 @@
             font-weight: 600;
             letter-spacing: 0;
             text-transform: none;
-            color: #9fd3ff;
+            color: var(--ap-blue);
         }
 
             .detail-card-head a.more:hover {
-                color: #fff;
+                color: var(--ap-navy);
             }
 
-        /* badge trạng thái nằm trong header tối */
+        /* badge trạng thái nằm trong header sáng */
         .detail-card-head .st {
-            color: #fff;
+            color: var(--ap-head-text);
         }
 
             .detail-card-head .st::before {
-                background: #ffd27f;
+                background: #f0a500;
             }
 
             .detail-card-head .st.done {
-                color: #7fe9d6;
+                color: #138a7a;
             }
 
                 .detail-card-head .st.done::before {
-                    background: #7fe9d6;
+                    background: #1aa38f;
                 }
 
     .detail-card-body {
@@ -709,7 +712,7 @@
                     <span>Hồ sơ bệnh án &amp; đơn thuốc</span>
                     @if (Model.HasRecord)
                     {
-                        <button type="button" class="btn btn-outline-light btn-sm font-weight-bold" style="border-radius:8px" onclick="$('#rxModal').modal('show')">In đơn thuốc</button>
+                        <button type="button" class="btn btn-outline-primary btn-sm font-weight-bold" style="border-radius:8px" onclick="$('#rxModal').modal('show')">In đơn thuốc</button>
                     }
                 </div>
                 <div class="detail-card-body">
