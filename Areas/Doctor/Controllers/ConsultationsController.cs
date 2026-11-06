@@ -33,8 +33,9 @@ public class ConsultationsController : DoctorBaseController
         };
     }
 
-    public IActionResult Exam(int id)
+    public IActionResult Exam(int id, bool embed = false)
     {
+        ViewBag.Embed = embed;
         var vm = BuildVm(id);
         if (vm == null) return NotFound();
         if (vm.Appointment.IsCancelled || vm.Appointment.IsPending)
@@ -46,8 +47,9 @@ public class ConsultationsController : DoctorBaseController
     }
 
     [HttpPost, ValidateAntiForgeryToken]
-    public IActionResult Save(ExamInput input, string mode = "draft")
+    public IActionResult Save(ExamInput input, string mode = "draft", bool embed = false)
     {
+        ViewBag.Embed = embed;
         input.Items ??= new();
         input.Diagnosis = (input.Diagnosis ?? "").Trim();
 
@@ -86,6 +88,8 @@ public class ConsultationsController : DoctorBaseController
         if (err != null) { Fail(err); return RedirectToAction("Index", "Appointments"); }
 
         Success(mode == "complete" ? "Đã hoàn thành ca khám và lưu bệnh án." : "Đã lưu nháp bệnh án.");
+        if (embed) return RedirectToAction(nameof(Exam), new { id = input.AppointId, embed = true });
+
         return mode == "complete"
             ? RedirectToAction("Details", "Appointments", new { id = input.AppointId })
             : RedirectToAction(nameof(Exam), new { id = input.AppointId });

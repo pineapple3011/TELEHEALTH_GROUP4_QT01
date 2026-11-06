@@ -2,6 +2,7 @@
     var doc = ViewBag.Doctor as DoctorProfile;
     var curCtrl = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
     var curAct = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
+    var embed = ViewBag.Embed == true;   // trang đang nhúng trong iframe: ẩn menu/banner/footer
 }
 <!DOCTYPE html>
 <html lang="vi">
@@ -106,6 +107,8 @@
 </head>
 
 <body>
+    @if (!embed)
+    {
     <div class="preloader d-flex align-items-center justify-content-center">
         <div class="preloader-circle"></div>
         <div class="preloader-img">
@@ -259,6 +262,8 @@
         </div>
     </div>
 
+    }
+
     <!-- Nội dung -->
     <div class="container mt-3" style="max-width:1140px">
         @if (TempData["Msg"] != null)
@@ -281,6 +286,8 @@
         @RenderBody()
     </div>
 
+    @if (!embed)
+    {
     <!-- Footer -->
     <footer class="footer-area bg-img" style="background-image: url(@Url.Content("~/img/bg-img/3.jpg"));">
         <div class="main-footer-area">
@@ -335,6 +342,7 @@
             </div>
         </div>
     </footer>
+    }
 
     <script src="~/js/jquery/jquery-2.2.4.min.js"></script>
     <script src="~/js/bootstrap/popper.min.js"></script>

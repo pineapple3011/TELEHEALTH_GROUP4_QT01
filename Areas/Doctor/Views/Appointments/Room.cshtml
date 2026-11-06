@@ -7,6 +7,7 @@
     var roomName = $"telehealth-tk-{Model.AppointId:D5}-x7k2";
     var roomUrl = $"https://meet.jit.si/{roomName}";
     var examUrl = Url.Action("Exam", "Consultations", new { id = Model.AppointId });
+    var examEmbedUrl = Url.Action("Exam", "Consultations", new { id = Model.AppointId, embed = true });
 }
 
 <style>
@@ -59,7 +60,7 @@
         <div class="col-xl-5" id="examCol">
             <div class="exam-frame-wrap mb-3">
                 <div class="exam-frame-head"><span><i class="fa fa-stethoscope text-primary"></i> Bệnh án &amp; đơn thuốc</span></div>
-                <iframe id="examFrame" src="@examUrl" title="Bệnh án"></iframe>
+                <iframe id="examFrame" src="@examEmbedUrl" title="Bệnh án"></iframe>
             </div>
         </div>
     </div>
@@ -73,27 +74,13 @@
                 roomName: "@roomName",
                 parentNode: document.querySelector('#jitsiBox'),
                 height: 600,
-                userInfo: { displayName: "@(me?.FullName ?? "Bác sĩ")" },
+                userInfo: { displayName: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(me?.FullName ?? "Bác sĩ")) },
                 configOverwrite: { prejoinPageEnabled: false },
                 interfaceConfigOverwrite: { SHOW_JITSI_WATERMARK: false }
             });
 
             api.addListener('readyToClose', function () {
                 window.location.href = '@Url.Action("Details", new { id = Model.AppointId })';
-            });
-
-            // Trang bệnh án nhúng trong khung: ẩn phần đầu trang, banner, chân trang cho gọn
-            var frame = document.getElementById('examFrame');
-            frame.addEventListener('load', function () {
-                try {
-                    var d = frame.contentDocument;
-                    var st = d.createElement('style');
-                    st.textContent = '.preloader,.header-area,.subpage-banner,.footer-area{display:none !important}' +
-                                     'body{padding-top:0 !important;background:#fff}' +
-                                     '#main-content{min-height:0 !important}' +
-                                     '#main-content > .container{max-width:100% !important;margin-top:12px !important}';
-                    d.head.appendChild(st);
-                } catch (e) { /* khác origin thì bỏ qua */ }
             });
 
             // Nút ẩn/hiện bệnh án: ẩn thì video rộng toàn màn hình

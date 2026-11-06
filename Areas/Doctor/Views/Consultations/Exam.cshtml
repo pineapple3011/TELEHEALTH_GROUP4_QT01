@@ -4,68 +4,227 @@
     var a = Model.Appointment;
     var p = Model.Patient;
     var readOnlyNote = a.IsCompleted;
+    var embed = ViewBag.Embed == true;
 }
 
-<div class="container my-4" style="min-height: 55vh;">
-    <div class="d-flex flex-wrap align-items-center justify-content-between mb-3">
-        <a asp-controller="Appointments" asp-action="Index" asp-route-date="@a.Date.ToString("yyyy-MM-dd")" class="btn btn-outline-secondary btn-sm"><i class="fa fa-arrow-left"></i> Về ca khám trong ngày</a>
+<style>
+    .ex-page {
+        --ex-navy: #1f3a6e; --ex-navy-dark: #162b54; --ex-soft: #f3f6fb; --ex-line: #dde4ee;
+        --ex-text: #2b3445; --ex-muted: #6b7689;
+        padding-top: 24px; padding-bottom: 32px; color: var(--ex-text); font-size: 14px;
+    }
+    .ex-page.ex-embed { padding-top: 14px; padding-bottom: 14px; }
+
+    /* Thanh thông tin ca khám */
+    .ex-bar { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px;
+              padding: 12px 18px; margin-bottom: 16px; background: #fff; border: 1px solid var(--ex-line);
+              border-left: 4px solid var(--ex-navy); border-radius: 8px; }
+    .ex-bar-code { font-size: 16px; font-weight: 700; color: var(--ex-navy); letter-spacing: .3px; }
+    .ex-bar-sub { font-size: 13px; color: var(--ex-muted); margin-left: 10px; }
+    .ex-back { display: inline-block; margin-bottom: 10px; font-size: 13px; font-weight: 600; color: var(--ex-navy); text-decoration: none; }
+    .ex-back:hover { text-decoration: underline; color: var(--ex-navy-dark); }
+
+    .ex-tag { display: inline-block; padding: 3px 10px; border-radius: 4px; font-size: 12px; font-weight: 600; line-height: 1.4; }
+    .ex-tag-active { background: #e4ecf8; color: var(--ex-navy); }
+    .ex-tag-done { background: #eceff3; color: #4a5568; }
+    .ex-tag-danger { background: #fdecec; color: #b42318; }
+
+    .ex-note { padding: 10px 14px; margin-bottom: 16px; font-size: 13px; background: var(--ex-soft);
+               border-left: 4px solid var(--ex-navy); border-radius: 4px; }
+
+    /* Khối nội dung */
+    .ex-section { background: #fff; border: 1px solid var(--ex-line); border-radius: 8px; margin-bottom: 16px; overflow: hidden; }
+    .ex-section-head { display: flex; justify-content: space-between; align-items: center; padding: 11px 18px;
+                       background: var(--ex-soft); border-bottom: 1px solid var(--ex-line); }
+    .ex-page .ex-section-title { margin: 0; font-size: 12.5px; font-weight: 700; letter-spacing: .6px; text-transform: uppercase; color: var(--ex-navy); line-height: 1.4; }
+    .ex-count { font-size: 12.5px; font-weight: 600; color: var(--ex-navy); }
+    .ex-section-body { padding: 18px; }
+
+    /* Danh sách thông tin */
+    .ex-patient-name { font-size: 17px; font-weight: 700; color: var(--ex-navy); margin-bottom: 8px; }
+    .ex-row { display: flex; justify-content: space-between; gap: 14px; padding: 9px 0; border-bottom: 1px solid #edf0f5; }
+    .ex-row:last-child { border-bottom: 0; padding-bottom: 0; }
+    .ex-row .k { color: var(--ex-muted); flex-shrink: 0; }
+    .ex-row .v { font-weight: 600; text-align: right; word-break: break-word; }
+
+    /* Form */
+    .ex-label { display: block; margin-bottom: 6px; font-size: 13px; font-weight: 600; color: #3a4558; }
+    .ex-page .form-control { border: 1px solid #cdd6e3; border-radius: 6px; font-size: 14px; color: var(--ex-text); box-shadow: none; }
+    .ex-page input.form-control, .ex-page select.form-control { height: 40px; }
+    .ex-page input.form-control-sm, .ex-page select.form-control-sm { height: 34px; font-size: 13px; }
+    .ex-page textarea.form-control { height: auto; min-height: 140px; line-height: 1.6; }
+    .ex-page .form-control:focus { border-color: var(--ex-navy); box-shadow: 0 0 0 3px rgba(31,58,110,.12); }
+
+    /* Nút */
+    .ex-btn { display: inline-block; padding: 9px 20px; border-radius: 6px; border: 1px solid var(--ex-navy); font-family: inherit;
+              font-size: 14px; font-weight: 600; line-height: 1.4; cursor: pointer; transition: background .15s, color .15s; }
+    .ex-btn-primary { background: var(--ex-navy); color: #fff; }
+    .ex-btn-primary:hover { background: var(--ex-navy-dark); border-color: var(--ex-navy-dark); }
+    .ex-btn-outline { background: #fff; color: var(--ex-navy); }
+    .ex-btn-outline:hover { background: var(--ex-soft); }
+    .ex-link-remove { background: none; border: 0; padding: 4px 6px; font-size: 13px; font-weight: 600; color: #b42318; cursor: pointer; }
+    .ex-link-remove:hover { text-decoration: underline; }
+
+    .ex-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px; padding: 14px 18px;
+                  background: #fff; border: 1px solid var(--ex-line); border-radius: 8px; }
+    .ex-embed .ex-actions { position: sticky; bottom: 8px; z-index: 5; box-shadow: 0 -6px 16px rgba(31,58,110,.10); }
+
+    /* Bảng thuốc */
+    .ex-picker { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 10px; margin-bottom: 16px; }
+    .ex-picker .grow { flex: 1; min-width: 200px; }
+    .ex-table { width: 100%; border-collapse: collapse; }
+    .ex-table th { padding: 10px 12px; background: var(--ex-soft); border-bottom: 2px solid #d3dbe9; text-align: left;
+                   font-size: 12px; font-weight: 700; letter-spacing: .4px; text-transform: uppercase; color: var(--ex-navy); }
+    .ex-table td { padding: 8px 12px; border-bottom: 1px solid #edf0f5; vertical-align: middle; }
+    .ex-table select[data-f=MedicineId] { pointer-events: none; -webkit-appearance: none; appearance: none; background: transparent;
+                                          border-color: transparent; padding-left: 0; font-weight: 600; color: var(--ex-navy); }
+</style>
+
+<div class="@(embed ? "px-3 ex-embed" : "container") ex-page">
+
+    @if (!embed)
+    {
+        <a asp-controller="Appointments" asp-action="Index" asp-route-date="@a.Date.ToString("yyyy-MM-dd")" class="ex-back">&larr; Về ca khám trong ngày</a>
+    }
+
+    <div class="ex-bar">
         <div>
-            <span class="font-weight-bold mr-2">@a.Code</span>
-            @if (a.IsCompleted) { <span class="badge badge-soft-turquoise rounded-pill px-3 py-1">Đã khám xong</span> }
-            else { <span class="badge badge-soft-success rounded-pill px-3 py-1">Đang khám</span> }
+            <span class="ex-bar-code">@a.Code</span>
+            <span class="ex-bar-sub">@a.TimeText &middot; @a.Date.ToString("dd/MM/yyyy")</span>
         </div>
+        @if (a.IsCompleted) { <span class="ex-tag ex-tag-done">Đã khám xong</span> }
+        else { <span class="ex-tag ex-tag-active">Đang khám</span> }
     </div>
 
     @if (readOnlyNote)
     {
-        <div class="alert alert-info small shadow-sm"><i class="fa fa-info-circle"></i> Ca này đã hoàn thành. Bạn vẫn có thể chỉnh sửa bệnh án và đơn thuốc, mọi thay đổi sẽ được lưu lại.</div>
+        <div class="ex-note">Ca này đã hoàn thành. Bạn vẫn có thể chỉnh sửa bệnh án và đơn thuốc, mọi thay đổi sẽ được lưu lại.</div>
     }
 
     <div class="row">
         <!-- Cột trái: bệnh nhân + tệp đính kèm -->
-        <div class="col-lg-4">
-            <div class="dr-card">
-                <div class="dr-card-title"><i class="fa fa-user"></i> Bệnh nhân</div>
-                <div class="dr-meta">
-                    <div class="mb-2"><b style="font-size:16px">@p.FullName</b></div>
-                    <div class="mb-1"><span class="lbl">Điện thoại:</span> @p.Phone</div>
-                    <div class="mb-1"><span class="lbl">Email:</span> @p.Email</div>
-                    <div class="mb-1"><span class="lbl">Địa chỉ:</span> @(p.Address ?? "-")</div>
-                    <div class="mb-0"><span class="lbl">SĐT người thân:</span> @(p.EmergencyPhone ?? "-")</div>
+        <div class="@(embed ? "col-12" : "col-lg-4")">
+            <section class="ex-section">
+                <div class="ex-section-head"><h3 class="ex-section-title">Thông tin bệnh nhân</h3></div>
+                <div class="ex-section-body">
+                    <div class="ex-patient-name">@p.FullName</div>
+                    <div class="ex-row"><span class="k">Điện thoại</span><span class="v">@p.Phone</span></div>
+                    <div class="ex-row"><span class="k">Email</span><span class="v">@p.Email</span></div>
+                    <div class="ex-row"><span class="k">Địa chỉ</span><span class="v">@(p.Address ?? "-")</span></div>
+                    <div class="ex-row"><span class="k">SĐT người thân</span><span class="v">@(p.EmergencyPhone ?? "-")</span></div>
                 </div>
-                <hr />
-                <div class="dr-meta">
-                    <div class="mb-1"><span class="lbl">Giờ hẹn:</span> <b class="text-success">@a.TimeText - @a.Date.ToString("dd/MM/yyyy")</b></div>
-                    <div class="mb-0"><span class="lbl">Hình thức:</span> <b>@a.BookingType</b>
-                        @if (a.BookingType == "Cấp cứu") { <span class="badge badge-soft-danger rounded-pill px-2 ml-1">Mức @(a.TriageLevel ?? "-")</span> }
+            </section>
+
+            <section class="ex-section">
+                <div class="ex-section-head"><h3 class="ex-section-title">Thông tin lịch hẹn</h3></div>
+                <div class="ex-section-body">
+                    <div class="ex-row"><span class="k">Giờ hẹn</span><span class="v">@a.TimeText - @a.Date.ToString("dd/MM/yyyy")</span></div>
+                    <div class="ex-row">
+                        <span class="k">Hình thức</span>
+                        <span class="v">
+                            @a.BookingType
+                            @if (a.BookingType == "Cấp cứu") { <span class="ex-tag ex-tag-danger ml-1">Mức @(a.TriageLevel ?? "-")</span> }
+                        </span>
                     </div>
                     @if (a.BookingType == "Cấp cứu" && !string.IsNullOrEmpty(a.EmergencyLocation))
                     {
-                        <div class="mt-1"><span class="lbl">Vị trí:</span> @a.EmergencyLocation</div>
+                        <div class="ex-row"><span class="k">Vị trí</span><span class="v">@a.EmergencyLocation</span></div>
                     }
                 </div>
-            </div>
+            </section>
 
-            <div class="dr-card">
-                <div class="dr-card-title"><i class="fa fa-paperclip"></i> Tệp bệnh nhân đính kèm (@Model.Files.Count)</div>
-                <partial name="_FileGrid" model="Model.Files" />
-            </div>
+            <section class="ex-section">
+                <div class="ex-section-head">
+                    <h3 class="ex-section-title">Tệp đính kèm</h3>
+                    <span class="ex-count">@Model.Files.Count tệp</span>
+                </div>
+                <div class="ex-section-body">
+                    <partial name="_FileGrid" model="Model.Files" />
+                </div>
+            </section>
         </div>
 
         <!-- Cột phải: form khám -->
-        <div class="col-lg-8">
+        <div class="@(embed ? "col-12" : "col-lg-8")">
             <form asp-action="Save" method="post" id="examForm">
                 <input type="hidden" name="AppointId" value="@a.AppointId" />
+                <input type="hidden" name="embed" value="@(ViewBag.Embed == true ? "true" : "false")" />
 
-                <partial name="_MedicalRecordForm" model="Model" />
-                <partial name="_PrescriptionTable" model="Model" />
+                <section class="ex-section">
+                    <div class="ex-section-head"><h3 class="ex-section-title">Bệnh án</h3></div>
+                    <div class="ex-section-body">
+                        <div class="form-group">
+                            <label class="ex-label" for="Diagnosis">Chẩn đoán &amp; kết luận <span class="text-danger">*</span></label>
+                            <textarea id="Diagnosis" name="Diagnosis" class="form-control" rows="6" maxlength="4000" required
+                                      placeholder="Triệu chứng, kết quả thăm khám, chẩn đoán và lời dặn cho bệnh nhân...">@Model.Input.Diagnosis</textarea>
+                        </div>
+                        <div class="form-group mb-0" style="max-width:240px">
+                            <label class="ex-label" for="FollowUpDate">Ngày tái khám (nếu có)</label>
+                            <input id="FollowUpDate" type="date" name="FollowUpDate" class="form-control"
+                                   min="@Model.Appointment.Date.ToString("yyyy-MM-dd")"
+                                   value="@(Model.Input.FollowUpDate?.ToString("yyyy-MM-dd"))" />
+                        </div>
+                    </div>
+                </section>
+                <section class="ex-section">
+                    <div class="ex-section-head">
+                        <h3 class="ex-section-title">Đơn thuốc</h3>
+                        <span class="ex-count"><span id="rxCount">0</span> thuốc</span>
+                    </div>
+                    <div class="ex-section-body">
+                        <div class="ex-picker">
+                            <div class="grow">
+                                <label class="ex-label" for="rxPicker">Chọn thuốc từ danh mục</label>
+                                <select id="rxPicker" class="form-control">
+                                    <option value="">-- Chọn thuốc --</option>
+                                    @foreach (var m in Model.Medicines)
+                                    {
+                                        <option value="@m.MedicineId" data-hds="@m.Hds">@m.Name</option>
+                                    }
+                                </select>
+                            </div>
+                            <button type="button" id="btnAddRx" class="ex-btn ex-btn-outline">Thêm thuốc</button>
+                        </div>
 
-                <div class="d-flex flex-wrap justify-content-end">
-                    <button type="submit" name="mode" value="draft" class="btn btn-outline-secondary font-weight-bold mr-2 mb-2">
-                        <i class="fa fa-floppy-o"></i> Lưu nháp
-                    </button>
-                    <button type="submit" name="mode" value="complete" class="btn btn-success font-weight-bold mb-2" id="btnComplete">
-                        <i class="fa fa-check-circle"></i> @(a.IsCompleted ? "Lưu thay đổi" : "Hoàn thành ca khám")
+                        <div class="table-responsive">
+                            <table class="ex-table">
+                                <thead>
+                                    <tr>
+                                        <th style="min-width:180px">Thuốc</th>
+                                        <th style="width:90px">Số lượng</th>
+                                        <th style="min-width:150px">Liều dùng</th>
+                                        <th style="min-width:200px">Hướng dẫn sử dụng</th>
+                                        <th style="width:60px"></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="rxBody"></tbody>
+                            </table>
+                        </div>
+                        <p id="rxEmpty" class="text-muted small text-center mt-3 mb-0">Chưa kê thuốc nào. Chọn thuốc ở trên rồi bấm "Thêm thuốc". Để trống nếu ca này không cần đơn.</p>
+
+                        <template id="rxRowTpl">
+                            <tr class="rx-row">
+                                <td>
+                                    <select data-f="MedicineId" class="form-control form-control-sm" tabindex="-1">
+                                        @foreach (var m in Model.Medicines)
+                                        {
+                                            <option value="@m.MedicineId">@m.Name</option>
+                                        }
+                                    </select>
+                                </td>
+                                <td><input data-f="Quantity" type="number" min="1" max="999" value="1" class="form-control form-control-sm" required /></td>
+                                <td><input data-f="Dosage" type="text" maxlength="100" class="form-control form-control-sm" placeholder="VD: 1 viên x 2 lần/ngày" required /></td>
+                                <td><input data-f="Hds" type="text" maxlength="255" class="form-control form-control-sm" placeholder="VD: Uống sau ăn" /></td>
+                                <td class="text-center"><button type="button" class="ex-link-remove rx-remove" title="Bỏ thuốc này">Xóa</button></td>
+                            </tr>
+                        </template>
+                    </div>
+                </section>
+
+                <div class="ex-actions">
+                    <button type="submit" name="mode" value="draft" class="ex-btn ex-btn-outline">Lưu nháp</button>
+                    <button type="submit" name="mode" value="complete" class="ex-btn ex-btn-primary" id="btnComplete">
+                        @(a.IsCompleted ? "Lưu thay đổi" : "Hoàn thành ca khám")
                     </button>
                 </div>
             </form>
