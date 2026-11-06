@@ -1,77 +1,283 @@
 @model TELEHEALTH_GROUP4_QT01.Models.ViewModels.PaymentVm
 @{
     ViewData["Title"] = $"Thanh toán lịch khám #TK-{Model.AppointId:D5}";
+
+    var hinhThucText = Model.HinhThuc == "Online" ? "Khám trực tuyến (Video Call)"
+        : Model.HinhThuc == "Cấp cứu" ? "Cấp cứu khẩn cấp"
+        : "Khám trực tiếp tại viện";
 }
 
 <style>
+    :root {
+        --ap-navy: #1d2b4f;
+        --ap-bar: #2b4c7e;
+        --ap-blue: #0056b3;
+        --ap-line: #e6ecf2;
+        --ap-muted: #6b7785;
+        /* Nếu tiêu đề trang dùng font riêng, thay inherit bằng font đó, VD: "Be Vietnam Pro", sans-serif */
+        --ap-font: inherit;
+    }
+
+    /* ===== Đồng bộ font (không đụng tới icon FontAwesome) ===== */
+    .ap-font,
+    .ap-font *:not(.fa):not(.fas):not(.far):not(i) {
+        font-family: var(--ap-font);
+    }
+
+    /* ===== Thẻ thông tin ===== */
+    .detail-card {
+        background: #fff;
+        border: 1px solid var(--ap-line);
+        border-radius: 16px;
+        margin-bottom: 22px;
+        overflow: hidden;
+        box-shadow: 0 4px 16px rgba(23,40,75,.03);
+    }
+
+    .detail-card-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 14px 22px;
+        background: var(--ap-bar);
+        color: #fff;
+        font-weight: 700;
+        font-size: 15px;
+        letter-spacing: .5px;
+        text-transform: uppercase;
+    }
+
+    .detail-card-body {
+        padding: 20px 22px;
+    }
+
+    .kv {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 18px;
+        padding: 11px 0;
+        border-bottom: 1px solid #eef2f6;
+        font-size: 14px;
+    }
+
+        .kv:last-child {
+            border-bottom: 0;
+        }
+
+        .kv .k {
+            color: var(--ap-muted);
+            flex-shrink: 0;
+        }
+
+        .kv .v {
+            font-weight: 700;
+            color: var(--ap-navy);
+            text-align: right;
+            word-break: break-word;
+        }
+
+            .kv .v.note {
+                color: #c0392b;
+            }
+
+    .soft-box {
+        background: #f4f8fc;
+        border-radius: 12px;
+        padding: 14px 16px;
+        font-size: 13.5px;
+        color: #44546b;
+    }
+
+        .soft-box b {
+            color: var(--ap-navy);
+        }
+
+    .sub-title {
+        font-size: 13.5px;
+        font-weight: 700;
+        letter-spacing: .5px;
+        text-transform: uppercase;
+        color: var(--ap-navy);
+        margin: 0 0 10px;
+        padding-left: 10px;
+        border-left: 3px solid var(--ap-blue);
+    }
+
+    /* ===== Tổng tiền ===== */
+    .pay-box {
+        background: #f4f8fc;
+        border-radius: 12px;
+        padding: 16px 18px;
+        margin-top: 14px;
+    }
+
+        .pay-box .lbl {
+            font-size: 13px;
+            color: var(--ap-muted);
+        }
+
+        .pay-box .amt {
+            font-size: 26px;
+            font-weight: 800;
+            color: var(--ap-navy);
+            margin: 2px 0 0;
+        }
+
+        .pay-box small {
+            color: var(--ap-muted);
+        }
+
+    /* ===== Khối QR ===== */
     .qr-card {
         background: #fff;
+        border: 1px solid var(--ap-line);
         border-radius: 16px;
-        border: 1px solid #e3e8ee;
-        box-shadow: 0 8px 30px rgba(0,0,0,0.06);
         overflow: hidden;
+        box-shadow: 0 4px 16px rgba(23,40,75,.03);
+        margin-bottom: 22px;
     }
 
     .qr-header {
-        background: linear-gradient(135deg, #1a2f23, #2c9d8f);
+        background: linear-gradient(135deg, #2b4c7e, #1f6fc2);
         color: #fff;
-        padding: 20px;
+        padding: 22px 24px;
         text-align: center;
     }
 
-    .qr-box {
-        background: #fbfdfc;
-        border: 2px dashed #0056b3;
-        border-radius: 16px;
-        padding: 16px;
-        display: inline-block;
-        margin: 15px auto;
+        .qr-header h5 {
+            color: #fff;
+            font-weight: 800;
+            letter-spacing: .4px;
+            margin: 12px 0 4px;
+        }
+
+        .qr-header small {
+            opacity: .92;
+            font-size: 13px;
+        }
+
+    .timer-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 13px;
+        font-weight: 700;
+        padding: 4px 14px;
+        border-radius: 999px;
+        background: rgba(255,255,255,.18);
     }
+
+        .timer-badge #countdown {
+            font-size: 14px;
+            font-weight: 800;
+            letter-spacing: 1px;
+        }
+
+    .qr-box {
+        background: #fff;
+        border: 1px solid var(--ap-line);
+        border-radius: 16px;
+        padding: 14px;
+        display: inline-block;
+        margin: 6px auto 20px;
+        box-shadow: 0 4px 16px rgba(23,40,75,.06);
+    }
+
+    .qr-box {
+        min-width: 282px;
+        min-height: 282px;
+    }
+
+    .qr-loading {
+        width: 250px;
+        height: 250px;
+        max-width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .bank-info {
+        text-align: left;
+        background: #f4f8fc;
+        border-radius: 12px;
+        padding: 6px 18px;
+        margin-bottom: 22px;
+    }
+
+        .bank-info .kv {
+            border-bottom-color: #e3ebf3;
+        }
+
+            .bank-info .kv:last-child {
+                border-bottom: 0;
+            }
 
     .copy-btn {
         cursor: pointer;
-        color: #0056b3;
-        background: #e8f5e9;
-        border: none;
+        color: var(--ap-blue);
+        background: #fff;
+        border: 1px solid #cfdcec;
         border-radius: 6px;
-        padding: 2px 8px;
-        font-size: 11px;
+        padding: 2px 10px;
+        font-size: 12px;
         font-weight: 700;
-        margin-left: 6px;
+        margin-left: 8px;
         transition: all .2s;
     }
 
         .copy-btn:hover {
-            background: #2c9d8f;
+            background: var(--ap-blue);
+            border-color: var(--ap-blue);
             color: #fff;
         }
 
-    .timer-badge {
-        font-size: 15px;
-        font-weight: 800;
-        background: rgba(255,255,255,0.2);
-        padding: 4px 14px;
-        border-radius: 20px;
-        display: inline-block;
-        letter-spacing: 1px;
+    .upload-box {
+        border-top: 1px solid var(--ap-line);
+        padding-top: 22px;
+        text-align: left;
     }
+
+        .upload-box .form-control-file {
+            border: 1px dashed #b9c9dc;
+            border-radius: 10px;
+            padding: 10px;
+            background: #fbfdff;
+            font-size: 14px;
+        }
+
+    .status-note {
+        text-align: left;
+        background: #eaf3fb;
+        border: 1px solid #d3e4f4;
+        border-radius: 14px;
+        padding: 14px 18px;
+        font-size: 14px;
+        color: #33415c;
+    }
+
+        .status-note i {
+            color: var(--ap-blue);
+            margin-right: 6px;
+        }
 </style>
 
-<div class="container my-4" style="min-height: 65vh;">
-    <!-- Breadcrumb -->
+<div class="container my-4 ap-font" style="min-height: 65vh;">
+    <!-- Tiêu đề -->
     <div class="mb-4">
-        <a asp-action="Details" asp-route-id="@Model.AppointId" class="text-success small font-weight-bold">
+        <a asp-action="Details" asp-route-id="@Model.AppointId" class="font-weight-bold small" style="color:var(--ap-blue)">
             &larr; Xem chi tiết ca khám
         </a>
-        <h3 class="font-weight-bold text-dark mt-1">
-            <i class="fa fa-qrcode text-success mr-2"></i> Cổng Thanh Toán Trực Tuyến VietQR
-        </h3>
+        <h3 class="font-weight-bold mt-1 mb-1" style="color:var(--ap-navy)">Cổng thanh toán trực tuyến VietQR</h3>
         <p class="text-muted small mb-0">Hoàn tất thanh toán để bệnh viện tự động xác nhận lịch hẹn của bạn.</p>
     </div>
 
     @if (TempData["Err"] != null)
     {
-        <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+        <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert" style="border-radius:12px">
             <i class="fa fa-exclamation-triangle mr-2"></i> @TempData["Err"]
             <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
@@ -80,125 +286,121 @@
     }
 
     <div class="row">
-        <!-- CỘT TRÁI: Tóm tắt đơn hàng & Thông tin ca khám -->
-        <div class="col-lg-5 mb-4">
-            <div class="card border-0 shadow-sm rounded-lg p-4 bg-white mb-4">
-                <h6 class="font-weight-bold text-dark mb-3 border-bottom pb-2">
-                    <i class="fa fa-receipt text-success mr-2"></i> Thông Tin Lịch Khám
-                </h6>
-
-                <div class="mb-3">
-                    <span class="text-muted small d-block">Mã lịch khám:</span>
-                    <span class="font-weight-bold text-dark" style="font-size:16px;">#TK-@Model.AppointId.ToString("D5")</span>
+        <!-- CỘT TRÁI: Tóm tắt lịch khám -->
+        <div class="col-lg-5">
+            <div class="detail-card">
+                <div class="detail-card-head">
+                    <span>Thông tin lịch khám</span>
                 </div>
+                <div class="detail-card-body">
+                    <div class="kv"><span class="k">Mã lịch khám</span><span class="v">#TK-@Model.AppointId.ToString("D5")</span></div>
+                    <div class="kv"><span class="k">Bác sĩ khám</span><span class="v">@Model.DoctorName</span></div>
+                    <div class="kv"><span class="k">Thời gian hẹn</span><span class="v">@Model.DateText lúc @Model.TimeText</span></div>
+                    <div class="kv"><span class="k">Hình thức khám</span><span class="v">@hinhThucText</span></div>
 
-                <div class="mb-3">
-                    <span class="text-muted small d-block">Bác sĩ khám:</span>
-                    <span class="font-weight-bold text-dark">@Model.DoctorName</span>
-                </div>
-
-                <div class="mb-3">
-                    <span class="text-muted small d-block">Thời gian hẹn:</span>
-                    <span class="font-weight-bold text-success">@Model.DateText lúc @Model.TimeText</span>
-                </div>
-
-                <div class="mb-3">
-                    <span class="text-muted small d-block">Hình thức khám:</span>
-                    <span class="badge badge-soft-primary px-3 py-1 font-weight-bold">@Model.HinhThuc</span>
-                </div>
-
-                <hr />
-
-                <div class="p-3 bg-light rounded">
-                    <span class="text-muted small d-block">@Model.LoaiGiaoDich:</span>
-                    <h3 class="font-weight-bold text-success mb-0">@Cv.Money(Model.Amount)</h3>
-                    <small class="text-muted">Đã bao gồm thuế GTGT &amp; bảo hiểm y tế số</small>
+                    <div class="pay-box">
+                        <div class="lbl">@Model.LoaiGiaoDich</div>
+                        <p class="amt">@Cv.Money(Model.Amount)</p>
+                        <small>Đã bao gồm thuế GTGT &amp; bảo hiểm y tế số</small>
+                    </div>
                 </div>
             </div>
 
-            <div class="card border-0 shadow-sm rounded-lg p-3 bg-white">
-                <h6 class="font-weight-bold small text-dark mb-2"><i class="fa fa-shield text-success"></i> Cam kết bảo mật &amp; an toàn:</h6>
-                <p class="small text-muted mb-0">Giao dịch được bảo vệ bởi tiêu chuẩn mã hóa PCI DSS và hệ thống Napas247 liên ngân hàng. Khoản tiền cọc được hoàn 100% nếu bạn hủy trước 24 giờ.</p>
+            <div class="detail-card">
+                <div class="detail-card-head">
+                    <span>Cam kết bảo mật &amp; an toàn</span>
+                </div>
+                <div class="detail-card-body">
+                    <div class="soft-box">
+                        Giao dịch được bảo vệ bởi tiêu chuẩn mã hóa PCI DSS và hệ thống Napas247 liên ngân hàng. Khoản tiền cọc được hoàn <b>100%</b> nếu bạn hủy trước 24 giờ.
+                    </div>
+                </div>
             </div>
         </div>
 
         <!-- CỘT PHẢI: Mã VietQR & Tải biên lai -->
-        <div class="col-lg-7 mb-4">
+        <div class="col-lg-7">
             <div class="qr-card">
                 <div class="qr-header">
-                    <div class="timer-badge mb-2">
-                        <i class="fa fa-clock-o mr-1"></i> Khung giờ được giữ chỗ: <span id="countdown">14:59</span>
-                    </div>
-                    <h5 class="text-white font-weight-bold mb-0">QUÉT MÃ VIETQR ĐỂ THANH TOÁN</h5>
-                    <small class="text-light opacity-90">Mở bất kỳ ứng dụng ngân hàng hoặc ví điện tử để quét mã tự động điền</small>
+                    
+                    <h5>QUÉT MÃ VIETQR ĐỂ THANH TOÁN</h5>
+                    <small>Mở bất kỳ ứng dụng ngân hàng hoặc ví điện tử để quét mã, thông tin sẽ tự động điền</small>
                 </div>
 
                 <div class="p-4 text-center">
                     <div class="qr-box">
-                        <img src="@Model.QrUrl" alt="Mã VietQR" style="max-width: 250px; width: 100%;" class="rounded" />
+                        <div class="qr-loading" id="qrLoading">
+                            <div class="spinner-border text-primary" role="status"></div>
+                            <div class="small text-muted mt-2">Đang tạo mã QR...</div>
+                        </div>
+                        <img id="qrImg" src="@Model.QrUrl" alt="Mã VietQR" class="rounded" style="display:none; max-width: 250px; width: 100%;"
+                             onload="document.getElementById('qrLoading').style.display='none'; this.style.display='block';"
+                             onerror="document.getElementById('qrLoading').style.display='none'; document.getElementById('qrError').style.display='block';" />
+                        <div id="qrError" class="qr-loading" style="display:none">
+                            <div class="small text-muted mb-2">Không tải được mã QR.</div>
+                            <button type="button" class="copy-btn" onclick="reloadQr()">Tải lại mã</button>
+                        </div>
                     </div>
 
-                    <!-- Bảng thông tin chuyển khoản chi tiết kèm nút copy -->
-                    <div class="text-left bg-light p-3 rounded mb-4" style="font-size: 14px;">
-                        <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
-                            <span class="text-muted">Ngân hàng thụ hưởng:</span>
-                            <span class="font-weight-bold text-dark">@Model.BankId (Ngân hàng Quốc Dân)</span>
+                    <!-- Thông tin chuyển khoản kèm nút sao chép -->
+                    <div class="bank-info">
+                        <div class="kv">
+                            <span class="k">Ngân hàng thụ hưởng</span>
+                            <span class="v">@Model.BankId (Ngân hàng Quốc Dân)</span>
                         </div>
-                        <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
-                            <span class="text-muted">Số tài khoản:</span>
+                        <div class="kv">
+                            <span class="k">Số tài khoản</span>
                             <div>
-                                <span class="font-weight-bold text-dark" id="txtAccNo">@Model.AccountNo</span>
-                                <button type="button" class="copy-btn" onclick="copyText('@Model.AccountNo')">Sao chép</button>
+                                <span class="v" id="txtAccNo">@Model.AccountNo</span>
+                                <button type="button" class="copy-btn" onclick="copyText('@Model.AccountNo', this)">Sao chép</button>
                             </div>
                         </div>
-                        <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
-                            <span class="text-muted">Chủ tài khoản:</span>
-                            <span class="font-weight-bold text-dark">@Model.AccountName</span>
+                        <div class="kv">
+                            <span class="k">Chủ tài khoản</span>
+                            <span class="v">@Model.AccountName</span>
                         </div>
-                        <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
-                            <span class="text-muted">Số tiền chuyển:</span>
+                        <div class="kv">
+                            <span class="k">Số tiền chuyển</span>
                             <div>
-                                <span class="font-weight-bold text-success" id="txtAmount">@Cv.Money(Model.Amount)</span>
-                                <button type="button" class="copy-btn" onclick="copyText('@((long)Model.Amount)')">Sao chép</button>
+                                <span class="v" id="txtAmount">@Cv.Money(Model.Amount)</span>
+                                <button type="button" class="copy-btn" onclick="copyText('@((long)Model.Amount)', this)">Sao chép</button>
                             </div>
                         </div>
-                        <div class="d-flex justify-content-between align-items-center py-2">
-                            <span class="text-muted">Nội dung chuyển khoản:</span>
+                        <div class="kv">
+                            <span class="k">Nội dung chuyển khoản</span>
                             <div>
-                                <span class="font-weight-bold text-danger" id="txtNote">@Model.TransferNote</span>
-                                <button type="button" class="copy-btn" onclick="copyText('@Model.TransferNote')">Sao chép</button>
+                                <span class="v note" id="txtNote">@Model.TransferNote</span>
+                                <button type="button" class="copy-btn" onclick="copyText('@Model.TransferNote', this)">Sao chép</button>
                             </div>
                         </div>
                     </div>
 
                     @if (Model.CanUpload)
                     {
-                        <div class="border-top pt-4 text-left">
-                            <h6 class="font-weight-bold text-dark mb-2">
-                                <i class="fa fa-upload text-success mr-1"></i> Tải Lên Ảnh Chụp Biên Lai Chuyển Khoản:
-                            </h6>
+                        <div class="upload-box">
+                            <div class="sub-title">Tải lên ảnh chụp biên lai chuyển khoản</div>
                             <p class="small text-muted mb-3">Sau khi chuyển khoản thành công trên app ngân hàng, vui lòng chụp màn hình và tải lên để được duyệt ca khám nhanh nhất.</p>
 
                             <form asp-action="Pay" asp-route-id="@Model.AppointId" method="post" enctype="multipart/form-data">
                                 @Html.AntiForgeryToken()
                                 <div class="form-group mb-3">
-                                    <input type="file" name="receipt" accept=".jpg,.jpeg,.png,.pdf" class="form-control-file border p-2 rounded" required onchange="previewReceipt(this)" />
+                                    <input type="file" name="receipt" accept=".jpg,.jpeg,.png,.pdf" class="form-control-file" required onchange="previewReceipt(this)" />
                                     <div id="receiptPreview" class="mt-2" style="display: none;">
                                         <img id="receiptImg" src="#" alt="Xem trước biên lai" style="max-height: 120px; border-radius: 8px;" class="border shadow-sm" />
                                     </div>
                                 </div>
-                                <button type="submit" class="btn btn-success btn-block py-2 font-weight-bold shadow">
-                                    <i class="fa fa-check-circle mr-1"></i> Xác nhận &amp; Gửi biên lai thanh toán
+                                <button type="submit" class="btn btn-primary btn-block py-2 font-weight-bold" style="border-radius:10px">
+                                    Xác nhận &amp; gửi biên lai thanh toán
                                 </button>
                             </form>
                         </div>
                     }
                     else
                     {
-                        <div class="alert alert-info text-left p-3 mb-0">
-                            <i class="fa fa-info-circle mr-1"></i> <b>Trạng thái: @Model.TrangThaiGiaoDich</b>. Bạn đã gửi biên lai thanh toán, hệ thống bệnh viện đang kiểm tra và sẽ gửi thông báo xác nhận trong ít phút.
-                            <div class="mt-2">
-                                <a asp-action="Details" asp-route-id="@Model.AppointId" class="btn btn-outline-primary btn-sm">Xem chi tiết lịch hẹn</a>
+                        <div class="status-note">
+                            <i class="fa fa-info-circle"></i> <b>Trạng thái: @Model.TrangThaiGiaoDich</b>. Bạn đã gửi biên lai thanh toán, hệ thống bệnh viện đang kiểm tra và sẽ gửi thông báo xác nhận trong ít phút.
+                            <div class="mt-3">
+                                <a asp-action="Details" asp-route-id="@Model.AppointId" class="btn btn-outline-secondary btn-sm font-weight-bold" style="border-radius:8px">Xem chi tiết lịch hẹn</a>
                             </div>
                         </div>
                     }
@@ -210,10 +412,22 @@
 
 @section Scripts {
     <script>
-        function copyText(val) {
+        function copyText(val, btn) {
             navigator.clipboard.writeText(val).then(function() {
-                alert("Đã sao chép: " + val);
+                if (btn) {
+                    var old = btn.innerText;
+                    btn.innerText = "Đã chép";
+                    setTimeout(function() { btn.innerText = old; }, 1500);
+                }
             });
+        }
+
+        function reloadQr() {
+            var img = document.getElementById('qrImg');
+            document.getElementById('qrError').style.display = 'none';
+            document.getElementById('qrLoading').style.display = 'flex';
+            var base = img.src.split('#')[0];
+            img.src = base + (base.indexOf('?') > -1 ? '&' : '?') + 't=' + Date.now();
         }
 
         function previewReceipt(input) {
@@ -227,20 +441,7 @@
             }
         }
 
-        // Countdown timer 15:00
-        var timeLeft = 15 * 60;
-        var timerEl = document.getElementById('countdown');
-        var timer = setInterval(function() {
-            timeLeft--;
-            var mins = Math.floor(timeLeft / 60);
-            var secs = timeLeft % 60;
-            if (timerEl) {
-                timerEl.innerText = (mins < 10 ? '0' : '') + mins + ':' + (secs < 10 ? '0' : '') + secs;
-            }
-            if (timeLeft <= 0) {
-                clearInterval(timer);
-                if (timerEl) timerEl.innerText = "Hết hạn giữ chỗ";
-            }
-        }, 1000);
+        // Đếm ngược giữ chỗ 15:00
+        
     </script>
 }

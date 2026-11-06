@@ -3,82 +3,337 @@
     ViewData["Title"] = "Chi tiết ca khám";
     var a = Model.Appointment;
     var p = Model.Patient;
+
+    var statusText = a.IsPending ? "Chờ xác nhận" : a.IsConfirmed ? "Đã xác nhận" : a.IsCompleted ? "Đã khám xong" : "Đã hủy";
+    var statusCls = a.IsCancelled ? "cancelled" : "";
+    var stClass = a.IsCancelled ? "cancelled" : a.IsCompleted ? "done" : a.IsConfirmed ? "confirmed" : "pending";
+    var dotColor = a.IsCompleted ? "#7fe9d6" : "#ffffff";
+
+    var hinhThucText = a.BookingType == "Online" ? "Khám trực tuyến (Video Call)"
+        : a.BookingType == "Cấp cứu" ? "Cấp cứu khẩn cấp"
+        : "Khám trực tiếp tại viện";
 }
 
-<div class="container my-4" style="min-height: 55vh;">
-    <div class="d-flex flex-wrap align-items-center justify-content-between mb-3">
-        <a asp-action="Index" asp-route-date="@a.Date.ToString("yyyy-MM-dd")" class="btn btn-outline-secondary btn-sm"><i class="fa fa-arrow-left"></i> Quay lại danh sách</a>
-        <div class="dr-btn-group">
+<style>
+    :root {
+        --ap-navy: #1d2b4f;
+        --ap-bar: #2b4c7e;
+        --ap-blue: #0056b3;
+        --ap-line: #e6ecf2;
+        --ap-muted: #6b7785;
+        /* Nếu tiêu đề trang dùng font riêng, thay inherit bằng font đó, VD: "Be Vietnam Pro", sans-serif */
+        --ap-font: inherit;
+    }
+
+    /* ===== Đồng bộ font (không đụng tới icon FontAwesome) ===== */
+    .ap-font,
+    .ap-font *:not(.fa):not(.fas):not(.far):not(i) {
+        font-family: var(--ap-font);
+    }
+
+    /* ===== Banner ===== */
+    .dt-banner {
+        background: linear-gradient(135deg, #2b4c7e, #1f6fc2);
+        border-radius: 18px;
+        padding: 28px 32px;
+        color: #fff;
+        margin-bottom: 22px;
+        box-shadow: 0 10px 28px rgba(0,86,179,.18);
+    }
+
+        .dt-banner .code {
+            display: inline-block;
+            font-size: 12.5px;
+            font-weight: 700;
+            letter-spacing: .6px;
+            padding: 4px 14px;
+            border-radius: 999px;
+            background: rgba(255,255,255,.18);
+            margin-right: 10px;
+        }
+
+        .dt-banner .status {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            padding: 4px 14px;
+            border-radius: 999px;
+            background: rgba(255,255,255,.18);
+        }
+
+            .dt-banner .status.cancelled {
+                background: #b3261e;
+            }
+
+            .dt-banner .status::before {
+                content: "";
+                width: 8px;
+                height: 8px;
+                border-radius: 50%;
+                background: var(--dot, #fff);
+            }
+
+        .dt-banner h3 {
+            color: #fff;
+            font-weight: 800;
+            margin: 14px 0 6px;
+        }
+
+        .dt-banner .sub {
+            opacity: .92;
+            font-size: 14px;
+            margin: 0;
+        }
+
+    /* ===== Thẻ thông tin ===== */
+    .detail-card {
+        background: #fff;
+        border: 1px solid var(--ap-line);
+        border-radius: 16px;
+        margin-bottom: 22px;
+        overflow: hidden;
+        box-shadow: 0 4px 16px rgba(23,40,75,.03);
+    }
+
+    .detail-card-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 14px 22px;
+        background: var(--ap-bar);
+        color: #fff;
+        font-weight: 700;
+        font-size: 15px;
+        letter-spacing: .5px;
+        text-transform: uppercase;
+    }
+
+    .detail-card-body {
+        padding: 20px 22px;
+    }
+
+    .kv {
+        display: flex;
+        justify-content: space-between;
+        gap: 18px;
+        padding: 11px 0;
+        border-bottom: 1px solid #eef2f6;
+        font-size: 14px;
+    }
+
+        .kv:last-child {
+            border-bottom: 0;
+        }
+
+        .kv .k {
+            color: var(--ap-muted);
+            flex-shrink: 0;
+        }
+
+        .kv .v {
+            font-weight: 700;
+            color: var(--ap-navy);
+            text-align: right;
+            word-break: break-word;
+        }
+
+            .kv .v.danger {
+                color: #c0392b;
+            }
+
+    /* Trạng thái dạng chấm + chữ */
+    .st {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13.5px;
+        font-weight: 700;
+        color: #44546b;
+        white-space: nowrap;
+    }
+
+        .st::before {
+            content: "";
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #aab4c0;
+        }
+
+        .st.done {
+            color: #138a7a;
+        }
+
+            .st.done::before {
+                background: #1aa38f;
+            }
+
+        .st.confirmed::before {
+            background: #0056b3;
+        }
+
+        .st.cancelled {
+            color: #c0392b;
+        }
+
+            .st.cancelled::before {
+                background: #c0392b;
+            }
+
+        .st.warning {
+            color: #9a6a00;
+        }
+
+            .st.warning::before {
+                background: #e0a100;
+            }
+
+    .pay-box {
+        background: #f4f8fc;
+        border-radius: 12px;
+        padding: 16px 18px;
+        margin-bottom: 8px;
+    }
+
+        .pay-box .lbl {
+            font-size: 13px;
+            color: var(--ap-muted);
+        }
+
+        .pay-box .amt {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--ap-navy);
+            margin: 2px 0 0;
+        }
+
+    .empty-text {
+        color: var(--ap-muted);
+        font-size: 14px;
+        margin: 0;
+    }
+
+    .toolbar .btn {
+        font-weight: 600;
+        border-radius: 8px;
+    }
+</style>
+
+<div class="container my-4 ap-font" style="min-height: 55vh;">
+    <!-- Thanh công cụ -->
+    <div class="d-flex flex-wrap align-items-center justify-content-between mb-3 toolbar">
+        <a asp-action="Index" asp-route-date="@a.Date.ToString("yyyy-MM-dd")" class="btn btn-link pl-0 font-weight-bold" style="color:var(--ap-blue)">&larr; Quay lại danh sách</a>
+        <div class="mt-2 mt-md-0">
             @if (a.IsPending)
             {
-                <form asp-action="Confirm" asp-route-id="@a.AppointId" asp-route-date="@a.Date.ToString("yyyy-MM-dd")" method="post" class="d-inline"><button class="btn btn-success">Xác nhận ca</button></form>
+                <form asp-action="Confirm" asp-route-id="@a.AppointId" asp-route-date="@a.Date.ToString("yyyy-MM-dd")" method="post" class="d-inline"><button class="btn btn-primary btn-sm px-3">Xác nhận ca</button></form>
             }
             @if (a.IsConfirmed && a.BookingType == "Online")
             {
-                <a asp-action="Room" asp-route-id="@a.AppointId" class="btn btn-outline-primary"><i class="fa fa-video-camera"></i> Vào phòng khám online</a>
+                <a asp-action="Room" asp-route-id="@a.AppointId" class="btn btn-outline-primary btn-sm px-3 ml-1"><i class="fa fa-video-camera"></i> Vào phòng khám online</a>
             }
-            @if (a.IsConfirmed) { <a asp-controller="Consultations" asp-action="Exam" asp-route-id="@a.AppointId" class="btn btn-primary">Bắt đầu khám</a> }
-            @if (a.IsCompleted) { <a asp-controller="Consultations" asp-action="Exam" asp-route-id="@a.AppointId" class="btn btn-outline-turquoise">Xem / sửa bệnh án</a> }
+            @if (a.IsConfirmed)
+            {
+                <a asp-controller="Consultations" asp-action="Exam" asp-route-id="@a.AppointId" class="btn btn-primary btn-sm px-3 ml-1">Bắt đầu khám</a>
+            }
+            @if (a.IsCompleted)
+            {
+                <a asp-controller="Consultations" asp-action="Exam" asp-route-id="@a.AppointId" class="btn btn-outline-secondary btn-sm px-3 ml-1">Xem / sửa bệnh án</a>
+            }
         </div>
+    </div>
+
+    <!-- Banner -->
+    <div class="dt-banner">
+        <div>
+            <span class="code">MÃ CA @a.Code</span>
+            <span class="status @statusCls" style="--dot:@dotColor">@statusText</span>
+        </div>
+        <h3>Lịch hẹn lúc @a.TimeText - @a.Date.ToString("dd/MM/yyyy")</h3>
+        <p class="sub">Bệnh nhân: <b>@p.FullName</b> &bull; Hình thức: <b>@hinhThucText</b></p>
     </div>
 
     <div class="row">
         <div class="col-lg-6">
-            <div class="dr-card">
-                <div class="dr-card-title"><i class="fa fa-ticket"></i> Thông tin ca khám @a.Code</div>
-                <div class="dr-meta">
-                    <div class="mb-2"><span class="lbl">Ngày khám:</span> <b>@a.Date.ToString("dd/MM/yyyy")</b></div>
-                    <div class="mb-2"><span class="lbl">Giờ hẹn:</span> <b class="text-success">@a.TimeText</b></div>
-                    <div class="mb-2"><span class="lbl">Hình thức:</span> <b>@a.BookingType</b></div>
-                    @if (!string.IsNullOrEmpty(a.ClinicName)) { <div class="mb-2"><span class="lbl">Phòng khám:</span> <b>@a.ClinicName</b></div> }
+            <!-- Thông tin ca khám -->
+            <div class="detail-card">
+                <div class="detail-card-head">
+                    <span>Thông tin ca khám @a.Code</span>
+                </div>
+                <div class="detail-card-body">
+                    <div class="kv"><span class="k">Ngày khám</span><span class="v">@a.Date.ToString("dd/MM/yyyy")</span></div>
+                    <div class="kv"><span class="k">Giờ hẹn</span><span class="v">@a.TimeText</span></div>
+                    <div class="kv"><span class="k">Hình thức</span><span class="v">@a.BookingType</span></div>
+                    @if (!string.IsNullOrEmpty(a.ClinicName))
+                    {
+                        <div class="kv"><span class="k">Phòng khám</span><span class="v">@a.ClinicName</span></div>
+                    }
                     @if (a.BookingType == "Cấp cứu")
                     {
-                        <div class="mb-2"><span class="lbl">Vị trí cấp cứu:</span> <b>@(a.EmergencyLocation ?? "-")</b></div>
-                        <div class="mb-2"><span class="lbl">Phân loại:</span> <b class="text-danger">Mức @(a.TriageLevel ?? "-")</b></div>
+                        <div class="kv"><span class="k">Vị trí cấp cứu</span><span class="v">@(a.EmergencyLocation ?? "-")</span></div>
+                        <div class="kv"><span class="k">Phân loại</span><span class="v danger">Mức @(a.TriageLevel ?? "-")</span></div>
                     }
-                    <div class="mb-0"><span class="lbl">Trạng thái:</span>
-                        @if (a.IsPending) { <span class="badge badge-soft-warning rounded-pill px-3">Chờ xác nhận</span> }
-                        else if (a.IsConfirmed) { <span class="badge badge-soft-success rounded-pill px-3">Đã xác nhận</span> }
-                        else if (a.IsCompleted) { <span class="badge badge-soft-turquoise rounded-pill px-3">Đã khám xong</span> }
-                        else { <span class="badge badge-soft-danger rounded-pill px-3">Đã hủy</span> }
+                    <div class="kv">
+                        <span class="k">Trạng thái</span>
+                        <span class="v">
+                            <span class="st @stClass">@statusText</span>
+                        </span>
                     </div>
                 </div>
             </div>
 
-            <div class="dr-card">
-                <div class="dr-card-title"><i class="fa fa-money"></i> Thanh toán</div>
-                @if (Model.Payment == null)
-                {
-                    <p class="text-muted mb-0">Chưa có giao dịch cho ca khám này.</p>
-                }
-                else
-                {
-                    <div class="dr-meta">
-                        <div class="mb-2"><span class="lbl">Số tiền:</span> <b>@Model.Payment.Amount.ToString("N0") đ</b></div>
-                        <div class="mb-2"><span class="lbl">Phương thức:</span> <b>@Model.Payment.Method</b></div>
-                        <div class="mb-0"><span class="lbl">Trạng thái:</span>
-                            <span class="badge @(Model.Payment.Status == "Đã thanh toán" ? "badge-soft-success" : "badge-soft-warning") rounded-pill px-3">@Model.Payment.Status</span>
+            <!-- Thanh toán -->
+            <div class="detail-card">
+                <div class="detail-card-head">
+                    <span>Thanh toán</span>
+                </div>
+                <div class="detail-card-body">
+                    @if (Model.Payment == null)
+                    {
+                        <p class="empty-text">Chưa có giao dịch cho ca khám này.</p>
+                    }
+                    else
+                    {
+                        <div class="pay-box">
+                            <div class="lbl">Số tiền</div>
+                            <p class="amt">@Model.Payment.Amount.ToString("N0") đ</p>
                         </div>
-                    </div>
-                }
+                        <div class="kv"><span class="k">Phương thức</span><span class="v">@Model.Payment.Method</span></div>
+                        <div class="kv">
+                            <span class="k">Trạng thái</span>
+                            <span class="v"><span class="st @(Model.Payment.Status == "Đã thanh toán" ? "done" : "warning")">@Model.Payment.Status</span></span>
+                        </div>
+                    }
+                </div>
             </div>
         </div>
 
         <div class="col-lg-6">
-            <div class="dr-card">
-                <div class="dr-card-title"><i class="fa fa-user"></i> Bệnh nhân</div>
-                <div class="dr-meta">
-                    <div class="mb-2"><span class="lbl">Họ tên:</span> <b>@p.FullName</b></div>
-                    <div class="mb-2"><span class="lbl">Điện thoại:</span> <b>@p.Phone</b></div>
-                    <div class="mb-2"><span class="lbl">Email:</span> <b>@p.Email</b></div>
-                    <div class="mb-2"><span class="lbl">Địa chỉ:</span> <b>@(p.Address ?? "-")</b></div>
-                    <div class="mb-0"><span class="lbl">SĐT người thân:</span> <b>@(p.EmergencyPhone ?? "-")</b></div>
+            <!-- Bệnh nhân -->
+            <div class="detail-card">
+                <div class="detail-card-head">
+                    <span>Bệnh nhân</span>
+                </div>
+                <div class="detail-card-body">
+                    <div class="kv"><span class="k">Họ tên</span><span class="v">@p.FullName</span></div>
+                    <div class="kv"><span class="k">Điện thoại</span><span class="v">@p.Phone</span></div>
+                    <div class="kv"><span class="k">Email</span><span class="v">@p.Email</span></div>
+                    <div class="kv"><span class="k">Địa chỉ</span><span class="v">@(p.Address ?? "-")</span></div>
+                    <div class="kv"><span class="k">SĐT người thân</span><span class="v">@(p.EmergencyPhone ?? "-")</span></div>
                 </div>
             </div>
 
-            <div class="dr-card">
-                <div class="dr-card-title"><i class="fa fa-paperclip"></i> Tệp bệnh nhân đính kèm (@Model.Files.Count)</div>
-                <partial name="_FileGrid" model="Model.Files" />
+            <!-- Tệp đính kèm -->
+            <div class="detail-card">
+                <div class="detail-card-head">
+                    <span>Tệp bệnh nhân đính kèm (@Model.Files.Count)</span>
+                </div>
+                <div class="detail-card-body">
+                    <partial name="_FileGrid" model="Model.Files" />
+                </div>
             </div>
         </div>
     </div>

@@ -20,254 +20,382 @@
 
 <style>
     :root {
-        --ab-blue: #0056b3;
         --ab-navy: #1d2b4f;
-        --ab-soft: #eaf3fa;
+        --ab-bar: #2b4c7e;
+        --ab-blue: #0056b3;
+        --ab-line: #e6ecf2;
+        --ab-muted: #6b7785;
+        --ab-soft: #f4f8fc;
+        --ap-font: inherit;
     }
 
-    .ab-h {
-        color: var(--ab-blue);
-        font-weight: 700;
-        text-transform: uppercase;
+    /* ===== Đồng bộ font (không đụng tới icon FontAwesome) ===== */
+    .ap-font,
+    .ap-font *:not(.fa):not(.fas):not(.far):not(i) {
+        font-family: var(--ap-font);
     }
 
     .ab-sec {
-        padding: 56px 0;
+        padding: 44px 0;
     }
 
         .ab-sec.soft {
             background: var(--ab-soft);
+            border-top: 1px solid var(--ab-line);
+            border-bottom: 1px solid var(--ab-line);
         }
 
-    .ab-center {
-        text-align: center;
+    /* ===== Tiêu đề khối ===== */
+    .ab-title {
+        margin-bottom: 26px;
     }
 
-    .ab-lead {
-        color: #5a6472;
-    }
-
-    /* Về chúng tôi */
-    .ab-about {
-        display: flex;
-        gap: 40px;
-        align-items: center;
-        flex-wrap: wrap;
-    }
-
-        .ab-about .txt {
-            flex: 1 1 380px;
+        .ab-title .kicker {
+            display: inline-block;
+            font-size: 12.5px;
+            font-weight: 700;
+            letter-spacing: .8px;
+            text-transform: uppercase;
+            color: var(--ab-blue);
+            background: #e6effa;
+            padding: 4px 14px;
+            border-radius: 999px;
+            margin-bottom: 10px;
         }
 
-        .ab-about .panel {
-            flex: 1 1 320px;
-            border-radius: 16px;
-            padding: 28px;
+        .ab-title h2 {
+            font-size: 1.7rem;
+            font-weight: 800;
+            color: var(--ab-navy);
+            margin: 0 0 6px;
+        }
+
+        .ab-title p {
+            color: var(--ab-muted);
+            margin: 0;
+            max-width: 640px;
+        }
+
+        .ab-title.center {
+            text-align: center;
+        }
+
+            .ab-title.center p {
+                margin: 0 auto;
+            }
+
+    /* ===== Thẻ có header thanh xanh ===== */
+    .ab-card {
+        background: #fff;
+        border: 1px solid var(--ab-line);
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 4px 16px rgba(23,40,75,.04);
+        height: 100%;
+    }
+
+    .ab-card-head {
+        padding: 14px 22px;
+        background: var(--ab-bar);
+        color: #fff;
+        font-weight: 700;
+        font-size: 15px;
+        letter-spacing: .5px;
+        text-transform: uppercase;
+    }
+
+    .ab-card-body {
+        padding: 22px;
+    }
+
+    /* ===== Hero ===== */
+    .ab-hero {
+        position: relative;
+        overflow: hidden;
+        background: linear-gradient(135deg, #2b4c7e, #1f6fc2);
+        color: #fff;
+        padding: 56px 0;
+    }
+
+        .ab-hero::before, .ab-hero::after {
+            content: "";
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255,255,255,.07);
+        }
+
+        .ab-hero::before {
+            width: 380px;
+            height: 380px;
+            right: -90px;
+            top: -140px;
+        }
+
+        .ab-hero::after {
+            width: 240px;
+            height: 240px;
+            left: 38%;
+            bottom: -130px;
+        }
+
+        .ab-hero .container {
+            position: relative;
+            z-index: 1;
+        }
+
+        .ab-hero .tag {
+            display: inline-block;
+            font-size: 12.5px;
+            font-weight: 700;
+            letter-spacing: .8px;
+            text-transform: uppercase;
+            padding: 4px 14px;
+            border-radius: 999px;
+            background: rgba(255,255,255,.18);
+            margin-bottom: 16px;
+        }
+
+        .ab-hero h1 {
             color: #fff;
-            background: linear-gradient(135deg, #1f3a6e, #2c9d8f);
+            font-size: 2.1rem;
+            font-weight: 800;
+            line-height: 1.25;
+            margin: 0 0 14px;
         }
 
-            .ab-about .panel .row-i {
+        .ab-hero p {
+            opacity: .93;
+            font-size: 1.02rem;
+            max-width: 560px;
+            margin-bottom: 24px;
+        }
+
+        .ab-hero .btn-light {
+            color: var(--ab-blue);
+            font-weight: 700;
+            border-radius: 10px;
+            padding: 10px 26px;
+        }
+
+        .ab-hero .btn-outline-light {
+            font-weight: 700;
+            border-radius: 10px;
+            padding: 10px 26px;
+        }
+
+    .hero-stats {
+        background: rgba(255,255,255,.12);
+        border: 1px solid rgba(255,255,255,.22);
+        border-radius: 16px;
+        padding: 8px 22px;
+    }
+
+        .hero-stats .hs {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px 0;
+            border-bottom: 1px solid rgba(255,255,255,.2);
+        }
+
+            .hero-stats .hs:last-child {
+                border-bottom: 0;
+            }
+
+            .hero-stats .hs i {
+                width: 46px;
+                height: 46px;
+                border-radius: 12px;
                 display: flex;
                 align-items: center;
-                gap: 14px;
-                padding: 12px 0;
-                border-bottom: 1px solid rgba(255,255,255,.25);
+                justify-content: center;
+                font-size: 20px;
+                background: rgba(255,255,255,.18);
+                flex-shrink: 0;
             }
 
-                .ab-about .panel .row-i:last-child {
-                    border-bottom: 0;
-                }
-
-                .ab-about .panel .row-i i {
-                    font-size: 1.6rem;
-                    width: 34px;
-                    text-align: center;
-                }
-
-                .ab-about .panel .row-i b {
-                    display: block;
-                }
-
-                .ab-about .panel .row-i span {
-                    font-size: .85rem;
-                    opacity: .9;
-                }
-
-    /* Tại sao chọn */
-    .ab-why {
-        display: flex;
-        gap: 20px;
-        flex-wrap: wrap;
-        margin-top: 28px;
-    }
-
-        .ab-why .c {
-            flex: 1 1 260px;
-            background: #fff;
-            border: 1px solid var(--ab-blue);
-            border-radius: 12px;
-            padding: 22px;
-        }
-
-            .ab-why .c i {
-                font-size: 1.8rem;
-                color: var(--ab-blue);
-                margin-bottom: 10px;
-            }
-
-            .ab-why .c h6 {
-                font-weight: 700;
-                text-transform: uppercase;
-                color: var(--ab-navy);
-            }
-
-            .ab-why .c p {
-                margin: 0;
-                color: #5a6472;
-                font-size: .92rem;
-            }
-
-    /* Thanh số liệu */
-    .ab-pill {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        flex-wrap: wrap;
-        gap: 20px;
-        background: linear-gradient(90deg, #1f3a6e, #2f568f);
-        color: #fff;
-        border-radius: 70px;
-        padding: 26px 44px;
-    }
-
-        .ab-pill .st {
-            text-align: left;
-        }
-
-            .ab-pill .st .n {
-                font-size: 2.6rem;
-                font-weight: 700;
+            .hero-stats .hs .n {
+                font-size: 1.9rem;
+                font-weight: 800;
                 line-height: 1;
             }
 
-            .ab-pill .st .l {
+            .hero-stats .hs .l {
                 font-size: .85rem;
                 opacity: .9;
+                margin-top: 3px;
             }
 
-        .ab-pill .btn-w {
-            background: #fff;
-            color: var(--ab-blue);
-            border-radius: 30px;
-            padding: 10px 28px;
-            font-weight: 600;
+    /* ===== Về chúng tôi ===== */
+    .ab-points {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+        margin: 20px 0 22px;
+    }
+
+        .ab-points .pt {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            background: var(--ab-soft);
+            border: 1px solid var(--ab-line);
+            border-radius: 12px;
+            padding: 12px 14px;
+            font-size: .92rem;
+            color: #3c4858;
         }
 
-    /* Danh sách dịch vụ */
-    .sv-grid {
+            .ab-points .pt i {
+                color: var(--ab-blue);
+                margin-top: 3px;
+            }
+
+    .ab-photo {
+        position: relative;
+        border-radius: 12px;
+        overflow: hidden;
+        margin-bottom: 14px;
+    }
+
+        .ab-photo img {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .ab-photo .cap {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            padding: 24px 16px 10px;
+            font-size: .85rem;
+            color: #fff;
+            background: linear-gradient(transparent, rgba(20,40,80,.75));
+        }
+
+    .ab-svc-row {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 12px 0;
+        border-bottom: 1px solid #eef2f6;
+    }
+
+        .ab-svc-row:last-child {
+            border-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .ab-svc-row .ic {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            background: #e6effa;
+            color: var(--ab-blue);
+            flex-shrink: 0;
+        }
+
+        .ab-svc-row b {
+            display: block;
+            color: var(--ab-navy);
+            font-size: .95rem;
+        }
+
+        .ab-svc-row span {
+            font-size: .85rem;
+            color: var(--ab-muted);
+        }
+
+    /* ===== Quy trình ===== */
+    .ab-steps {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
-        grid-auto-rows: 120px;
-        gap: 14px;
-        grid-auto-flow: dense;
-        margin-top: 28px;
+        gap: 16px;
     }
 
-    .sv-card {
-        border: 1px solid var(--ab-blue);
-        border-radius: 12px;
-        background: #fff;
-        padding: 16px;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-    }
-
-        .sv-card:hover {
-            background: #f3f8ff;
+        .ab-steps .s {
+            position: relative;
+            background: #fff;
+            border: 1px solid var(--ab-line);
+            border-radius: 14px;
+            padding: 22px 20px;
+            box-shadow: 0 4px 16px rgba(23,40,75,.03);
         }
 
-        .sv-card .top {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            gap: 8px;
-        }
+            .ab-steps .s .no {
+                width: 38px;
+                height: 38px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: 800;
+                color: #fff;
+                background: linear-gradient(135deg, #2b4c7e, #1f6fc2);
+                margin-bottom: 14px;
+            }
 
-        .sv-card .nm {
-            font-weight: 700;
-            text-transform: uppercase;
-            font-size: .9rem;
-            color: var(--ab-navy);
-        }
+            .ab-steps .s h6 {
+                font-weight: 700;
+                color: var(--ab-navy);
+                margin-bottom: 6px;
+            }
 
-        .sv-card .ico {
-            font-size: 1.9rem;
-            color: var(--ab-blue);
-        }
+            .ab-steps .s p {
+                margin: 0;
+                font-size: .9rem;
+                color: var(--ab-muted);
+            }
 
-        .sv-card .meta {
-            font-size: .8rem;
-            color: #6c757d;
-        }
-
-    .sv-mosaic .sv-card:nth-child(6n+1) {
-        grid-row: span 3;
-    }
-
-    .sv-mosaic .sv-card:nth-child(6n+2) {
-        grid-row: span 2;
-    }
-
-    .sv-mosaic .sv-card:nth-child(6n+5) {
-        grid-column: span 2;
-    }
-
-    .sv-mosaic .sv-card:nth-child(6n+1) .ico {
-        font-size: 3.2rem;
-    }
-
-    @@media (max-width: 991px) {
-        .sv-grid {
-            grid-template-columns: repeat(2, 1fr);
-        }
-
-        .sv-mosaic .sv-card {
-            grid-row: auto !important;
-            grid-column: auto !important;
-        }
-    }
-
-    @@media (max-width: 575px) {
-        .sv-grid {
-            grid-template-columns: 1fr;
-        }
-
-        .ab-pill {
-            border-radius: 24px;
-            padding: 22px;
-        }
-    }
-
-    /* Thanh tỷ lệ */
+    /* ===== Thanh tỷ lệ ===== */
     .ab-bar {
-        margin-bottom: 20px;
+        margin-bottom: 18px;
     }
+
+        .ab-bar:last-child {
+            margin-bottom: 0;
+        }
 
     .ab-bar-head {
         display: flex;
         justify-content: space-between;
         align-items: baseline;
         margin-bottom: 6px;
+        font-size: .95rem;
     }
 
-        .ab-bar-head .name, .ab-bar-head .pct {
-            font-weight: 600;
+        .ab-bar-head .name {
+            font-weight: 700;
+            color: var(--ab-navy);
+        }
+
+            .ab-bar-head .name .rk {
+                display: inline-block;
+                width: 22px;
+                height: 22px;
+                line-height: 22px;
+                text-align: center;
+                font-size: 12px;
+                border-radius: 6px;
+                background: #e6effa;
+                color: var(--ab-blue);
+                margin-right: 8px;
+            }
+
+        .ab-bar-head .pct {
+            font-weight: 700;
+            color: var(--ab-navy);
         }
 
         .ab-bar-head .cnt {
-            color: #6c757d;
+            color: var(--ab-muted);
             font-size: .85em;
             margin-left: 6px;
             font-weight: 500;
@@ -275,135 +403,561 @@
 
     .ab-track {
         height: 10px;
-        background: #dfe6ee;
+        background: #e3ebf3;
         border-radius: 6px;
         overflow: hidden;
     }
 
     .ab-fill {
         height: 100%;
-        background: var(--ab-blue);
+        background: linear-gradient(90deg, #2b4c7e, #1f6fc2);
         border-radius: 6px;
+    }
+
+    /* ===== Số liệu hệ thống ===== */
+    .ab-totals {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        margin-bottom: 18px;
+    }
+
+        .ab-totals .t {
+            text-align: center;
+            background: var(--ab-soft);
+            border: 1px solid var(--ab-line);
+            border-radius: 12px;
+            padding: 16px 8px;
+        }
+
+            .ab-totals .t .n {
+                font-size: 1.8rem;
+                font-weight: 800;
+                line-height: 1;
+                color: var(--ab-navy);
+            }
+
+            .ab-totals .t .l {
+                font-size: .82rem;
+                color: var(--ab-muted);
+                margin-top: 5px;
+            }
+
+    .ab-note {
+        background: #eaf3fb;
+        border: 1px solid #d3e4f4;
+        border-radius: 12px;
+        padding: 12px 16px;
+        font-size: .9rem;
+        color: #33415c;
+        margin-bottom: 18px;
+    }
+
+        .ab-note i {
+            color: var(--ab-blue);
+            margin-right: 6px;
+        }
+
+    /* ===== Banner trang thiết bị ===== */
+    .ab-banner {
+        position: relative;
+        border-radius: 18px;
+        overflow: hidden;
+        min-height: 320px;
+        display: flex;
+        align-items: center;
+        color: #fff;
+        box-shadow: 0 12px 30px rgba(23,40,75,.14);
+    }
+
+        .ab-banner > img {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .ab-banner::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+            background: linear-gradient(90deg, rgba(31,58,110,.93) 0%, rgba(43,76,126,.7) 55%, rgba(43,76,126,.1) 100%);
+        }
+
+        .ab-banner .in {
+            position: relative;
+            z-index: 2;
+            padding: 40px 48px;
+            max-width: 580px;
+        }
+
+        .ab-banner h2 {
+            color: #fff;
+            font-weight: 800;
+            font-size: 1.7rem;
+            margin-bottom: 10px;
+        }
+
+        .ab-banner ul {
+            list-style: none;
+            padding: 0;
+            margin: 16px 0 0;
+        }
+
+        .ab-banner li {
+            padding: 5px 0;
+        }
+
+            .ab-banner li i {
+                color: #9fd3ff;
+                margin-right: 8px;
+            }
+
+    /* ===== Danh sách dịch vụ ===== */
+    .sv-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+    }
+
+    .sv-card {
+        background: #fff;
+        border: 1px solid var(--ab-line);
+        border-radius: 14px;
+        padding: 20px;
+        box-shadow: 0 4px 16px rgba(23,40,75,.03);
+        transition: transform .2s, box-shadow .2s, border-color .2s;
+    }
+
+        .sv-card:hover {
+            transform: translateY(-3px);
+            border-color: #bcd2ea;
+            box-shadow: 0 10px 24px rgba(23,40,75,.08);
+        }
+
+        .sv-card .ico {
+            width: 52px;
+            height: 52px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            background: #e6effa;
+            color: var(--ab-blue);
+            margin-bottom: 14px;
+        }
+
+        .sv-card .nm {
+            font-weight: 800;
+            color: var(--ab-navy);
+            font-size: .98rem;
+            margin-bottom: 10px;
+            min-height: 2.4em;
+        }
+
+        .sv-card .meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+            .sv-card .meta span {
+                font-size: .78rem;
+                font-weight: 600;
+                color: #44546b;
+                background: var(--ab-soft);
+                border: 1px solid var(--ab-line);
+                border-radius: 999px;
+                padding: 3px 10px;
+            }
+
+    /* ===== Tại sao chọn ===== */
+    .ab-why {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+    }
+
+        .ab-why .c {
+            background: #fff;
+            border: 1px solid var(--ab-line);
+            border-radius: 14px;
+            padding: 22px;
+            box-shadow: 0 4px 16px rgba(23,40,75,.03);
+        }
+
+            .ab-why .c .ic {
+                width: 48px;
+                height: 48px;
+                border-radius: 12px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 22px;
+                color: #fff;
+                background: linear-gradient(135deg, #2b4c7e, #1f6fc2);
+                margin-bottom: 14px;
+            }
+
+            .ab-why .c h6 {
+                font-weight: 800;
+                color: var(--ab-navy);
+                margin-bottom: 6px;
+            }
+
+            .ab-why .c p {
+                margin: 0;
+                color: var(--ab-muted);
+                font-size: .92rem;
+            }
+
+    /* ===== Đội ngũ bác sĩ ===== */
+    .ab-team {
+        display: flex;
+        gap: 48px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+        .ab-team .img {
+            position: relative;
+            flex: 1 1 380px;
+        }
+
+            .ab-team .img img {
+                width: 100%;
+                border-radius: 16px;
+                display: block;
+                box-shadow: 0 12px 30px rgba(23,40,75,.14);
+            }
+
+            .ab-team .img .badge-num {
+                position: absolute;
+                right: 18px;
+                bottom: -18px;
+                background: linear-gradient(135deg, #2b4c7e, #1f6fc2);
+                color: #fff;
+                padding: 12px 22px;
+                border-radius: 12px;
+                font-weight: 700;
+                box-shadow: 0 8px 20px rgba(0,86,179,.3);
+            }
+
+        .ab-team .txt {
+            flex: 1 1 380px;
+        }
+
+        .ab-team ul {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 22px;
+        }
+
+        .ab-team li {
+            padding: 6px 0;
+            color: #3c4858;
+        }
+
+            .ab-team li i {
+                color: var(--ab-blue);
+                margin-right: 10px;
+            }
+
+    /* ===== Kêu gọi hành động ===== */
+    .ab-cta {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 18px;
+        background: linear-gradient(135deg, #2b4c7e, #1f6fc2);
+        color: #fff;
+        border-radius: 18px;
+        padding: 30px 38px;
+        box-shadow: 0 10px 28px rgba(0,86,179,.18);
+    }
+
+        .ab-cta h3 {
+            color: #fff;
+            font-weight: 800;
+            margin: 0 0 4px;
+            font-size: 1.4rem;
+        }
+
+        .ab-cta p {
+            margin: 0;
+            opacity: .92;
+        }
+
+        .ab-cta .btn-light {
+            color: var(--ab-blue);
+            font-weight: 700;
+            border-radius: 10px;
+            padding: 10px 28px;
+        }
+
+    @@media (max-width: 991px) {
+        .sv-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .ab-steps {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .ab-why {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .ab-hero h1 {
+            font-size: 1.7rem;
+        }
+    }
+
+    @@media (max-width: 575px) {
+        .sv-grid, .ab-steps, .ab-why, .ab-points {
+            grid-template-columns: 1fr;
+        }
+
+        .ab-banner .in {
+            padding: 28px 22px;
+        }
+
+        .ab-banner::before {
+            background: rgba(31,58,110,.82);
+        }
+
+        .ab-cta {
+            padding: 24px;
+        }
     }
 </style>
 
-<!-- VỀ CHÚNG TÔI -->
-<section class="ab-sec">
-    <div class="container">
-        <div class="ab-about">
-            <div class="txt">
-                <h2 class="ab-h mb-3">Về chúng tôi</h2>
-                <p>
-                    Chúng tôi xây dựng hệ thống khám bệnh trực tuyến giúp bạn chăm sóc sức khỏe ngay cả khi không thể đến bệnh viện.
-                    Bạn có thể tìm bác sĩ theo chuyên khoa, chọn ngày giờ còn trống, mô tả triệu chứng kèm hình ảnh
-                    hoặc kết quả xét nghiệm, rồi thanh toán và nhận kết quả ngay trên hệ thống.
-                </p>
-                <p>
-                    Toàn bộ lịch khám, thanh toán, kết quả khám và đơn thuốc đều được lưu trong hồ sơ cá nhân,
-                    giúp bạn theo dõi sức khỏe thuận tiện và rõ ràng.
-                </p>
-                <a asp-controller="Doctors" asp-action="Index" class="btn btn-primary px-4 mt-2">Đặt lịch khám</a>
-            </div>
-            <div class="panel">
-                <div class="row-i"><i class="fa fa-hospital-o"></i><div><b>Khám trực tiếp</b><span>Đặt lịch tại phòng khám, chủ động thời gian</span></div></div>
-                <div class="row-i"><i class="fa fa-stethoscope"></i><div><b>Khám trực tuyến</b><span>Trao đổi với bác sĩ mà không cần di chuyển</span></div></div>
-                <div class="row-i"><i class="fa fa-ambulance"></i><div><b>Hỗ trợ cấp cứu</b><span>Phân loại mức độ khẩn cấp để ưu tiên xử lý</span></div></div>
+<div class="ap-font">
+
+
+
+    <!-- VỀ CHÚNG TÔI -->
+    <section class="ab-sec">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-6 mb-4 mb-lg-0">
+                    <div class="ab-title">
+                        <span class="kicker">Về chúng tôi</span>
+                        <h2>Nền tảng khám bệnh trực tuyến toàn diện</h2>
+                    </div>
+                    <p class="text-muted">
+                        Chúng tôi xây dựng hệ thống giúp bạn chăm sóc sức khỏe chủ động. Bạn có thể tìm bác sĩ theo chuyên khoa,
+                        chọn ngày giờ còn trống, mô tả triệu chứng kèm hình ảnh hoặc kết quả xét nghiệm,
+                        rồi thanh toán và nhận kết quả ngay trên hệ thống.
+                    </p>
+                    <p class="text-muted mb-0">
+                        Toàn bộ lịch khám, thanh toán, kết quả khám và đơn thuốc đều được lưu trong hồ sơ cá nhân,
+                        giúp bạn theo dõi sức khỏe thuận tiện và rõ ràng.
+                    </p>
+                    <div class="ab-points">
+                        <div class="pt"><i class="fa fa-check-circle"></i>Đặt lịch theo giờ còn trống, không cần bốc số</div>
+                        <div class="pt"><i class="fa fa-check-circle"></i>Đính kèm ảnh triệu chứng, kết quả xét nghiệm</div>
+                        <div class="pt"><i class="fa fa-check-circle"></i>Thanh toán VietQR nhanh chóng, minh bạch</div>
+                        <div class="pt"><i class="fa fa-check-circle"></i>Đơn thuốc điện tử lưu sẵn trong hồ sơ</div>
+                    </div>
+                    <a asp-controller="Doctors" asp-action="Index" class="btn btn-primary px-4 font-weight-bold" style="border-radius:10px">Đặt lịch khám</a>
+                </div>
+                <div class="col-lg-6">
+                    <div class="ab-card">
+                        <div class="ab-card-head">Các hình thức khám</div>
+                        <div class="ab-card-body">
+                            <div class="ab-photo">
+                                <img src="~/img/bg-img/hinh4.jpg" alt="Siêu âm tim" />
+                                <div class="cap">Thăm khám với trang thiết bị hiện đại</div>
+                            </div>
+                            <div class="ab-svc-row"><span class="ic"><i class="fa fa-hospital-o"></i></span><div><b>Khám trực tiếp</b><span>Đặt lịch tại phòng khám, chủ động thời gian</span></div></div>
+                            <div class="ab-svc-row"><span class="ic"><i class="fa fa-video-camera"></i></span><div><b>Khám trực tuyến</b><span>Trao đổi với bác sĩ mà không cần di chuyển</span></div></div>
+                            <div class="ab-svc-row"><span class="ic"><i class="fa fa-ambulance"></i></span><div><b>Hỗ trợ cấp cứu</b><span>Phân loại mức độ khẩn cấp để ưu tiên xử lý</span></div></div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-</section>
+    </section>
 
-<!-- THANH TỶ LỆ ĐƠN KHÁM -->
-<section class="ab-sec soft">
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-8">
-                <h2 class="ab-h">Chuyên khoa được đặt khám nhiều nhất</h2>
-                <p class="ab-lead mb-4">Tỷ lệ tính trên tổng số lượt đặt khám trong hệ thống</p>
+    <!-- QUY TRÌNH -->
+    <section class="ab-sec soft">
+        <div class="container">
+            <div class="ab-title center">
+                <span class="kicker">Quy trình</span>
+                <h2>Đặt khám chỉ với 4 bước đơn giản</h2>
+                <p>Từ lúc chọn bác sĩ đến khi nhận đơn thuốc, mọi thứ đều được thực hiện trực tuyến.</p>
+            </div>
+            <div class="ab-steps">
+                <div class="s"><div class="no">1</div><h6>Chọn bác sĩ</h6><p>Tìm theo chuyên khoa, xem kinh nghiệm và phí khám công khai.</p></div>
+                <div class="s"><div class="no">2</div><h6>Chọn giờ &amp; thanh toán</h6><p>Chọn khung giờ còn trống, thanh toán phí hoặc tiền cọc qua VietQR.</p></div>
+                <div class="s"><div class="no">3</div><h6>Thăm khám</h6><p>Khám trực tiếp tại phòng khám hoặc vào phòng video để trao đổi với bác sĩ.</p></div>
+                <div class="s"><div class="no">4</div><h6>Nhận kết quả</h6><p>Xem chẩn đoán, đơn thuốc điện tử và lịch tái khám trong hồ sơ cá nhân.</p></div>
+            </div>
+        </div>
+    </section>
 
-                @if (!Model.Bars.Any())
-                {
-                    <div class="alert alert-info">Chưa có lượt đặt khám nào để thống kê.</div>
-                }
-                else
-                {
-                    foreach (var b in Model.Bars)
-                    {
-                        <div class="ab-bar">
-                            <div class="ab-bar-head">
-                                <span class="name">@b.Label</span>
-                                <span class="pct">@b.Percent%<span class="cnt">(@b.Count lượt)</span></span>
+    <!-- THỐNG KÊ -->
+    <section class="ab-sec">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-7 mb-4 mb-lg-0">
+                    <div class="ab-card">
+                        <div class="ab-card-head">Chuyên khoa được đặt khám nhiều nhất</div>
+                        <div class="ab-card-body">
+                            <p class="text-muted small mb-4">Tỷ lệ tính trên tổng số lượt đặt khám trong hệ thống</p>
+                            @if (!Model.Bars.Any())
+                            {
+                                <div class="ab-note mb-0"><i class="fa fa-info-circle"></i>Chưa có lượt đặt khám nào để thống kê.</div>
+                            }
+                            else
+                            {
+                                var rank = 1;
+                                foreach (var b in Model.Bars)
+                                {
+                                    <div class="ab-bar">
+                                        <div class="ab-bar-head">
+                                            <span class="name"><span class="rk">@(rank++)</span>@b.Label</span>
+                                            <span class="pct">@b.Percent%<span class="cnt">(@b.Count lượt)</span></span>
+                                        </div>
+                                        <div class="ab-track"><div class="ab-fill" style="width:@(b.Percent)%"></div></div>
+                                    </div>
+                                }
+                            }
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-5">
+                    <div class="ab-card">
+                        <div class="ab-card-head">Số liệu hệ thống</div>
+                        <div class="ab-card-body">
+                            <div class="ab-totals">
+                                <div class="t"><div class="n">@Model.TotalDoctors</div><div class="l">Bác sĩ</div></div>
+                                <div class="t"><div class="n">@Model.TotalPatients</div><div class="l">Bệnh nhân</div></div>
+                                <div class="t"><div class="n">@Model.TotalAppointments</div><div class="l">Lượt khám</div></div>
                             </div>
-                            <div class="ab-track"><div class="ab-fill" style="width:@(b.Percent)%"></div></div>
+                            <div class="ab-note"><i class="fa fa-info-circle"></i>Hệ thống hiện có <b>@Model.Services.Count</b> chuyên khoa đang có bác sĩ sẵn sàng nhận lịch.</div>
+                            <a asp-controller="Doctors" asp-action="Index" class="btn btn-primary btn-block font-weight-bold" style="border-radius:10px">Tìm bác sĩ ngay</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- TRANG THIẾT BỊ -->
+    <section class="ab-sec" style="padding-top:0">
+        <div class="container">
+            <div class="ab-banner">
+                <img src="~/img/bg-img/hinh5.jpg" alt="Phòng thông tim hiện đại" />
+                <div class="in">
+                    <h2>Trang thiết bị hiện đại</h2>
+                    <p class="mb-0">Phòng khám và thủ thuật được trang bị máy móc chuẩn quốc tế, hỗ trợ bác sĩ chẩn đoán chính xác và an toàn.</p>
+                    <ul>
+                        <li><i class="fa fa-check-circle"></i> Chụp mạch và can thiệp tim</li>
+                        <li><i class="fa fa-check-circle"></i> Siêu âm, theo dõi sinh hiệu</li>
+                        <li><i class="fa fa-check-circle"></i> Kết quả lưu trong hồ sơ cá nhân</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- DANH SÁCH DỊCH VỤ -->
+    <section class="ab-sec soft">
+        <div class="container">
+            <div class="ab-title center">
+                <span class="kicker">Chuyên khoa</span>
+                <h2>Danh sách dịch vụ</h2>
+                <p>Các chuyên khoa đang có bác sĩ trên hệ thống</p>
+            </div>
+
+            @if (!Model.Services.Any())
+            {
+                <div class="ab-note"><i class="fa fa-info-circle"></i>Chưa có chuyên khoa nào.</div>
+            }
+            else
+            {
+                <div class="sv-grid">
+                    @for (var i = 0; i < Model.Services.Count; i++)
+                    {
+                        var s = Model.Services[i];
+                        <div class="sv-card">
+                            <div class="ico"><i class="fa @Icon(s.Name, i)"></i></div>
+                            <div class="nm">@s.Name</div>
+                            <div class="meta">
+                                <span>@s.DoctorCount bác sĩ</span>
+                                <span>@s.AppointmentCount lượt khám</span>
+                            </div>
                         </div>
                     }
-                }
+                </div>
+            }
+        </div>
+    </section>
+
+    <!-- TẠI SAO CHỌN -->
+    <section class="ab-sec">
+        <div class="container">
+            <div class="ab-title center">
+                <span class="kicker">Lợi ích</span>
+                <h2>Tại sao chọn chúng tôi?</h2>
+                <p>Những điểm giúp việc khám chữa bệnh của bạn trở nên đơn giản hơn.</p>
+            </div>
+            <div class="ab-why">
+                <div class="c"><div class="ic"><i class="fa fa-lock"></i></div><h6>Bảo mật thông tin</h6><p>Hồ sơ bệnh án và lịch sử khám được lưu trữ riêng cho từng bệnh nhân trên hệ thống.</p></div>
+                <div class="c"><div class="ic"><i class="fa fa-user-md"></i></div><h6>Đội ngũ bác sĩ chuyên khoa</h6><p>Bác sĩ thuộc nhiều chuyên khoa, thông tin kinh nghiệm và phí khám công khai, rõ ràng.</p></div>
+                <div class="c"><div class="ic"><i class="fa fa-clock-o"></i></div><h6>Tiết kiệm thời gian, chi phí</h6><p>Chọn giờ trống trực tiếp trên lịch, không cần chờ bốc số, theo dõi đơn khám mọi lúc.</p></div>
+                <div class="c"><div class="ic"><i class="fa fa-qrcode"></i></div><h6>Thanh toán thuận tiện</h6><p>Quét mã VietQR bằng ứng dụng ngân hàng, gửi biên lai và được xác nhận nhanh chóng.</p></div>
+                <div class="c"><div class="ic"><i class="fa fa-file-text-o"></i></div><h6>Đơn thuốc điện tử</h6><p>Chẩn đoán, đơn thuốc và lịch tái khám được lưu sẵn, xem và in lại bất cứ lúc nào.</p></div>
+                <div class="c"><div class="ic"><i class="fa fa-ambulance"></i></div><h6>Hỗ trợ cấp cứu</h6><p>Phân loại mức độ khẩn cấp và ghi nhận vị trí để ưu tiên xử lý các ca nguy cấp.</p></div>
             </div>
         </div>
-    </div>
-</section>
+    </section>
 
-<!-- THANH SỐ LIỆU -->
-<section class="ab-sec" style="padding-bottom: 0;">
-    <div class="container">
-        <div class="ab-pill">
-            <div class="st"><div class="n">@Model.TotalDoctors</div><div class="l">bác sĩ</div></div>
-            <div class="st"><div class="n">@Model.TotalPatients</div><div class="l">bệnh nhân</div></div>
-            <div class="st"><div class="n">@Model.TotalAppointments</div><div class="l">lượt đặt khám</div></div>
-            <a asp-controller="Doctors" asp-action="Index" class="btn-w">Tìm bác sĩ</a>
-        </div>
-    </div>
-</section>
-
-<!-- DANH SÁCH DỊCH VỤ -->
-<section class="ab-sec">
-    <div class="container">
-        <h2 class="ab-h ab-center">Danh sách dịch vụ</h2>
-        <p class="ab-lead ab-center mb-0">Các chuyên khoa đang có bác sĩ trên hệ thống</p>
-
-        @if (!Model.Services.Any())
-        {
-            <div class="alert alert-info mt-4">Chưa có chuyên khoa nào.</div>
-        }
-        else
-        {
-            <div class="sv-grid @(Model.Services.Count >= 7 ? "sv-mosaic" : "")">
-                @for (var i = 0; i < Model.Services.Count; i++)
-                {
-                    var s = Model.Services[i];
-                    <div class="sv-card">
-                        <div class="top">
-                            <span class="nm">@s.Name</span>
-                            <i class="fa @Icon(s.Name, i) ico"></i>
-                        </div>
-                        <div class="meta">@s.DoctorCount bác sĩ · @s.AppointmentCount lượt khám</div>
+    <!-- ĐỘI NGŨ BÁC SĨ -->
+    <section class="ab-sec soft">
+        <div class="container">
+            <div class="ab-team">
+                <div class="img">
+                    <img src="~/img/bg-img/hinh2.jpg" alt="Đội ngũ bác sĩ" />
+                    <div class="badge-num">@Model.TotalDoctors bác sĩ · @Model.Services.Count chuyên khoa</div>
+                </div>
+                <div class="txt">
+                    <div class="ab-title">
+                        <span class="kicker">Đội ngũ</span>
+                        <h2>Nơi hội tụ đội ngũ bác sĩ</h2>
                     </div>
-                }
+                    <p class="text-muted mb-3">
+                        Hệ thống hiện có @Model.TotalDoctors bác sĩ thuộc @Model.Services.Count chuyên khoa,
+                        sẵn sàng tư vấn và thăm khám theo lịch bạn chọn.
+                    </p>
+                    <ul>
+                        <li><i class="fa fa-check-circle"></i>Thông tin chuyên khoa, kinh nghiệm minh bạch</li>
+                        <li><i class="fa fa-check-circle"></i>Phí khám công khai trước khi đặt lịch</li>
+                        <li><i class="fa fa-check-circle"></i>Đánh giá sau khám giúp nâng cao chất lượng</li>
+                    </ul>
+                    <a asp-controller="Doctors" asp-action="Index" class="btn btn-primary px-4 font-weight-bold" style="border-radius:10px">Xem đội ngũ bác sĩ</a>
+                </div>
             </div>
-        }
-    </div>
-</section>
-
-<!-- TẠI SAO CHỌN -->
-<section class="ab-sec soft">
-    <div class="container">
-        <h2 class="ab-h ab-center">Tại sao chọn chúng tôi?</h2>
-        <div class="ab-why">
-            <div class="c"><i class="fa fa-lock"></i><h6>Bảo mật thông tin</h6><p>Hồ sơ bệnh án và lịch sử khám được lưu trữ riêng cho từng bệnh nhân trên hệ thống.</p></div>
-            <div class="c"><i class="fa fa-user-md"></i><h6>Đội ngũ bác sĩ chuyên khoa</h6><p>Bác sĩ thuộc nhiều chuyên khoa, thông tin kinh nghiệm và phí khám công khai, rõ ràng.</p></div>
-            <div class="c"><i class="fa fa-clock-o"></i><h6>Tiết kiệm thời gian, chi phí</h6><p>Chọn giờ trống trực tiếp trên lịch, không cần chờ bốc số, theo dõi đơn khám mọi lúc.</p></div>
         </div>
-    </div>
-</section>
+    </section>
 
-<!-- ĐỘI NGŨ BÁC SĨ -->
-<section class="ab-sec">
-    <div class="container ab-center">
-        <h2 class="ab-h">Nơi hội tụ đội ngũ bác sĩ</h2>
-        <p class="ab-lead mx-auto mb-4" style="max-width:720px">
-            Hệ thống hiện có @Model.TotalDoctors bác sĩ thuộc @Model.Services.Count chuyên khoa,
-            sẵn sàng tư vấn và thăm khám theo lịch bạn chọn.
-        </p>
-        <a asp-controller="Doctors" asp-action="Index" class="btn btn-primary px-4">Xem đội ngũ bác sĩ</a>
-    </div>
-</section>
+    <!-- KÊU GỌI HÀNH ĐỘNG -->
+    <section class="ab-sec">
+        <div class="container">
+            <div class="ab-cta">
+                <div>
+                    <h3>Sẵn sàng đặt lịch khám?</h3>
+                    <p>Chọn bác sĩ phù hợp và đặt lịch chỉ trong vài phút.</p>
+                </div>
+                <a asp-controller="Doctors" asp-action="Index" class="btn btn-light">Đặt lịch ngay</a>
+            </div>
+        </div>
+    </section>
+
+</div>

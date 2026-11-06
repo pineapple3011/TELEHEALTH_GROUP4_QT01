@@ -6,88 +6,388 @@
         : string.Concat(words.Skip(Math.Max(0, words.Length - 2)).Select(w => char.ToUpperInvariant(w[0])));
     var completedApps = Model.RecentList.Where(x => x.TrangThai == "Hoàn thành").ToList();
 
-    // Chọn class badge theo trạng thái (đồng bộ với trang Lịch khám của tôi)
-    string StatusBadge(string s) => s switch
+    // Class chấm trạng thái (đồng bộ với trang Lịch khám của tôi)
+    string StatusClass(string s) => s switch
     {
-        "Chờ xác nhận" => "badge-status-pending",
-        "Đã xác nhận" or "Sắp diễn ra" => "badge-status-confirmed",
-        "Hoàn thành" => "badge-status-done",
-        "Đã hủy" => "badge-soft-danger",
-        "Chờ thanh toán" => "badge-soft-warning",
-        _ => "badge-soft-secondary"
+        "Đã xác nhận" or "Sắp diễn ra" => "confirmed",
+        "Hoàn thành" => "done",
+        "Đã hủy" => "cancelled",
+        "Chờ thanh toán" => "warning",
+        _ => "pending"
+    };
+
+    // Nhãn trạng thái (đồng bộ với trang Lịch khám của tôi và Chi tiết lịch khám)
+    string StatusText(string s) => s switch
+    {
+        "Hoàn thành" => "Đã khám xong",
+        _ => s
+    };
+
+    string TypeIcon(string t) => t switch
+    {
+        "Online" => "fa-video-camera",
+        "Cấp cứu" => "fa-ambulance",
+        _ => "fa-hospital-o"
     };
 }
 
 <style>
-    /* Thẻ bệnh nhân điện tử */
+    :root {
+        --ap-navy: #1d2b4f;
+        --ap-bar: #2b4c7e;
+        --ap-blue: #0056b3;
+        --ap-line: #e6ecf2;
+        --ap-muted: #6b7785;
+        --ap-head: #e9f0f7;
+        /* Nếu tiêu đề trang dùng font riêng, thay inherit bằng font đó, VD: "Be Vietnam Pro", sans-serif */
+        --ap-font: inherit;
+    }
+
+    /* ===== Đồng bộ font (không đụng tới icon FontAwesome) ===== */
+    .ap-font,
+    .ap-font *:not(.fa):not(.fas):not(.far):not(i) {
+        font-family: var(--ap-font);
+    }
+
+    /* ===== Thẻ bệnh nhân điện tử ===== */
     .health-id-card {
-        background: linear-gradient(135deg, #2c9d8f, #0056b3);
+        background: linear-gradient(135deg, #2b4c7e, #1f6fc2);
         border-radius: 16px;
         color: #fff;
         padding: 24px;
-        box-shadow: 0 10px 25px rgba(0, 86, 179, 0.25);
+        margin-bottom: 22px;
+        box-shadow: 0 10px 28px rgba(0,86,179,.18);
     }
 
+        .health-id-card .cap {
+            display: inline-block;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: .8px;
+            text-transform: uppercase;
+            padding: 4px 14px;
+            border-radius: 999px;
+            background: rgba(255,255,255,.18);
+            margin-bottom: 18px;
+        }
+
+        .health-id-card h5 {
+            color: #fff;
+            font-weight: 800;
+            margin: 0 0 4px;
+        }
+
+        .health-id-card .code {
+            font-size: 13px;
+            opacity: .92;
+        }
+
     .patient-avatar-box {
-        width: 80px;
-        height: 80px;
-        border-radius: 50%;
-        background: rgba(255,255,255,0.2);
-        border: 2px solid rgba(255,255,255,0.6);
+        width: 72px;
+        height: 72px;
+        border-radius: 18px;
+        flex-shrink: 0;
+        background: rgba(255,255,255,.18);
+        border: 1px solid rgba(255,255,255,.35);
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 28px;
+        font-size: 26px;
         font-weight: 700;
         color: #fff;
     }
 
-    /* Tabs */
-    .profile-tabs .nav-link {
-        font-weight: 700;
-        font-size: 14px;
-        color: #495057;
-        border: none;
-        border-bottom: 3px solid transparent;
-        padding: 12px 20px;
-        background: transparent;
+    /* ===== Thẻ thông tin ===== */
+    .detail-card {
+        background: #fff;
+        border: 1px solid var(--ap-line);
+        border-radius: 16px;
+        margin-bottom: 22px;
+        overflow: hidden;
+        box-shadow: 0 4px 16px rgba(23,40,75,.03);
     }
 
-        .profile-tabs .nav-link.active {
-            color: #2c9d8f;
-            border-bottom: 3px solid #0056b3;
+    .detail-card-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 14px 22px;
+        background: var(--ap-bar);
+        color: #fff;
+        font-weight: 700;
+        font-size: 15px;
+        letter-spacing: .5px;
+        text-transform: uppercase;
+    }
+
+        .detail-card-head a.more {
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 0;
+            text-transform: none;
+            color: #9fd3ff;
+        }
+
+            .detail-card-head a.more:hover {
+                color: #fff;
+            }
+
+    .detail-card-body {
+        padding: 20px 22px;
+    }
+
+    .kv {
+        padding: 11px 0;
+        border-bottom: 1px solid #eef2f6;
+        font-size: 14px;
+    }
+
+        .kv:last-of-type {
+            border-bottom: 0;
+        }
+
+        .kv .k {
+            display: block;
+            font-size: 13px;
+            color: var(--ap-muted);
+            margin-bottom: 2px;
+        }
+
+        .kv .v {
+            font-weight: 700;
+            color: var(--ap-navy);
+            word-break: break-word;
+        }
+
+            .kv .v.plain {
+                font-weight: 600;
+            }
+
+            .kv .v.emergency {
+                color: #c0392b;
+            }
+
+    .sub-title {
+        font-size: 13.5px;
+        font-weight: 700;
+        letter-spacing: .5px;
+        text-transform: uppercase;
+        color: var(--ap-navy);
+        padding-left: 10px;
+        border-left: 3px solid var(--ap-blue);
+        margin: 0;
+    }
+
+    .pane-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 16px;
+    }
+
+        .pane-head a.link {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--ap-blue);
+        }
+
+    /* ===== Cảnh báo thanh toán ===== */
+    .pay-alert {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 12px;
+        background: #fff8e8;
+        border: 1px solid #f3dfae;
+        border-radius: 14px;
+        padding: 14px 20px;
+        margin-bottom: 22px;
+        font-size: 14px;
+        color: #5c4a1c;
+    }
+
+        .pay-alert i {
+            color: #c98a00;
+            margin-right: 8px;
+        }
+
+    /* ===== Tabs ===== */
+    .profile-tabs {
+        background: #f7fafd;
+        border-bottom: 1px solid var(--ap-line);
+        padding: 0 14px;
+    }
+
+        .profile-tabs .nav-link {
+            font-weight: 700;
+            font-size: 13.5px;
+            color: var(--ap-muted);
+            border: 0;
+            border-bottom: 3px solid transparent;
+            border-radius: 0;
+            padding: 14px 18px;
             background: transparent;
         }
 
-    /* Badge trạng thái */
-    /* Đã khám xong: xanh ngọc ngả xanh dương */
-    .badge-status-done {
-        background: #e0f4f1;
-        color: #1f8a7d;
-        border: 1px solid #a9ddd5;
+            .profile-tabs .nav-link:hover {
+                color: var(--ap-navy);
+            }
+
+            .profile-tabs .nav-link.active {
+                color: var(--ap-navy);
+                border-bottom-color: var(--ap-blue);
+                background: transparent;
+            }
+
+    /* ===== Bảng ===== */
+    .appt-table {
+        width: 100%;
+        min-width: 640px;
+        border-collapse: collapse;
+        margin: 0;
     }
 
-    /* Đã xác nhận: tím indigo */
-    .badge-status-confirmed {
-        background: #ece9fb;
-        color: #5b45c9;
-        border: 1px solid #cfc8f3;
+        .appt-table thead th {
+            background: var(--ap-head);
+            color: #44546b;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: .5px;
+            text-transform: uppercase;
+            padding: 11px 14px;
+            border: 0;
+            white-space: nowrap;
+        }
+
+        .appt-table tbody td {
+            padding: 14px;
+            vertical-align: middle;
+            border-top: 1px solid #eef2f6;
+            font-size: 13.5px;
+            color: #3c4858;
+        }
+
+        .appt-table tbody tr:hover {
+            background: #f6f9fc;
+        }
+
+    .code-chip {
+        display: inline-block;
+        background: #eef3f9;
+        color: var(--ap-navy);
+        font-weight: 700;
+        font-size: 12.5px;
+        padding: 4px 10px;
+        border-radius: 8px;
+        white-space: nowrap;
     }
 
-    /* Chờ bác sĩ xác nhận: xám nhạt */
-    .badge-status-pending {
-        background: #f1f3f5;
-        color: #6c757d;
-        border: 1px solid #dee2e6;
+    .type-cell i {
+        width: 18px;
+        color: var(--ap-muted);
     }
+
+    .dt-date {
+        font-weight: 700;
+        color: var(--ap-navy);
+    }
+
+    .dt-time {
+        font-size: 12.5px;
+        color: var(--ap-muted);
+        margin-top: 2px;
+    }
+
+    .doc-name {
+        font-weight: 700;
+        color: var(--ap-navy);
+    }
+
+    /* Trạng thái dạng chấm + chữ (giống trang Lịch khám của tôi) */
+    .st {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        color: #44546b;
+        white-space: nowrap;
+    }
+
+        .st::before {
+            content: "";
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #aab4c0;
+        }
+
+        .st.confirmed::before {
+            background: #0056b3;
+        }
+
+        .st.warning {
+            color: #9a6a00;
+        }
+
+            .st.warning::before {
+                background: #e0a100;
+            }
+
+        .st.done {
+            color: #138a7a;
+        }
+
+            .st.done::before {
+                background: #1aa38f;
+            }
+
+        .st.cancelled {
+            color: #c0392b;
+        }
+
+            .st.cancelled::before {
+                background: #c0392b;
+            }
+
+    .act-cell {
+        text-align: right;
+        white-space: nowrap;
+    }
+
+        .act-cell .btn {
+            font-size: 13px;
+            font-weight: 600;
+            border-radius: 8px;
+            padding: 4px 12px;
+            margin-left: 4px;
+        }
+
+    .empty-state {
+        text-align: center;
+        padding: 36px 10px;
+        color: var(--ap-muted);
+        font-size: 14px;
+    }
+
+        .empty-state i {
+            font-size: 40px;
+            display: block;
+            margin-bottom: 10px;
+            color: #b6c2d0;
+        }
 </style>
 
-<div class="container my-4" style="min-height: 65vh;">
+<div class="container my-4 ap-font" style="min-height: 65vh;">
     <!-- Thông báo -->
     @if (TempData["Msg"] != null)
     {
-        <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
-            @TempData["Msg"]
+        <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert" style="border-radius:12px">
+            <i class="fa fa-check-circle mr-2"></i> @TempData["Msg"]
             <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
             </button>
@@ -96,11 +396,12 @@
 
     @if (Model.PendingPayment > 0 && Model.PendingPayAppointId != null)
     {
-        <div class="alert alert-warning d-flex flex-wrap align-items-center justify-content-between shadow-sm mb-4 p-3 rounded-lg">
+        <div class="pay-alert">
             <div>
+                <i class="fa fa-exclamation-circle"></i>
                 Bạn đang có <b>@Model.PendingPayment</b> lịch khám cần thanh toán phí/tiền cọc giữ chỗ.
             </div>
-            <a asp-controller="Appointments" asp-action="Pay" asp-route-id="@Model.PendingPayAppointId" class="btn btn-warning font-weight-bold text-dark btn-sm mt-2 mt-md-0 shadow-sm">
+            <a asp-controller="Appointments" asp-action="Pay" asp-route-id="@Model.PendingPayAppointId" class="btn btn-primary btn-sm font-weight-bold px-3" style="border-radius:8px">
                 Thanh toán ngay
             </a>
         </div>
@@ -108,50 +409,51 @@
 
     <div class="row">
         <!-- CỘT TRÁI: THẺ BỆNH NHÂN & THÔNG TIN LIÊN HỆ -->
-        <div class="col-lg-4 mb-4">
-            <div class="health-id-card mb-4">
-                <div class="mb-3">
-                    <span class="small text-uppercase font-weight-bold" style="letter-spacing: 1px; opacity: .85;">Thẻ bệnh nhân điện tử</span>
-                </div>
-
+        <div class="col-lg-4">
+            <div class="health-id-card">
+                <span class="cap">Thẻ bệnh nhân điện tử</span>
                 <div class="d-flex align-items-center">
                     <div class="patient-avatar-box mr-3">@initials</div>
                     <div>
-                        <h5 class="font-weight-bold mb-0 text-white">@Model.FullName</h5>
-                        <div class="small" style="opacity: .9;">Mã BN: <b>@($"BN-{Model.PatientId:D6}")</b></div>
+                        <h5>@Model.FullName</h5>
+                        <div class="code">Mã BN: <b>@($"BN-{Model.PatientId:D6}")</b></div>
                     </div>
                 </div>
             </div>
 
-            <div class="card border-0 shadow-sm rounded-lg p-4 bg-white mb-4">
-                <h6 class="font-weight-bold text-dark mb-3 border-bottom pb-2">Thông tin liên hệ</h6>
-                <div class="small mb-2">
-                    <span class="text-muted d-block">Địa chỉ email:</span>
-                    <b class="text-dark">@Model.Email</b>
+            <div class="detail-card">
+                <div class="detail-card-head">
+                    <span>Thông tin liên hệ</span>
                 </div>
-                <div class="small mb-2">
-                    <span class="text-muted d-block">Số điện thoại liên lạc:</span>
-                    <b class="text-dark">@Model.Phone</b>
-                </div>
-                <div class="small mb-2">
-                    <span class="text-muted d-block">Địa chỉ thường trú:</span>
-                    <span class="text-dark">@(string.IsNullOrWhiteSpace(Model.Address) ? "Chưa cập nhật địa chỉ" : Model.Address)</span>
-                </div>
-                <div class="small mb-3">
-                    <span class="text-muted d-block">SĐT người thân (liên hệ khẩn cấp):</span>
-                    <b class="text-danger">@(string.IsNullOrWhiteSpace(Model.EmergencyPhone) ? "Chưa cập nhật" : Model.EmergencyPhone)</b>
-                </div>
+                <div class="detail-card-body">
+                    <div class="kv">
+                        <span class="k">Địa chỉ email</span>
+                        <span class="v">@Model.Email</span>
+                    </div>
+                    <div class="kv">
+                        <span class="k">Số điện thoại liên lạc</span>
+                        <span class="v">@Model.Phone</span>
+                    </div>
+                    <div class="kv">
+                        <span class="k">Địa chỉ thường trú</span>
+                        <span class="v plain">@(string.IsNullOrWhiteSpace(Model.Address) ? "Chưa cập nhật địa chỉ" : Model.Address)</span>
+                    </div>
+                    <div class="kv mb-3">
+                        <span class="k">SĐT người thân (liên hệ khẩn cấp)</span>
+                        <span class="v emergency">@(string.IsNullOrWhiteSpace(Model.EmergencyPhone) ? "Chưa cập nhật" : Model.EmergencyPhone)</span>
+                    </div>
 
-                <a asp-action="Edit" class="btn btn-outline-success btn-sm btn-block font-weight-bold">
-                    Chỉnh sửa thông tin hồ sơ
-                </a>
+                    <a asp-action="Edit" class="btn btn-outline-secondary btn-sm btn-block font-weight-bold" style="border-radius:8px">
+                        Chỉnh sửa thông tin hồ sơ
+                    </a>
+                </div>
             </div>
         </div>
 
         <!-- CỘT PHẢI: TABS QUẢN LÝ -->
-        <div class="col-lg-8 mb-4">
-            <div class="card border-0 shadow-sm rounded-lg bg-white overflow-hidden">
-                <ul class="nav nav-tabs profile-tabs bg-light px-3 pt-2" id="profileTab" role="tablist">
+        <div class="col-lg-8">
+            <div class="detail-card">
+                <ul class="nav nav-tabs profile-tabs" id="profileTab" role="tablist">
                     <li class="nav-item">
                         <a class="nav-link active" id="upcoming-tab" data-toggle="tab" href="#upcoming" role="tab">
                             Lịch sắp tới (@Model.Upcoming)
@@ -172,50 +474,54 @@
                 <div class="tab-content p-4" id="profileTabContent">
                     <!-- TAB 1: LỊCH SẮP TỚI -->
                     <div class="tab-pane fade show active" id="upcoming" role="tabpanel">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h6 class="font-weight-bold text-dark mb-0">Lịch khám bệnh sắp diễn ra</h6>
-                            <a asp-controller="Doctors" asp-action="Index" class="btn btn-success btn-sm font-weight-bold">Đặt lịch mới</a>
+                        <div class="pane-head">
+                            <div class="sub-title">Lịch khám bệnh sắp diễn ra</div>
+                            <a asp-controller="Doctors" asp-action="Index" class="btn btn-primary btn-sm font-weight-bold px-3" style="border-radius:8px">Đặt lịch mới</a>
                         </div>
 
                         @if (!Model.UpcomingList.Any())
                         {
-                            <div class="text-center py-4 text-muted">
-                                <p class="mb-0 small">Bạn không có lịch khám sắp tới nào.</p>
+                            <div class="empty-state">
+                                <i class="fa fa-calendar-o"></i>
+                                Bạn không có lịch khám sắp tới nào.
                             </div>
                         }
                         else
                         {
                             <div class="table-responsive">
-                                <table class="table table-hover table-sm small mb-0">
-                                    <thead class="bg-light">
+                                <table class="appt-table">
+                                    <thead>
                                         <tr>
                                             <th>Mã ca</th>
                                             <th>Ngày giờ</th>
                                             <th>Bác sĩ</th>
                                             <th>Hình thức</th>
                                             <th>Trạng thái</th>
-                                            <th class="text-right">Thao tác</th>
+                                            <th style="text-align:right">Thao tác</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         @foreach (var r in Model.UpcomingList)
                                         {
                                             <tr>
-                                                <td class="font-weight-bold">#TK-@r.AppointId.ToString("D5")</td>
-                                                <td>@r.DateText lúc <b>@r.TimeText</b></td>
-                                                <td>@r.DoctorName</td>
-                                                <td><span class="badge badge-soft-primary">@r.HinhThuc</span></td>
-                                                <td><span class="badge @StatusBadge(r.TrangThai)">@r.TrangThai</span></td>
-                                                <td class="text-right">
+                                                <td><span class="code-chip">TK-@r.AppointId.ToString("D5")</span></td>
+                                                <td>
+                                                    <div class="dt-date">@r.DateText</div>
+                                                    <div class="dt-time"><i class="fa fa-clock-o mr-1"></i>@r.TimeText</div>
+                                                </td>
+                                                <td class="doc-name">@r.DoctorName</td>
+                                                <td><span class="type-cell"><i class="fa @TypeIcon(r.HinhThuc)"></i>@r.HinhThuc</span></td>
+                                                <td><span class="st @StatusClass(r.TrangThai)">@StatusText(r.TrangThai)</span></td>
+                                                <td class="act-cell">
                                                     @if (r.TrangThai == "Chờ thanh toán")
                                                     {
-                                                        <a asp-controller="Appointments" asp-action="Pay" asp-route-id="@r.AppointId" class="btn btn-warning btn-sm py-0 px-2 font-weight-bold">Trả phí</a>
+                                                        <a asp-controller="Appointments" asp-action="Pay" asp-route-id="@r.AppointId" class="btn btn-primary btn-sm">Trả phí</a>
                                                     }
                                                     else if (r.HinhThuc == "Online" && (r.TrangThai == "Đã xác nhận" || r.TrangThai == "Sắp diễn ra"))
                                                     {
-                                                        <a asp-controller="Appointments" asp-action="Room" asp-route-id="@r.AppointId" class="btn btn-primary btn-sm py-0 px-2 font-weight-bold">Vào khám</a>
+                                                        <a asp-controller="Appointments" asp-action="Room" asp-route-id="@r.AppointId" class="btn btn-primary btn-sm">Vào khám</a>
                                                     }
-                                                    <a asp-controller="Appointments" asp-action="Details" asp-route-id="@r.AppointId" class="btn btn-outline-secondary btn-sm py-0 px-2 ml-1">Chi tiết</a>
+                                                    <a asp-controller="Appointments" asp-action="Details" asp-route-id="@r.AppointId" class="btn btn-outline-secondary btn-sm">Chi tiết</a>
                                                 </td>
                                             </tr>
                                         }
@@ -227,44 +533,43 @@
 
                     <!-- TAB 2: LỊCH SỬ KHÁM -->
                     <div class="tab-pane fade" id="records" role="tabpanel">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h6 class="font-weight-bold text-dark mb-0">Lịch sử các lần khám trước đây</h6>
-                            <a asp-controller="Appointments" asp-action="Index" class="small text-success font-weight-bold">Xem toàn bộ &rarr;</a>
+                        <div class="pane-head">
+                            <div class="sub-title">Lịch sử các lần khám trước đây</div>
+                            <a asp-controller="Appointments" asp-action="Index" class="link">Xem toàn bộ &rarr;</a>
                         </div>
 
                         @if (!Model.RecentList.Any())
                         {
-                            <p class="text-muted small mb-0">Chưa có lịch sử khám bệnh.</p>
+                            <div class="empty-state">
+                                <i class="fa fa-folder-open-o"></i>
+                                Chưa có lịch sử khám bệnh.
+                            </div>
                         }
                         else
                         {
                             <div class="table-responsive">
-                                <table class="table table-hover table-sm small mb-0">
-                                    <thead class="bg-light">
+                                <table class="appt-table">
+                                    <thead>
                                         <tr>
                                             <th>Mã ca</th>
                                             <th>Ngày khám</th>
                                             <th>Bác sĩ</th>
                                             <th>Hình thức</th>
                                             <th>Trạng thái</th>
-                                            <th class="text-right">Hồ sơ</th>
+                                            <th style="text-align:right">Hồ sơ</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         @foreach (var r in Model.RecentList)
                                         {
                                             <tr>
-                                                <td class="font-weight-bold">#TK-@r.AppointId.ToString("D5")</td>
-                                                <td>@r.DateText</td>
-                                                <td>@r.DoctorName</td>
-                                                <td>@r.HinhThuc</td>
-                                                <td>
-                                                    <span class="badge @StatusBadge(r.TrangThai)">
-                                                        @r.TrangThai
-                                                    </span>
-                                                </td>
-                                                <td class="text-right">
-                                                    <a asp-controller="Appointments" asp-action="Details" asp-route-id="@r.AppointId" class="btn btn-outline-success btn-sm py-0 px-2">Xem bệnh án</a>
+                                                <td><span class="code-chip">TK-@r.AppointId.ToString("D5")</span></td>
+                                                <td class="dt-date">@r.DateText</td>
+                                                <td class="doc-name">@r.DoctorName</td>
+                                                <td><span class="type-cell"><i class="fa @TypeIcon(r.HinhThuc)"></i>@r.HinhThuc</span></td>
+                                                <td><span class="st @StatusClass(r.TrangThai)">@StatusText(r.TrangThai)</span></td>
+                                                <td class="act-cell">
+                                                    <a asp-controller="Appointments" asp-action="Details" asp-route-id="@r.AppointId" class="btn btn-outline-secondary btn-sm">Xem bệnh án</a>
                                                 </td>
                                             </tr>
                                         }
@@ -276,34 +581,38 @@
 
                     <!-- TAB 3: ĐƠN THUỐC -->
                     <div class="tab-pane fade" id="prescriptions" role="tabpanel">
-                        <h6 class="font-weight-bold text-dark mb-3">Đơn thuốc điện tử</h6>
+                        <div class="pane-head">
+                            <div class="sub-title">Đơn thuốc điện tử</div>
+                        </div>
+
                         @if (!completedApps.Any())
                         {
-                            <div class="text-center py-4 text-muted">
-                                <p class="mb-0 small">Chưa có đơn thuốc nào được lưu trong hệ thống.</p>
+                            <div class="empty-state">
+                                <i class="fa fa-file-text-o"></i>
+                                Chưa có đơn thuốc nào được lưu trong hệ thống.
                             </div>
                         }
                         else
                         {
                             <div class="table-responsive">
-                                <table class="table table-hover table-sm small mb-0">
-                                    <thead class="bg-light">
+                                <table class="appt-table">
+                                    <thead>
                                         <tr>
                                             <th>Mã đơn</th>
                                             <th>Ngày khám</th>
                                             <th>Bác sĩ</th>
-                                            <th class="text-right">Chi tiết</th>
+                                            <th style="text-align:right">Chi tiết</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         @foreach (var app in completedApps)
                                         {
                                             <tr>
-                                                <td class="font-weight-bold">#DT-@app.AppointId.ToString("D5")</td>
-                                                <td>@app.DateText</td>
-                                                <td>@app.DoctorName</td>
-                                                <td class="text-right">
-                                                    <a asp-controller="Appointments" asp-action="Details" asp-route-id="@app.AppointId" class="btn btn-outline-success btn-sm py-0 px-2">Xem toa thuốc</a>
+                                                <td><span class="code-chip">DT-@app.AppointId.ToString("D5")</span></td>
+                                                <td class="dt-date">@app.DateText</td>
+                                                <td class="doc-name">@app.DoctorName</td>
+                                                <td class="act-cell">
+                                                    <a asp-controller="Appointments" asp-action="Details" asp-route-id="@app.AppointId" class="btn btn-outline-secondary btn-sm">Xem toa thuốc</a>
                                                 </td>
                                             </tr>
                                         }

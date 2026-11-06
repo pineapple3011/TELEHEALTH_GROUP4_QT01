@@ -8,153 +8,459 @@
 }
 
 <style>
-    .chip-group { display: flex; flex-wrap: wrap; gap: 8px; }
-    .chip { margin: 0; cursor: pointer; }
-    .chip input { position: absolute; opacity: 0; pointer-events: none; }
-    .chip span { display: inline-block; padding: 7px 14px; border: 1px solid #ced4da; border-radius: 999px; background: #fff; font-size: 14px; font-weight: 600; color: #495057; transition: all .15s; user-select: none; }
-    .chip:hover span { border-color: #007bff; }
-    .chip input:checked + span { background: #007bff; border-color: #007bff; color: #fff; }
-    .chip input:focus-visible + span { box-shadow: 0 0 0 3px rgba(0,123,255,.3); }
-    .chip small { display: block; font-weight: 400; font-size: 12px; opacity: .85; }
-    .slot-chip span { border-radius: 10px; text-align: center; min-width: 120px; }
-    .quick-link { font-size: 13px; margin-right: 10px; }
-    .bulk-summary { background: #eef5ff; border: 1px solid #cfe2ff; color: #0b4a9e; border-radius: 10px; padding: 10px 14px; font-size: 14px; }
-    .bulk-summary.is-empty { background: #f8f9fa; border-color: #e2e6ea; color: #6c757d; }
+    :root {
+        --ap-navy: #1d2b4f;
+        --ap-bar: #2b4c7e;
+        --ap-blue: #0056b3;
+        --ap-line: #e6ecf2;
+        --ap-muted: #6b7785;
+        --ap-head: #e9f0f7;
+        /* Nếu tiêu đề trang dùng font riêng, thay inherit bằng font đó, VD: "Be Vietnam Pro", sans-serif */
+        --ap-font: inherit;
+    }
+
+    /* ===== Đồng bộ font (không đụng tới icon FontAwesome) ===== */
+    .ap-font,
+    .ap-font *:not(.fa):not(.fas):not(.far):not(i) {
+        font-family: var(--ap-font);
+    }
+
+    /* ===== Thẻ thông tin ===== */
+    .detail-card {
+        background: #fff;
+        border: 1px solid var(--ap-line);
+        border-radius: 16px;
+        margin-bottom: 22px;
+        overflow: hidden;
+        box-shadow: 0 4px 16px rgba(23,40,75,.03);
+    }
+
+    .detail-card-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 14px 22px;
+        background: var(--ap-bar);
+        color: #fff;
+        font-weight: 700;
+        font-size: 15px;
+        letter-spacing: .5px;
+        text-transform: uppercase;
+    }
+
+    .detail-card-body {
+        padding: 20px 22px;
+    }
+
+    .sub-title {
+        font-size: 13.5px;
+        font-weight: 700;
+        letter-spacing: .5px;
+        text-transform: uppercase;
+        color: var(--ap-navy);
+        margin: 0 0 10px;
+        padding-left: 10px;
+        border-left: 3px solid var(--ap-blue);
+    }
+
+    /* ===== Trạng thái làm việc ===== */
+    .work-status {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        background: #f4f8fc;
+        border-radius: 12px;
+        padding: 16px 18px;
+        margin-bottom: 14px;
+    }
+
+        .work-status .dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            background: #1aa38f;
+            box-shadow: 0 0 0 5px rgba(26,163,143,.15);
+        }
+
+        .work-status.busy .dot {
+            background: #e0a100;
+            box-shadow: 0 0 0 5px rgba(224,161,0,.15);
+        }
+
+        .work-status .t {
+            font-weight: 800;
+            font-size: 16px;
+            color: var(--ap-navy);
+            line-height: 1.2;
+        }
+
+        .work-status .s {
+            font-size: 13px;
+            color: var(--ap-muted);
+        }
+
+    /* ===== Chip chọn ===== */
+    .chip-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .chip {
+        position: relative;
+        margin: 0;
+        cursor: pointer;
+    }
+
+        .chip input {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .chip span {
+            display: inline-block;
+            padding: 7px 14px;
+            border: 1px solid #d9e2ec;
+            border-radius: 999px;
+            background: #fff;
+            font-size: 14px;
+            font-weight: 600;
+            color: #44546b;
+            transition: all .15s;
+            user-select: none;
+        }
+
+        .chip:hover span {
+            border-color: var(--ap-blue);
+            color: var(--ap-blue);
+        }
+
+        .chip input:checked + span {
+            background: var(--ap-bar);
+            border-color: var(--ap-bar);
+            color: #fff;
+        }
+
+        .chip input:focus-visible + span {
+            box-shadow: 0 0 0 3px rgba(0,86,179,.25);
+        }
+
+        .chip small {
+            display: block;
+            font-weight: 400;
+            font-size: 12px;
+            opacity: .85;
+        }
+
+    .slot-chip span {
+        border-radius: 10px;
+        text-align: center;
+        min-width: 112px;
+    }
+
+    .quick-link {
+        display: inline-block;
+        font-size: 12.5px;
+        font-weight: 600;
+        color: var(--ap-blue);
+        background: #e6effa;
+        border-radius: 999px;
+        padding: 3px 12px;
+        margin: 0 6px 6px 0;
+        text-decoration: none !important;
+    }
+
+        .quick-link:hover {
+            background: #d3e4f7;
+        }
+
+    .form-step {
+        padding-bottom: 16px;
+        margin-bottom: 16px;
+        border-bottom: 1px solid #eef2f6;
+    }
+
+    .detail-card-body .form-control {
+        border-radius: 10px;
+        border: 1px solid #d9e2ec;
+    }
+
+    .bulk-summary {
+        background: #eaf3fb;
+        border: 1px solid #d3e4f4;
+        color: #33415c;
+        border-radius: 12px;
+        padding: 12px 16px;
+        font-size: 14px;
+    }
+
+        .bulk-summary.is-empty {
+            background: #f4f6f9;
+            border-color: #e2e6ea;
+            color: var(--ap-muted);
+        }
+
+    /* ===== Bảng lịch trực ===== */
+    .appt-table {
+        width: 100%;
+        min-width: 560px;
+        border-collapse: collapse;
+        margin: 0;
+    }
+
+        .appt-table thead th {
+            background: var(--ap-head);
+            color: #44546b;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: .5px;
+            text-transform: uppercase;
+            padding: 12px 18px;
+            border: 0;
+            white-space: nowrap;
+        }
+
+        .appt-table tbody td {
+            padding: 14px 18px;
+            vertical-align: middle;
+            border-top: 1px solid #eef2f6;
+            font-size: 14px;
+            color: #3c4858;
+        }
+
+        .appt-table tbody tr:hover {
+            background: #f6f9fc;
+        }
+
+    .dt-date {
+        font-weight: 700;
+        color: var(--ap-navy);
+    }
+
+    .dt-sub {
+        font-size: 12.5px;
+        color: var(--ap-muted);
+        margin-top: 2px;
+    }
+
+    .slot-time {
+        display: inline-block;
+        background: #eef3f9;
+        color: var(--ap-navy);
+        font-weight: 700;
+        font-size: 13px;
+        padding: 4px 12px;
+        border-radius: 8px;
+        white-space: nowrap;
+    }
+
+    .booked-link {
+        display: inline-block;
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--ap-blue);
+        background: #e6effa;
+        border-radius: 999px;
+        padding: 3px 14px;
+        text-decoration: none !important;
+    }
+
+        .booked-link:hover {
+            background: #d3e4f7;
+        }
+
+    .act-cell {
+        text-align: right;
+        white-space: nowrap;
+    }
+
+        .act-cell .btn {
+            font-size: 13px;
+            font-weight: 600;
+            border-radius: 8px;
+            padding: 4px 13px;
+        }
+
+    .empty-state {
+        text-align: center;
+        padding: 44px 20px;
+        color: var(--ap-muted);
+        font-size: 14px;
+    }
+
+        .empty-state i {
+            display: block;
+            font-size: 46px;
+            margin-bottom: 10px;
+            color: #b6c2d0;
+        }
 </style>
 
-<div class="container my-4" style="min-height: 55vh;">
+<div class="container my-4 ap-font" style="min-height: 55vh;">
+    <div class="mb-4">
+        <h3 class="font-weight-bold mb-1" style="color:var(--ap-navy)">Lịch trực &amp; trạng thái</h3>
+        <p class="text-muted mb-0 small">Quản lý trạng thái nhận ca và tạo lịch trực để bệnh nhân chọn được khung giờ khám.</p>
+    </div>
+
     <div class="row">
-        <!-- Trạng thái làm việc -->
+        <!-- CỘT TRÁI -->
         <div class="col-lg-5">
-            <div class="dr-card">
-                <div class="dr-card-title"><i class="fa fa-toggle-on"></i> Trạng thái làm việc</div>
-                <div class="d-flex align-items-center mb-3">
-                    <span class="badge @(doc.IsAvailable ? "badge-soft-turquoise" : "badge-soft-warning") px-3 py-2 rounded-pill mr-3" style="font-size:14px">
-                        @(doc.IsAvailable ? "Available - Sẵn sàng" : "Busy - Đang bận")
-                    </span>
+            <!-- Trạng thái làm việc -->
+            <div class="detail-card">
+                <div class="detail-card-head">
+                    <span>Trạng thái làm việc</span>
                 </div>
-                <p class="text-muted small mb-3">
-                    @(doc.IsAvailable
-                        ? "Bệnh nhân đang thấy bạn ở trạng thái sẵn sàng và có thể đặt lịch. Chuyển sang Bận khi bạn tạm ngưng nhận ca."
-                        : "Bệnh nhân đang thấy bạn ở trạng thái bận. Bật lại Sẵn sàng khi bạn tiếp tục nhận ca.")
-                </p>
-                <form asp-action="SetStatus" method="post">
-                    <input type="hidden" name="status" value="@(doc.IsAvailable ? "Busy" : "Available")" />
-                    <button type="submit" class="btn @(doc.IsAvailable ? "btn-outline-primary" : "btn-success") font-weight-bold">
-                        <i class="fa @(doc.IsAvailable ? "fa-pause-circle" : "fa-play-circle")"></i>
-                        @(doc.IsAvailable ? "Chuyển sang Bận" : "Chuyển sang Sẵn sàng")
-                    </button>
-                </form>
+                <div class="detail-card-body">
+                    <div class="work-status @(doc.IsAvailable ? "" : "busy")">
+                        <span class="dot"></span>
+                        <div>
+                            <div class="t">@(doc.IsAvailable ? "Sẵn sàng nhận ca" : "Đang bận")</div>
+                            <div class="s">@(doc.IsAvailable ? "Available" : "Busy")</div>
+                        </div>
+                    </div>
+                    <p class="text-muted small mb-3">
+                        @(doc.IsAvailable
+                            ? "Bệnh nhân đang thấy bạn ở trạng thái sẵn sàng và có thể đặt lịch. Chuyển sang Bận khi bạn tạm ngưng nhận ca."
+                            : "Bệnh nhân đang thấy bạn ở trạng thái bận. Bật lại Sẵn sàng khi bạn tiếp tục nhận ca.")
+                    </p>
+                    <form asp-action="SetStatus" method="post">
+                        <input type="hidden" name="status" value="@(doc.IsAvailable ? "Busy" : "Available")" />
+                        <button type="submit" class="btn @(doc.IsAvailable ? "btn-outline-secondary" : "btn-primary") btn-block font-weight-bold" style="border-radius:10px">
+                            @(doc.IsAvailable ? "Chuyển sang Bận" : "Chuyển sang Sẵn sàng")
+                        </button>
+                    </form>
+                </div>
             </div>
 
-            <div class="dr-card">
-                <div class="dr-card-title"><i class="fa fa-plus-circle"></i> Thêm ca trực nhanh</div>
-                <form asp-action="CreateBulk" method="post" id="bulkForm">
-                    <!-- 1. Khoảng ngày -->
-                    <label class="small font-weight-bold mb-1">1. Khoảng ngày</label>
-                    <div class="form-row">
-                        <div class="form-group col-6 mb-2">
-                            <input id="bFrom" type="date" name="Bulk.FromDate" class="form-control" min="@today" value="@today" required />
+            <!-- Thêm ca trực nhanh -->
+            <div class="detail-card">
+                <div class="detail-card-head">
+                    <span>Thêm ca trực nhanh</span>
+                </div>
+                <div class="detail-card-body">
+                    <form asp-action="CreateBulk" method="post" id="bulkForm">
+                        <!-- 1. Khoảng ngày -->
+                        <div class="form-step">
+                            <div class="sub-title">1. Khoảng ngày</div>
+                            <div class="form-row">
+                                <div class="form-group col-6 mb-2">
+                                    <input id="bFrom" type="date" name="Bulk.FromDate" class="form-control" min="@today" value="@today" required />
+                                </div>
+                                <div class="form-group col-6 mb-2">
+                                    <input id="bTo" type="date" name="Bulk.ToDate" class="form-control" min="@today" value="@weekLater" required />
+                                </div>
+                            </div>
+                            <div>
+                                <a href="#" class="quick-link" data-range="7">7 ngày tới</a>
+                                <a href="#" class="quick-link" data-range="14">2 tuần tới</a>
+                                <a href="#" class="quick-link" data-range="30">30 ngày tới</a>
+                                <a href="#" class="quick-link" data-range="month">Hết tháng này</a>
+                            </div>
                         </div>
-                        <div class="form-group col-6 mb-2">
-                            <input id="bTo" type="date" name="Bulk.ToDate" class="form-control" min="@today" value="@weekLater" required />
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <a href="#" class="quick-link" data-range="7">7 ngày tới</a>
-                        <a href="#" class="quick-link" data-range="14">2 tuần tới</a>
-                        <a href="#" class="quick-link" data-range="30">30 ngày tới</a>
-                        <a href="#" class="quick-link" data-range="month">Hết tháng này</a>
-                    </div>
 
-                    <!-- 2. Các thứ trong tuần -->
-                    <label class="small font-weight-bold mb-1">2. Trực vào các thứ</label>
-                    <div class="chip-group mb-1">
-                        @foreach (var d in new[] { (1, "T2"), (2, "T3"), (3, "T4"), (4, "T5"), (5, "T6"), (6, "T7"), (0, "CN") })
-                        {
-                            <label class="chip"><input type="checkbox" name="Bulk.Days" value="@d.Item1" class="day-cb" @(d.Item1 >= 1 && d.Item1 <= 5 ? "checked" : "") /><span>@d.Item2</span></label>
-                        }
-                    </div>
-                    <div class="mb-3">
-                        <a href="#" class="quick-link" data-days="1,2,3,4,5">Thứ 2 - Thứ 6</a>
-                        <a href="#" class="quick-link" data-days="0,1,2,3,4,5,6">Cả tuần</a>
-                        <a href="#" class="quick-link" data-days="6,0">Cuối tuần</a>
-                    </div>
-
-                    <!-- 3. Khung giờ -->
-                    <label class="small font-weight-bold mb-1">3. Khung giờ (chọn một hoặc nhiều)</label>
-                    <div class="chip-group mb-2">
-                        <label class="chip slot-chip"><input type="checkbox" name="Bulk.Slots" value="08:00-12:00" class="slot-cb" checked /><span>Sáng<small>08:00 - 12:00</small></span></label>
-                        <label class="chip slot-chip"><input type="checkbox" name="Bulk.Slots" value="13:30-17:30" class="slot-cb" /><span>Chiều<small>13:30 - 17:30</small></span></label>
-                        <label class="chip slot-chip"><input type="checkbox" name="Bulk.Slots" value="18:00-21:00" class="slot-cb" /><span>Tối<small>18:00 - 21:00</small></span></label>
-                    </div>
-                    <div class="form-row align-items-end mb-3">
-                        <div class="col-12"><span class="small text-muted">Hoặc tự đặt khung giờ riêng:</span></div>
-                        <div class="form-group col-6 mb-0">
-                            <input id="cStart" type="time" name="Bulk.CustomStart" class="form-control form-control-sm" />
+                        <!-- 2. Các thứ trong tuần -->
+                        <div class="form-step">
+                            <div class="sub-title">2. Trực vào các thứ</div>
+                            <div class="chip-group mb-2">
+                                @foreach (var d in new[] { (1, "T2"), (2, "T3"), (3, "T4"), (4, "T5"), (5, "T6"), (6, "T7"), (0, "CN") })
+                                {
+                                    <label class="chip"><input type="checkbox" name="Bulk.Days" value="@d.Item1" class="day-cb" @(d.Item1 >= 1 && d.Item1 <= 5 ? "checked" : "") /><span>@d.Item2</span></label>
+                                }
+                            </div>
+                            <div>
+                                <a href="#" class="quick-link" data-days="1,2,3,4,5">Thứ 2 - Thứ 6</a>
+                                <a href="#" class="quick-link" data-days="0,1,2,3,4,5,6">Cả tuần</a>
+                                <a href="#" class="quick-link" data-days="6,0">Cuối tuần</a>
+                            </div>
                         </div>
-                        <div class="form-group col-6 mb-0">
-                            <input id="cEnd" type="time" name="Bulk.CustomEnd" class="form-control form-control-sm" />
-                        </div>
-                    </div>
 
-                    <div id="bulkSummary" class="bulk-summary mb-3"></div>
-                    <button type="submit" class="btn btn-primary font-weight-bold" id="bulkSubmit"><i class="fa fa-save"></i> Tạo lịch trực</button>
-                </form>
+                        <!-- 3. Khung giờ -->
+                        <div class="form-step">
+                            <div class="sub-title">3. Khung giờ (chọn một hoặc nhiều)</div>
+                            <div class="chip-group mb-3">
+                                <label class="chip slot-chip"><input type="checkbox" name="Bulk.Slots" value="08:00-12:00" class="slot-cb" checked /><span>Sáng<small>08:00 - 12:00</small></span></label>
+                                <label class="chip slot-chip"><input type="checkbox" name="Bulk.Slots" value="13:30-17:30" class="slot-cb" /><span>Chiều<small>13:30 - 17:30</small></span></label>
+                                <label class="chip slot-chip"><input type="checkbox" name="Bulk.Slots" value="18:00-21:00" class="slot-cb" /><span>Tối<small>18:00 - 21:00</small></span></label>
+                            </div>
+                            <div class="form-row align-items-end">
+                                <div class="col-12 mb-1"><span class="small text-muted">Hoặc tự đặt khung giờ riêng:</span></div>
+                                <div class="form-group col-6 mb-0">
+                                    <input id="cStart" type="time" name="Bulk.CustomStart" class="form-control form-control-sm" />
+                                </div>
+                                <div class="form-group col-6 mb-0">
+                                    <input id="cEnd" type="time" name="Bulk.CustomEnd" class="form-control form-control-sm" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="bulkSummary" class="bulk-summary mb-3"></div>
+                        <button type="submit" class="btn btn-primary btn-block font-weight-bold" id="bulkSubmit" style="border-radius:10px">Tạo lịch trực</button>
+                    </form>
+                </div>
             </div>
         </div>
 
-        <!-- Danh sách lịch trực -->
+        <!-- CỘT PHẢI: Danh sách lịch trực -->
         <div class="col-lg-7">
-            <div class="dr-card">
-                <div class="dr-card-title"><i class="fa fa-calendar"></i> Lịch trực sắp tới (@Model.Upcoming.Count ca)</div>
+            <div class="detail-card">
+                <div class="detail-card-head">
+                    <span>Lịch trực sắp tới (@Model.Upcoming.Count ca)</span>
+                </div>
                 @if (!Model.Upcoming.Any())
                 {
-                    <div class="text-center text-muted py-4">
-                        <i class="fa fa-calendar-o" style="font-size:44px"></i>
-                        <p class="mt-2 mb-0">Bạn chưa có ca trực nào sắp tới. Thêm ca trực để bệnh nhân chọn được khung giờ khám.</p>
+                    <div class="empty-state">
+                        <i class="fa fa-calendar-o"></i>
+                        Bạn chưa có ca trực nào sắp tới. Thêm ca trực để bệnh nhân chọn được khung giờ khám.
                     </div>
                 }
                 else
                 {
                     <div class="table-responsive">
-                        <table class="table table-hover mb-0">
-                            <thead class="thead-light">
-                                <tr><th>Ngày</th><th>Khung giờ</th><th>Ca đã đặt</th><th></th></tr>
+                        <table class="appt-table">
+                            <thead>
+                                <tr>
+                                    <th>Ngày</th>
+                                    <th>Khung giờ</th>
+                                    <th>Ca đã đặt</th>
+                                    <th style="text-align:right">Thao tác</th>
+                                </tr>
                             </thead>
                             <tbody>
-                            @foreach (var s in Model.Upcoming)
-                            {
-                                <tr>
-                                    <td>
-                                        <b>@s.WorkDate.ToString("dd/MM/yyyy")</b>
-                                        <div class="small text-muted">@days[(int)s.WorkDate.DayOfWeek]</div>
-                                    </td>
-                                    <td><span class="font-weight-bold text-success">@DateTime.Today.Add(s.StartTime).ToString("HH:mm") - @DateTime.Today.Add(s.EndTime).ToString("HH:mm")</span></td>
-                                    <td>
-                                        @if (s.ActiveAppointments > 0)
-                                        {
-                                            <a asp-controller="Appointments" asp-action="Index" asp-route-date="@s.WorkDate.ToString("yyyy-MM-dd")" class="badge badge-soft-info px-3 py-1 rounded-pill">@s.ActiveAppointments ca</a>
-                                        }
-                                        else
-                                        {
-                                            <span class="text-muted small">Chưa có</span>
-                                        }
-                                    </td>
-                                    <td class="text-right">
-                                        @if (s.ActiveAppointments == 0)
-                                        {
-                                            <form asp-action="Delete" asp-route-id="@s.ScheduleId" method="post" class="d-inline" onsubmit="return confirm('Xóa ca trực này?');">
-                                                <button type="submit" class="btn btn-sm btn-outline-danger">Xóa</button>
-                                            </form>
-                                        }
-                                        else
-                                        {
-                                            <span class="text-muted small" title="Đang có bệnh nhân đặt lịch">Đang có ca</span>
-                                        }
-                                    </td>
-                                </tr>
-                            }
+                                @foreach (var s in Model.Upcoming)
+                                {
+                                    <tr>
+                                        <td>
+                                            <div class="dt-date">@s.WorkDate.ToString("dd/MM/yyyy")</div>
+                                            <div class="dt-sub">@days[(int)s.WorkDate.DayOfWeek]</div>
+                                        </td>
+                                        <td><span class="slot-time">@DateTime.Today.Add(s.StartTime).ToString("HH:mm") - @DateTime.Today.Add(s.EndTime).ToString("HH:mm")</span></td>
+                                        <td>
+                                            @if (s.ActiveAppointments > 0)
+                                            {
+                                                <a asp-controller="Appointments" asp-action="Index" asp-route-date="@s.WorkDate.ToString("yyyy-MM-dd")" class="booked-link">@s.ActiveAppointments ca</a>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted small">Chưa có</span>
+                                            }
+                                        </td>
+                                        <td class="act-cell">
+                                            @if (s.ActiveAppointments == 0)
+                                            {
+                                                <form asp-action="Delete" asp-route-id="@s.ScheduleId" method="post" class="d-inline" onsubmit="return confirm('Xóa ca trực này?');">
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger">Xóa</button>
+                                                </form>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted small" title="Đang có bệnh nhân đặt lịch">Đang có ca</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
                             </tbody>
                         </table>
                     </div>

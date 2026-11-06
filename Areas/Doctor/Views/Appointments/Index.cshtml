@@ -4,52 +4,394 @@
     var days = new[] { "Chủ nhật", "Thứ hai", "Thứ ba", "Thứ tư", "Thứ năm", "Thứ sáu", "Thứ bảy" };
     var rows = Model.Rows;
     var dateStr = Model.Date.ToString("yyyy-MM-dd");
+
+    var tiles = new[]
+    {
+        (Key: "all", Label: "Tất cả ca", Count: rows.Count, Icon: "fa-calendar-o"),
+        (Key: "pending", Label: "Chờ xác nhận", Count: rows.Count(r => r.IsPending), Icon: "fa-hourglass-half"),
+        (Key: "confirmed", Label: "Đã xác nhận", Count: rows.Count(r => r.IsConfirmed), Icon: "fa-check-circle-o"),
+        (Key: "completed", Label: "Đã khám xong", Count: rows.Count(r => r.IsCompleted), Icon: "fa-stethoscope")
+    };
 }
 
-<div class="container my-4" style="min-height: 55vh;">
+<style>
+    :root {
+        --ap-navy: #1d2b4f;
+        --ap-bar: #2b4c7e;
+        --ap-blue: #0056b3;
+        --ap-line: #e6ecf2;
+        --ap-muted: #6b7785;
+        --ap-head: #e9f0f7;
+        /* Nếu tiêu đề trang dùng font riêng, thay inherit bằng font đó, VD: "Be Vietnam Pro", sans-serif */
+        --ap-font: inherit;
+    }
 
-    <!-- Chọn ngày -->
+    /* ===== Đồng bộ font (không đụng tới icon FontAwesome) ===== */
+    .ap-font,
+    .ap-font *:not(.fa):not(.fas):not(.far):not(i) {
+        font-family: var(--ap-font);
+    }
+
+    .today-chip {
+        display: inline-block;
+        font-size: 12.5px;
+        font-weight: 700;
+        letter-spacing: .4px;
+        color: var(--ap-blue);
+        background: #e6effa;
+        padding: 3px 12px;
+        border-radius: 999px;
+        margin-left: 10px;
+        vertical-align: middle;
+    }
+
+    .date-nav .form-control {
+        border-radius: 8px;
+        border: 1px solid #d9e2ec;
+    }
+
+    .date-nav .btn {
+        border-radius: 8px;
+        font-weight: 600;
+    }
+
+    /* ===== Thẻ thống kê (đồng thời là bộ lọc) ===== */
+    .stat-tile {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        height: 100%;
+        padding: 16px 18px;
+        background: #fff;
+        border: 1px solid var(--ap-line);
+        border-radius: 14px;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+        transition: transform .2s, box-shadow .2s, border-color .2s;
+    }
+
+        .stat-tile::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            height: 3px;
+            background: var(--ap-blue);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform .25s;
+        }
+
+        .stat-tile:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(23,40,75,.08);
+        }
+
+        .stat-tile.active {
+            border-color: #bcd2ea;
+            box-shadow: 0 8px 20px rgba(0,86,179,.10);
+        }
+
+            .stat-tile.active::after {
+                transform: scaleX(1);
+            }
+
+        .stat-tile .ico {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+            background: #eaf1f9;
+            color: var(--ap-blue);
+        }
+
+        .stat-tile .num {
+            font-size: 26px;
+            font-weight: 800;
+            line-height: 1;
+            color: var(--ap-navy);
+        }
+
+        .stat-tile .lbl {
+            font-size: 13px;
+            color: var(--ap-muted);
+            font-weight: 600;
+            margin-top: 4px;
+        }
+
+    /* ===== Khung lưu ý ===== */
+    .appt-note {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: #eaf3fb;
+        border: 1px solid #d3e4f4;
+        border-radius: 14px;
+        padding: 13px 20px;
+        margin-bottom: 20px;
+        font-size: 14px;
+        color: #33415c;
+    }
+
+        .appt-note i {
+            color: var(--ap-blue);
+        }
+
+    /* ===== Khung danh sách ===== */
+    .appt-panel {
+        background: #fff;
+        border: 1px solid var(--ap-line);
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 6px 22px rgba(23,40,75,.04);
+    }
+
+    .panel-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 8px;
+        background: var(--ap-bar);
+        color: #fff;
+        padding: 14px 22px;
+    }
+
+        .panel-bar .ttl {
+            font-weight: 700;
+            font-size: 14px;
+            letter-spacing: .6px;
+            text-transform: uppercase;
+        }
+
+        .panel-bar .meta {
+            font-size: 13px;
+            opacity: .9;
+        }
+
+    .appt-table {
+        width: 100%;
+        min-width: 900px;
+        border-collapse: collapse;
+        margin: 0;
+    }
+
+        .appt-table thead th {
+            background: var(--ap-head);
+            color: #44546b;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: .5px;
+            text-transform: uppercase;
+            padding: 12px 18px;
+            border: 0;
+            white-space: nowrap;
+        }
+
+        .appt-table tbody td {
+            padding: 16px 18px;
+            vertical-align: middle;
+            border-top: 1px solid #eef2f6;
+            font-size: 14px;
+            color: #3c4858;
+        }
+
+        .appt-table tbody tr:hover {
+            background: #f6f9fc;
+        }
+
+    .code-chip {
+        display: inline-block;
+        background: #eef3f9;
+        color: var(--ap-navy);
+        font-weight: 700;
+        font-size: 12.5px;
+        padding: 3px 10px;
+        border-radius: 8px;
+        white-space: nowrap;
+    }
+
+    .dt-time {
+        font-size: 17px;
+        font-weight: 800;
+        color: var(--ap-navy);
+        margin-bottom: 4px;
+    }
+
+    .pt-cell {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .pt-avatar {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-weight: 700;
+        background: linear-gradient(135deg, #2b4c7e, #1f6fc2);
+    }
+
+    .pt-name {
+        font-weight: 700;
+        color: var(--ap-navy);
+        line-height: 1.25;
+    }
+
+    .pt-sub {
+        font-size: 12.5px;
+        color: var(--ap-muted);
+    }
+
+    .type-cell i {
+        width: 18px;
+        color: var(--ap-muted);
+    }
+
+    .type-sub {
+        font-size: 12.5px;
+        color: var(--ap-muted);
+        margin-top: 3px;
+    }
+
+        .type-sub i {
+            margin-right: 4px;
+        }
+
+    /* Trạng thái dạng chấm + chữ */
+    .st {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13.5px;
+        font-weight: 600;
+        color: #44546b;
+        white-space: nowrap;
+    }
+
+        .st::before {
+            content: "";
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #aab4c0;
+        }
+
+        .st.confirmed::before {
+            background: #0056b3;
+        }
+
+        .st.done {
+            color: #138a7a;
+        }
+
+            .st.done::before {
+                background: #1aa38f;
+            }
+
+        .st.cancelled {
+            color: #c0392b;
+        }
+
+            .st.cancelled::before {
+                background: #c0392b;
+            }
+
+    .act-cell {
+        text-align: right;
+        white-space: nowrap;
+    }
+
+        .act-cell .btn {
+            font-size: 13px;
+            font-weight: 600;
+            border-radius: 8px;
+            padding: 5px 13px;
+            margin-left: 4px;
+        }
+
+    .empty-card {
+        background: #fff;
+        border: 1px solid var(--ap-line);
+        border-radius: 16px;
+        padding: 48px 20px;
+        text-align: center;
+        box-shadow: 0 6px 22px rgba(23,40,75,.04);
+    }
+
+        .empty-card i.big {
+            font-size: 52px;
+            color: #b6c2d0;
+        }
+</style>
+
+<div class="container my-4 ap-font" style="min-height: 55vh;">
+
+    <!-- Tiêu đề & chọn ngày -->
     <div class="d-flex flex-wrap align-items-center justify-content-between mb-4">
         <div>
-            <h3 class="font-weight-bold text-dark mb-1">
-                <i class="fa fa-stethoscope text-success mr-2"></i>
+            <h3 class="font-weight-bold mb-1" style="color:var(--ap-navy)">
                 @days[(int)Model.Date.DayOfWeek], @Model.Date.ToString("dd/MM/yyyy")
-                @if (Model.Date.Date == DateTime.Today) { <span class="badge badge-soft-turquoise rounded-pill ml-2" style="font-size:13px">Hôm nay</span> }
+                @if (Model.Date.Date == DateTime.Today)
+                {
+                    <span class="today-chip">Hôm nay</span>
+                }
             </h3>
             <p class="text-muted mb-0 small">Xác nhận lịch hẹn, xem hồ sơ đính kèm của bệnh nhân và bắt đầu khám.</p>
         </div>
-        <form method="get" asp-action="Index" class="form-inline mt-3 mt-md-0" id="dateForm">
+        <form method="get" asp-action="Index" class="form-inline date-nav mt-3 mt-md-0" id="dateForm">
             <a asp-action="Index" asp-route-date="@Model.Date.AddDays(-1).ToString("yyyy-MM-dd")" class="btn btn-outline-secondary btn-sm mr-1" title="Ngày trước"><i class="fa fa-chevron-left"></i></a>
             <input type="date" name="date" value="@dateStr" class="form-control form-control-sm" onchange="document.getElementById('dateForm').submit()" />
             <a asp-action="Index" asp-route-date="@Model.Date.AddDays(1).ToString("yyyy-MM-dd")" class="btn btn-outline-secondary btn-sm ml-1" title="Ngày sau"><i class="fa fa-chevron-right"></i></a>
-            <a asp-action="Index" class="btn btn-outline-success btn-sm ml-2">Hôm nay</a>
+            <a asp-action="Index" class="btn btn-primary btn-sm ml-2 px-3">Hôm nay</a>
         </form>
     </div>
 
     @if (Model.PendingElsewhere > 0)
     {
-        <div class="alert alert-warning small shadow-sm">
-            <i class="fa fa-bell"></i> Bạn còn <b>@Model.PendingElsewhere</b> ca đang chờ xác nhận ở các ngày khác.
+        <div class="appt-note">
+            <i class="fa fa-bell"></i>
+            <span>Bạn còn <b>@Model.PendingElsewhere</b> ca đang chờ xác nhận ở các ngày khác.</span>
+            <a asp-action="All" asp-route-status="pending" class="btn btn-primary btn-sm ml-auto" style="border-radius:8px">Xem ngay</a>
         </div>
     }
 
-    <!-- Thống kê / lọc -->
-    <div class="row mb-4">
-        <div class="col-6 col-md-3 mb-3"><div class="dr-stat-card active-stat" onclick="filterBy('all', this)"><div class="dr-stat-num">@rows.Count</div><p class="dr-stat-label">Tất cả ca</p></div></div>
-        <div class="col-6 col-md-3 mb-3"><div class="dr-stat-card" onclick="filterBy('pending', this)"><div class="dr-stat-num">@rows.Count(r => r.IsPending)</div><p class="dr-stat-label">Chờ xác nhận</p></div></div>
-        <div class="col-6 col-md-3 mb-3"><div class="dr-stat-card" onclick="filterBy('confirmed', this)"><div class="dr-stat-num">@rows.Count(r => r.IsConfirmed)</div><p class="dr-stat-label">Đã xác nhận</p></div></div>
-        <div class="col-6 col-md-3 mb-3"><div class="dr-stat-card" onclick="filterBy('completed', this)"><div class="dr-stat-num">@rows.Count(r => r.IsCompleted)</div><p class="dr-stat-label">Đã khám xong</p></div></div>
+    <!-- Thẻ thống kê / bộ lọc -->
+    <div class="row mb-2">
+        @foreach (var t in tiles)
+        {
+            <div class="col-6 col-md-3 mb-3">
+                <div class="stat-tile @(t.Key == "all" ? "active" : "")" onclick="filterBy('@t.Key', this)">
+                    <span class="ico"><i class="fa @t.Icon"></i></span>
+                    <div>
+                        <div class="num">@t.Count</div>
+                        <div class="lbl">@t.Label</div>
+                    </div>
+                </div>
+            </div>
+        }
     </div>
 
     @if (!rows.Any())
     {
-        <div class="dr-card text-center py-5">
-            <i class="fa fa-calendar-times-o text-muted" style="font-size:52px"></i>
-            <h5 class="font-weight-bold text-dark mt-3">Không có ca khám nào trong ngày này</h5>
+        <div class="empty-card">
+            <i class="fa fa-calendar-times-o big"></i>
+            <h5 class="font-weight-bold mt-3" style="color:var(--ap-navy)">Không có ca khám nào trong ngày này</h5>
             @if (Model.NextDateWithAppointments.HasValue)
             {
                 <p class="text-muted mb-3">Ca khám gần nhất của bạn là ngày <b>@Model.NextDateWithAppointments.Value.ToString("dd/MM/yyyy")</b>.</p>
-                <a asp-action="Index" asp-route-date="@Model.NextDateWithAppointments.Value.ToString("yyyy-MM-dd")" class="btn btn-primary font-weight-bold">Xem ngày @Model.NextDateWithAppointments.Value.ToString("dd/MM")</a>
+                <a asp-action="Index" asp-route-date="@Model.NextDateWithAppointments.Value.ToString("yyyy-MM-dd")" class="btn btn-primary font-weight-bold px-4" style="border-radius:10px">Xem ngày @Model.NextDateWithAppointments.Value.ToString("dd/MM")</a>
             }
             else
             {
@@ -59,72 +401,104 @@
     }
     else
     {
-        <div id="apptList">
-        @foreach (var r in rows)
-        {
-            var st = r.IsCancelled ? "cancelled" : r.IsCompleted ? "completed" : r.IsConfirmed ? "confirmed" : "pending";
-            <div class="appt-row" data-status="@st">
-                <div class="dr-card">
-                    <div class="row align-items-center">
-                        <div class="col-md-2 text-center mb-3 mb-md-0">
-                            <div class="dr-time">@r.TimeText</div>
-                            <div class="small text-muted mt-1">@r.Code</div>
-                        </div>
+        <div class="appt-panel">
+            <div class="panel-bar">
+                <span class="ttl">Danh sách ca khám trong ngày</span>
+                <span class="meta">Hiển thị <b id="visibleCount">@rows.Count</b> / @rows.Count ca</span>
+            </div>
+            <div class="table-responsive">
+                <table class="appt-table" id="apptList">
+                    <thead>
+                        <tr>
+                            <th>Giờ hẹn</th>
+                            <th>Bệnh nhân</th>
+                            <th>Hình thức</th>
+                            <th>Trạng thái</th>
+                            <th style="text-align:right">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var r in rows)
+                        {
+                            var st = r.IsCancelled ? "cancelled" : r.IsCompleted ? "completed" : r.IsConfirmed ? "confirmed" : "pending";
+                            var stClass = r.IsCancelled ? "cancelled" : r.IsCompleted ? "done" : r.IsConfirmed ? "confirmed" : "pending";
+                            var stText = r.IsCancelled ? "Đã hủy" : r.IsCompleted ? "Đã khám xong" : r.IsConfirmed ? "Đã xác nhận" : "Chờ xác nhận";
 
-                        <div class="col-md-5 mb-3 mb-md-0">
-                            <div class="d-flex align-items-center">
-                                <div class="dr-avatar mr-3">@(r.PatientName.Length > 0 ? r.PatientName.Split(' ').Last().Substring(0, 1).ToUpper() : "BN")</div>
-                                <div>
-                                    <h6 class="font-weight-bold mb-1 text-dark">@r.PatientName</h6>
-                                    <div class="small text-muted"><i class="fa fa-phone"></i> @r.PatientPhone</div>
-                                    <div class="mt-1">
-                                        @if (r.BookingType == "Online") { <span class="badge badge-soft-primary rounded-pill px-2"><i class="fa fa-video-camera"></i> Trực tuyến</span> }
-                                        else if (r.BookingType == "Cấp cứu") { <span class="badge badge-soft-danger rounded-pill px-2"><i class="fa fa-ambulance"></i> Cấp cứu@(string.IsNullOrEmpty(r.TriageLevel) ? "" : " - mức " + r.TriageLevel)</span> }
-                                        else { <span class="badge badge-soft-secondary rounded-pill px-2"><i class="fa fa-hospital-o"></i> Tại viện</span> }
-                                        @if (r.FileCount > 0) { <span class="badge badge-soft-info rounded-pill px-2"><i class="fa fa-paperclip"></i> @r.FileCount tệp</span> }
+                            <tr class="appt-row" data-status="@st">
+                                <td>
+                                    <div class="dt-time">@r.TimeText</div>
+                                    <span class="code-chip">@r.Code</span>
+                                </td>
+
+                                <td>
+                                    <div class="pt-cell">
+                                        <div class="pt-avatar">@(r.PatientName.Length > 0 ? r.PatientName.Split(' ').Last().Substring(0, 1).ToUpper() : "BN")</div>
+                                        <div>
+                                            <div class="pt-name">@r.PatientName</div>
+                                            <div class="pt-sub"><i class="fa fa-phone"></i> @r.PatientPhone</div>
+                                        </div>
                                     </div>
-                                </div>
-                            </div>
-                        </div>
+                                </td>
 
-                        <div class="col-md-2 mb-3 mb-md-0 text-md-center">
-                            @if (r.IsPending) { <span class="badge badge-soft-warning px-3 py-1 rounded-pill">Chờ xác nhận</span> }
-                            else if (r.IsConfirmed) { <span class="badge badge-soft-success px-3 py-1 rounded-pill">Đã xác nhận</span> }
-                            else if (r.IsCompleted) { <span class="badge badge-soft-turquoise px-3 py-1 rounded-pill">Đã khám xong</span> }
-                            else { <span class="badge badge-soft-danger px-3 py-1 rounded-pill">Đã hủy</span> }
-                        </div>
-
-                        <div class="col-md-3 text-md-right dr-btn-group">
-                            @if (r.IsPending)
-                            {
-                                <form asp-action="Confirm" asp-route-id="@r.AppointId" asp-route-date="@dateStr" method="post" class="d-inline">
-                                    <button type="submit" class="btn btn-success">Xác nhận</button>
-                                </form>
-                            }
-                            @if (r.IsConfirmed)
-                            {
+                                <td>
                                     @if (r.BookingType == "Online")
                                     {
-                                        <a asp-action="Room" asp-route-id="@r.AppointId" class="btn btn-outline-primary"><i class="fa fa-video-camera"></i> Vào phòng</a>
+                                        <span class="type-cell"><i class="fa fa-video-camera"></i>Trực tuyến</span>
                                     }
-                                <a asp-controller="Consultations" asp-action="Exam" asp-route-id="@r.AppointId" class="btn btn-primary shadow-sm">Khám bệnh</a>
-                            }
-                            @if (r.IsCompleted)
-                            {
-                                <a asp-controller="Consultations" asp-action="Exam" asp-route-id="@r.AppointId" class="btn btn-outline-turquoise">Xem bệnh án</a>
-                            }
-                            <a asp-action="Details" asp-route-id="@r.AppointId" class="btn btn-outline-secondary">Chi tiết</a>
-                            @if (r.IsPending || r.IsConfirmed)
-                            {
-                                <form asp-action="Reject" asp-route-id="@r.AppointId" asp-route-date="@dateStr" method="post" class="d-inline" onsubmit="return confirm('Hủy ca khám @r.Code của @r.PatientName?');">
-                                    <button type="submit" class="btn btn-outline-danger">Hủy</button>
-                                </form>
-                            }
-                        </div>
-                    </div>
-                </div>
+                                    else if (r.BookingType == "Cấp cứu")
+                                    {
+                                        <span class="type-cell"><i class="fa fa-ambulance"></i>Cấp cứu@(string.IsNullOrEmpty(r.TriageLevel) ? "" : " - mức " + r.TriageLevel)</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="type-cell"><i class="fa fa-hospital-o"></i>Tại viện</span>
+                                    }
+                                    @if (r.FileCount > 0)
+                                    {
+                                        <div class="type-sub"><i class="fa fa-paperclip"></i>@r.FileCount tệp đính kèm</div>
+                                    }
+                                </td>
+
+                                <td><span class="st @stClass">@stText</span></td>
+
+                                <td class="act-cell">
+                                    @if (r.IsPending)
+                                    {
+                                        <form asp-action="Confirm" asp-route-id="@r.AppointId" asp-route-date="@dateStr" method="post" class="d-inline">
+                                            <button type="submit" class="btn btn-primary btn-sm">Xác nhận</button>
+                                        </form>
+                                    }
+                                    @if (r.IsConfirmed)
+                                    {
+                                        if (r.BookingType == "Online")
+                                        {
+                                            <a asp-action="Room" asp-route-id="@r.AppointId" class="btn btn-outline-primary btn-sm"><i class="fa fa-video-camera"></i> Vào phòng</a>
+                                        }
+                                        <a asp-controller="Consultations" asp-action="Exam" asp-route-id="@r.AppointId" class="btn btn-primary btn-sm">Khám bệnh</a>
+                                    }
+                                    @if (r.IsCompleted)
+                                    {
+                                        <a asp-controller="Consultations" asp-action="Exam" asp-route-id="@r.AppointId" class="btn btn-outline-secondary btn-sm">Xem bệnh án</a>
+                                    }
+                                    <a asp-action="Details" asp-route-id="@r.AppointId" class="btn btn-outline-secondary btn-sm">Chi tiết</a>
+                                    @if (r.IsPending || r.IsConfirmed)
+                                    {
+                                        <form asp-action="Reject" asp-route-id="@r.AppointId" asp-route-date="@dateStr" method="post" class="d-inline" onsubmit="return confirm('Hủy ca khám @r.Code của @r.PatientName?');">
+                                            <button type="submit" class="btn btn-outline-danger btn-sm">Hủy</button>
+                                        </form>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                        <tr id="emptyRow" style="display:none">
+                            <td colspan="5" class="text-center text-muted py-5">
+                                <i class="fa fa-inbox" style="font-size:34px"></i>
+                                <div class="mt-2">Không có ca khám nào trong mục này.</div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
-        }
         </div>
     }
 </div>
@@ -132,12 +506,16 @@
 @section Scripts {
     <script>
         function filterBy(status, el) {
-            $('.dr-stat-card').removeClass('active-stat');
-            $(el).addClass('active-stat');
+            $('.stat-tile').removeClass('active');
+            $(el).addClass('active');
+            var visible = 0;
             $('.appt-row').each(function () {
                 var ok = status === 'all' || $(this).data('status') === status;
                 $(this).toggle(ok);
+                if (ok) visible++;
             });
+            $('#visibleCount').text(visible);
+            $('#emptyRow').toggle(visible === 0);
         }
     </script>
 }

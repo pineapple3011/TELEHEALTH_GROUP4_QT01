@@ -8,24 +8,114 @@
     var canCancel = (Model.TrangThai == "Chờ xác nhận" || Model.TrangThai == "Đã xác nhận");
     var canJoinOnline = isOnline && !isCancelled;
     var receiptFile = Model.Files.FirstOrDefault(f => f.Loai != null && (f.Loai.Contains("Biên lai") || f.Loai.Contains("receipt")));
+
+    var statusText = isCompleted ? "Đã khám xong" : Model.TrangThai;
+
+    var dotColor = isCompleted ? "#7fe9d6" : "#ffffff";
+    var statusCls = isCancelled ? "cancelled" : "";
+
+    var nameParts = (Model.DoctorName ?? "").Split(' ', StringSplitOptions.RemoveEmptyEntries);
+    var initial = nameParts.Length > 0 ? nameParts[nameParts.Length - 1].Substring(0, 1).ToUpper() : "B";
 }
 
 <style>
+    :root {
+        --ap-navy: #1d2b4f;
+        --ap-bar: #2b4c7e;
+        --ap-blue: #0056b3;
+        --ap-teal: #2c9d8f;
+        --ap-line: #e6ecf2;
+        --ap-muted: #6b7785;
+        /* Nếu tiêu đề trang dùng font riêng, thay inherit bằng font đó, VD: "Be Vietnam Pro", sans-serif */
+        --ap-font: inherit;
+    }
+
+    /* ===== Đồng bộ font (không đụng tới icon FontAwesome) ===== */
+    .ap-font,
+    .ap-font *:not(.fa):not(.fas):not(.far):not(i) {
+        font-family: var(--ap-font);
+    }
+
+    /* ===== Banner gradient ===== */
+    .dt-banner {
+        background: linear-gradient(135deg, #2b4c7e, #1f6fc2);
+        border-radius: 18px;
+        padding: 28px 32px;
+        color: #fff;
+        margin-bottom: 22px;
+        box-shadow: 0 10px 28px rgba(0,86,179,.18);
+    }
+
+        .dt-banner .code {
+            display: inline-block;
+            font-size: 12.5px;
+            font-weight: 700;
+            letter-spacing: .6px;
+            padding: 4px 14px;
+            border-radius: 999px;
+            background: rgba(255,255,255,.18);
+            margin-right: 10px;
+        }
+
+        .dt-banner .status {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            padding: 4px 14px;
+            border-radius: 999px;
+            background: rgba(255,255,255,.18);
+        }
+
+            .dt-banner .status.cancelled {
+                background: #b3261e;
+            }
+
+            .dt-banner .status::before {
+                content: "";
+                width: 8px;
+                height: 8px;
+                border-radius: 50%;
+                background: var(--dot, #fff);
+            }
+
+        .dt-banner h3 {
+            color: #fff;
+            font-weight: 800;
+            margin: 14px 0 6px;
+        }
+
+        .dt-banner .sub {
+            opacity: .92;
+            font-size: 14px;
+            margin: 0;
+        }
+
+    /* ===== Tiến trình ===== */
+    .dt-steps-card {
+        background: #fff;
+        border: 1px solid var(--ap-line);
+        border-radius: 16px;
+        padding: 22px 26px 8px;
+        margin-bottom: 22px;
+    }
+
     .stepper-wrap {
         display: flex;
         justify-content: space-between;
         position: relative;
-        margin: 20px 0 35px;
+        margin: 18px 0 22px;
     }
 
         .stepper-wrap::before {
             content: '';
             position: absolute;
-            top: 20px;
-            left: 40px;
-            right: 40px;
-            height: 4px;
-            background: #e9ecef;
+            top: 17px;
+            left: 8%;
+            right: 8%;
+            height: 3px;
+            background: #e6ecf2;
             z-index: 1;
         }
 
@@ -37,122 +127,341 @@
     }
 
     .step-circle {
-        width: 42px;
-        height: 42px;
+        width: 36px;
+        height: 36px;
         border-radius: 50%;
         background: #fff;
-        border: 3px solid #dee2e6;
+        border: 2px solid #d5dde6;
         display: flex;
         align-items: center;
         justify-content: center;
         margin: 0 auto 10px;
         font-weight: 700;
-        color: #6c757d;
+        font-size: 14px;
+        color: #8a96a5;
         transition: all .25s;
     }
 
-    .step-item.active .step-circle {
-        border-color: #0056b3;
-        background: #2c9d8f;
+    .step-item.completed .step-circle {
+        border-color: transparent;
+        background: linear-gradient(135deg, #2b4c7e, #1f6fc2);
         color: #fff;
-        box-shadow: 0 0 0 5px rgba(112,199,69,0.25);
     }
 
-    .step-item.completed .step-circle {
-        border-color: #0056b3;
-        background: #2c9d8f;
-        color: #fff;
+    .step-item.active .step-circle {
+        border-color: var(--ap-blue);
+        color: var(--ap-blue);
+        box-shadow: 0 0 0 5px rgba(0,86,179,.12);
     }
 
     .step-title {
         font-size: 13px;
-        font-weight: 600;
-        color: #495057;
+        font-weight: 700;
+        color: var(--ap-navy);
         margin-bottom: 2px;
     }
 
     .step-desc {
-        font-size: 11px;
-        color: #868e96;
+        font-size: 12px;
+        color: var(--ap-muted);
     }
 
+    /* ===== Thẻ thông tin ===== */
     .detail-card {
         background: #fff;
-        border-radius: 12px;
-        border: 1px solid #e9ecef;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.02);
-        margin-bottom: 24px;
+        border: 1px solid var(--ap-line);
+        border-radius: 16px;
+        margin-bottom: 22px;
         overflow: hidden;
+        box-shadow: 0 4px 16px rgba(23,40,75,.03);
     }
 
+    /* Header thẻ: thanh dark blue, chữ trắng */
     .detail-card-head {
-        padding: 16px 20px;
-        background: #fdfdfd;
-        border-bottom: 1px solid #f1f3f5;
-        font-weight: 700;
-        font-size: 15px;
-        color: #0056b3;
         display: flex;
         align-items: center;
         justify-content: space-between;
+        gap: 10px;
+        padding: 14px 22px;
+        background: var(--ap-bar);
+        color: #fff;
+        font-weight: 700;
+        font-size: 15px;
+        letter-spacing: .5px;
+        text-transform: uppercase;
     }
 
-        .detail-card-head .text-success {
-            color: #0056b3 !important;
+        .detail-card-head a.more {
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 0;
+            text-transform: none;
+            color: #9fd3ff;
         }
 
+            .detail-card-head a.more:hover {
+                color: #fff;
+            }
+
+        /* badge trạng thái nằm trong header tối */
+        .detail-card-head .st {
+            color: #fff;
+        }
+
+            .detail-card-head .st::before {
+                background: #ffd27f;
+            }
+
+            .detail-card-head .st.done {
+                color: #7fe9d6;
+            }
+
+                .detail-card-head .st.done::before {
+                    background: #7fe9d6;
+                }
+
     .detail-card-body {
-        padding: 20px;
+        padding: 20px 22px;
     }
 
     .doc-avatar-lg {
-        width: 80px;
-        height: 80px;
-        border-radius: 14px;
+        width: 64px;
+        height: 64px;
+        border-radius: 16px;
+        flex-shrink: 0;
         display: flex;
         align-items: center;
         justify-content: center;
         color: #fff;
-        font-size: 26px;
+        font-size: 24px;
         font-weight: 700;
-        background: linear-gradient(135deg, #0056b3, #2c9d8f);
+        background: linear-gradient(135deg, #2b4c7e, #1f6fc2);
     }
 
-    .rx-table th {
-        background: #f8f9fa;
+    .kv {
+        display: flex;
+        justify-content: space-between;
+        gap: 18px;
+        padding: 11px 0;
+        border-bottom: 1px solid #eef2f6;
+        font-size: 14px;
+    }
+
+        .kv:last-child {
+            border-bottom: 0;
+        }
+
+        .kv .k {
+            color: var(--ap-muted);
+            flex-shrink: 0;
+        }
+
+        .kv .v {
+            font-weight: 700;
+            color: var(--ap-navy);
+            text-align: right;
+        }
+
+    .soft-box {
+        background: #f4f8fc;
+        border-radius: 12px;
+        padding: 14px 16px;
+        font-size: 13.5px;
+        color: #44546b;
+    }
+
+        .soft-box b {
+            color: var(--ap-navy);
+        }
+
+    /* Tiêu đề phụ trong thân thẻ: đậm, navy, có gạch xanh bên trái */
+    .sub-title {
+        font-size: 13.5px;
         font-weight: 700;
+        letter-spacing: .5px;
+        text-transform: uppercase;
+        color: var(--ap-navy);
+        margin: 18px 0 10px;
+        padding-left: 10px;
+        border-left: 3px solid var(--ap-blue);
+    }
+
+    .file-row {
+        display: block;
+        padding: 9px 14px;
+        border: 1px solid var(--ap-line);
+        border-left: 3px solid var(--ap-blue);
+        border-radius: 10px;
+        background: #fff;
+        color: var(--ap-navy);
+        font-size: 13.5px;
+        text-decoration: none !important;
+        transition: background .15s;
+    }
+
+        .file-row:hover {
+            background: #f6f9fc;
+        }
+
+        .file-row .d {
+            font-size: 12px;
+            color: var(--ap-muted);
+        }
+
+    /* Trạng thái dạng chấm + chữ */
+    .st {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
         font-size: 13px;
-        color: #2c9d8f;
-        border-top: none;
+        font-weight: 700;
+        letter-spacing: 0;
+        text-transform: none;
+        color: #44546b;
+        white-space: nowrap;
+    }
+
+        .st::before {
+            content: "";
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #aab4c0;
+        }
+
+        .st.done {
+            color: #138a7a;
+        }
+
+            .st.done::before {
+                background: #1aa38f;
+            }
+
+    .pay-box {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+        background: #f4f8fc;
+        border-radius: 12px;
+        padding: 16px 18px;
+    }
+
+        .pay-box .lbl {
+            font-size: 13px;
+            color: var(--ap-muted);
+        }
+
+        .pay-box .amt {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--ap-navy);
+            margin: 0;
+        }
+
+    .dx-box {
+        border-left: 4px solid var(--ap-blue);
+        background: #f4f8fc;
+        border-radius: 0 12px 12px 0;
+        padding: 14px 18px;
+    }
+
+        .dx-box .lbl {
+            font-size: 12.5px;
+            color: var(--ap-muted);
+        }
+
+        .dx-box .dx {
+            font-size: 17px;
+            font-weight: 800;
+            color: var(--ap-navy);
+            margin: 2px 0 0;
+        }
+
+    .rx-table {
+        margin-bottom: 0;
+    }
+
+        .rx-table th {
+            background: #e9f0f7;
+            color: #44546b;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: .4px;
+            text-transform: uppercase;
+            border-top: none;
+        }
+
+    /* ===== Modal ===== */
+    .tk-modal .modal-content {
+        border-radius: 16px;
+        overflow: hidden;
+    }
+
+    .tk-modal .modal-header {
+        background: var(--ap-bar);
+        color: #fff;
+        border-bottom: 0;
+        padding: 14px 22px;
+    }
+
+    .tk-modal .modal-title {
+        font-size: 15px;
+        font-weight: 700;
+        letter-spacing: .5px;
+        text-transform: uppercase;
+    }
+
+    .tk-modal .close {
+        color: #fff;
+        opacity: .8;
+        text-shadow: none;
+    }
+
+    .tk-modal .modal-footer {
+        background: #f7fafd;
+        border-top: 1px solid var(--ap-line);
+    }
+
+    .tk-modal .form-control {
+        border-radius: 10px;
+        border: 1px solid #d9e2ec;
+    }
+
+    @@media (max-width: 575px) {
+        .step-desc {
+            display: none;
+        }
+
+        .step-title {
+            font-size: 11px;
+        }
+
+        .dt-banner {
+            padding: 22px 20px;
+        }
     }
 </style>
 
-<div class="container my-4" style="min-height: 65vh;">
-    <!-- Top Action Toolbar -->
+<div class="container my-4 ap-font" style="min-height: 65vh;">
+    <!-- Thanh công cụ -->
     <div class="d-flex flex-wrap align-items-center justify-content-between mb-3">
-        <a asp-action="Index" class="btn btn-link pl-0 text-success font-weight-bold">
-            <i class="fa fa-arrow-left mr-1"></i> Quay lại danh sách lịch khám
-        </a>
+        <a asp-action="Index" class="btn btn-link pl-0 font-weight-bold" style="color:var(--ap-blue)">&larr; Quay lại danh sách lịch khám</a>
         <div class="mt-2 mt-md-0">
-            <button type="button" class="btn btn-outline-secondary btn-sm mr-2" onclick="window.print()">
-                <i class="fa fa-print mr-1"></i> In hồ sơ
-            </button>
-            <button type="button" class="btn btn-outline-info btn-sm mr-2" onclick="downloadIcs()">
-                <i class="fa fa-calendar-plus-o mr-1"></i> Thêm vào Calendar
-            </button>
+            <button type="button" class="btn btn-outline-secondary btn-sm mr-2" style="border-radius:8px" onclick="window.print()">In hồ sơ</button>
+            <button type="button" class="btn btn-outline-secondary btn-sm mr-2" style="border-radius:8px" onclick="downloadIcs()">Thêm vào Calendar</button>
             @if (canCancel)
             {
-                <button type="button" class="btn btn-outline-danger btn-sm" onclick="$('#cancelModal').modal('show')">
-                    <i class="fa fa-times mr-1"></i> Hủy ca khám
-                </button>
+                <button type="button" class="btn btn-outline-danger btn-sm" style="border-radius:8px" onclick="$('#cancelModal').modal('show')">Hủy ca khám</button>
             }
         </div>
     </div>
 
     @if (TempData["Msg"] != null)
     {
-        <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
-            <i class="fa fa-check-circle mr-2"></i> @TempData["Msg"]
+        <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert" style="border-radius:12px">
+            @TempData["Msg"]
             <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
             </button>
@@ -160,59 +469,51 @@
     }
     @if (TempData["Err"] != null)
     {
-        <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
-            <i class="fa fa-exclamation-triangle mr-2"></i> @TempData["Err"]
+        <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert" style="border-radius:12px">
+            @TempData["Err"]
             <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
             </button>
         </div>
     }
 
-    <!-- Banner Trạng Thái Ca Khám -->
-    <div class="card border-0 shadow-sm rounded-lg mb-4 p-4 text-white" style="background: linear-gradient(135deg, #0056b3, #2c9d8f);">
+    <!-- Banner trạng thái -->
+    <div class="dt-banner">
         <div class="row align-items-center">
             <div class="col-lg-8 mb-3 mb-lg-0">
-                <div class="d-flex align-items-center mb-2">
-                    <span class="badge badge-light text-dark font-weight-bold px-3 py-1 rounded-pill mr-3">
-                        MÃ HỒ SƠ: #TK-@Model.AppointId.ToString("D5")
-                    </span>
-                    <span class="badge @(Model.TrangThai == "Đã xác nhận" ? "badge-success" : (isCompleted ? "badge-info" : (isCancelled ? "badge-danger" : "badge-warning"))) px-3 py-1 rounded-pill font-weight-bold">
-                        @Model.TrangThai
-                    </span>
+                <div>
+                    <span class="code">MÃ HỒ SƠ #TK-@Model.AppointId.ToString("D5")</span>
+                    <span class="status @statusCls" style="--dot:@dotColor">@statusText</span>
                 </div>
-                <h3 class="font-weight-bold text-white mb-1">
-                    Lịch hẹn lúc @Model.TimeText - @Model.DateText
-                </h3>
-                <p class="mb-0 text-light opacity-90 small">
-                    <i class="fa fa-user-md text-success"></i> Bác sĩ phụ trách: <b>@Model.DoctorName</b> &bull; Chuyên khoa: <b>@Model.SpecName</b>
-                </p>
+                <h3>Lịch hẹn lúc @Model.TimeText - @Model.DateText</h3>
+                <p class="sub">Bác sĩ phụ trách: <b>@Model.DoctorName</b> &bull; Chuyên khoa: <b>@Model.SpecName</b></p>
             </div>
             <div class="col-lg-4 text-lg-right">
                 @if (Model.CanPay)
                 {
-                    <a asp-action="Pay" asp-route-id="@Model.AppointId" class="btn btn-warning btn-lg font-weight-bold text-dark shadow">
-                        <i class="fa fa-credit-card mr-1"></i> Thanh toán (@Cv.Money(Model.Amount))
+                    <a asp-action="Pay" asp-route-id="@Model.AppointId" class="btn btn-light btn-lg font-weight-bold px-4" style="border-radius:12px; color:var(--ap-blue)">
+                        Thanh toán (@Cv.Money(Model.Amount))
                     </a>
                 }
                 else if (canJoinOnline)
                 {
-                    <a asp-action="Room" asp-route-id="@Model.AppointId" class="btn btn-success btn-lg font-weight-bold shadow">
-                        <i class="fa fa-video-camera mr-1"></i> Vào phòng khám Video
+                    <a asp-action="Room" asp-route-id="@Model.AppointId" class="btn btn-light btn-lg font-weight-bold px-4" style="border-radius:12px; color:var(--ap-blue)">
+                        Vào phòng khám video
                     </a>
                 }
                 else if (isCompleted)
                 {
-                    <button type="button" class="btn btn-outline-light btn-sm" onclick="$('#rateModal').modal('show')">
-                        <i class="fa fa-star text-warning mr-1"></i> Đánh giá bác sĩ
+                    <button type="button" class="btn btn-outline-light font-weight-bold px-4" style="border-radius:12px" onclick="$('#rateModal').modal('show')">
+                        Đánh giá bác sĩ
                     </button>
                 }
             </div>
         </div>
     </div>
 
-    <!-- TIẾN TRÌNH 5 BƯỚC KHÁM BỆNH -->
-    <div class="card border-0 shadow-sm p-4 mb-4 bg-white rounded-lg">
-        <h6 class="font-weight-bold text-dark mb-2"><i class="fa fa-road text-success mr-2"></i> Tiến trình ca khám</h6>
+    <!-- Tiến trình 5 bước -->
+    <div class="dt-steps-card">
+        <div class="font-weight-bold" style="font-size:13.5px; letter-spacing:.6px; text-transform:uppercase; color:var(--ap-navy)">Tiến trình ca khám</div>
         <div class="stepper-wrap">
             <div class="step-item completed">
                 <div class="step-circle"><i class="fa fa-check"></i></div>
@@ -227,7 +528,6 @@
                     }
                     else
                     {
-
                         <i class="fa fa-check"></i>
                     }
                 </div>
@@ -242,7 +542,6 @@
                     }
                     else
                     {
-
                         <i class="fa fa-check"></i>
                     }
                 </div>
@@ -257,7 +556,6 @@
                     }
                     else
                     {
-
                         <span>4</span>
                     }
                 </div>
@@ -272,94 +570,72 @@
                     }
                     else
                     {
-
                         <span>5</span>
                     }
                 </div>
-                <div class="step-title">5. Kết quả &amp; Đơn thuốc</div>
+                <div class="step-title">5. Kết quả &amp; đơn thuốc</div>
                 <div class="step-desc">@(Model.HasRecord ? "Đã kê đơn" : "Đang cập nhật")</div>
             </div>
         </div>
     </div>
 
     <div class="row">
-        <!-- CỘT TRÁI: Bác sĩ & Chi tiết ca khám -->
-        <div class="col-lg-6 mb-4">
-            <!-- Thẻ Bác sĩ -->
+        <!-- CỘT TRÁI -->
+        <div class="col-lg-6">
+            <!-- Bác sĩ -->
             <div class="detail-card">
                 <div class="detail-card-head">
-                    <span><i class="fa fa-user-md text-success mr-2"></i> Bác Sĩ Phụ Trách</span>
-                    <a asp-controller="Doctors" asp-action="Index" class="small text-success">Danh bạ bác sĩ &rarr;</a>
+                    <span>Bác sĩ phụ trách</span>
+                    <a asp-controller="Doctors" asp-action="Index" class="more">Danh bạ bác sĩ &rarr;</a>
                 </div>
                 <div class="detail-card-body">
                     <div class="d-flex align-items-center mb-3">
-                        <div class="doc-avatar-lg mr-3 shadow-sm">
-                            BS
-                        </div>
+                        <div class="doc-avatar-lg mr-3">@initial</div>
                         <div>
-                            <h5 class="font-weight-bold mb-1">@Model.DoctorName</h5>
-                            <p class="text-muted small mb-1">
-                                <i class="fa fa-stethoscope text-success"></i> Chuyên khoa: <b>@Model.SpecName</b>
-                            </p>
-                            <p class="text-muted small mb-0">
-                                <i class="fa fa-hospital-o text-muted"></i> Trung tâm Y tế Telehealth Quốc tế
-                            </p>
+                            <h5 class="font-weight-bold mb-1" style="color:var(--ap-navy)">@Model.DoctorName</h5>
+                            <div class="small text-muted">Chuyên khoa: <b style="color:var(--ap-navy)">@Model.SpecName</b></div>
+                            <div class="small text-muted">Trung tâm Y tế Telehealth Quốc tế</div>
                         </div>
                     </div>
-                    <div class="p-3 bg-light rounded small">
+                    <div class="soft-box">
                         <div class="mb-1"><b>Cơ sở tiếp nhận:</b> Phòng khám Đa khoa Telehealth</div>
-                        <div class="mb-0 text-muted"><b>Địa chỉ:</b> 2 Cầu Giấy, Quận Cầu Giấy, Hà Nội</div>
+                        <div><b>Địa chỉ:</b> 2 Cầu Giấy, Quận Cầu Giấy, Hà Nội</div>
                     </div>
                 </div>
             </div>
 
-            <!-- Thẻ Chi tiết lịch hẹn -->
+            <!-- Chi tiết lịch hẹn -->
             <div class="detail-card">
                 <div class="detail-card-head">
-                    <span><i class="fa fa-info-circle text-info mr-2"></i> Thông Tin Chi Tiết Lịch Hẹn</span>
+                    <span>Thông tin chi tiết lịch hẹn</span>
                 </div>
                 <div class="detail-card-body">
-                    <table class="table table-sm mb-0">
-                        <tr>
-                            <td class="text-muted" style="width: 40%;">Ngày khám:</td>
-                            <td class="font-weight-bold">@Model.DateText</td>
-                        </tr>
-                        <tr>
-                            <td class="text-muted">Khung giờ hẹn:</td>
-                            <td class="font-weight-bold text-success">@Model.TimeText</td>
-                        </tr>
-                        <tr>
-                            <td class="text-muted">Hình thức khám:</td>
-                            <td>
-                                @if (isOnline)
-                                {
-                                    <span class="badge badge-soft-primary"><i class="fa fa-video-camera"></i> Khám trực tuyến Video Call</span>
-                                }
-                                else if (isEmergency)
-                                {
-                                    <span class="badge badge-soft-danger"><i class="fa fa-ambulance"></i> Cấp cứu khẩn cấp</span>
-                                }
-                                else
-                                {
-                                    <span class="badge badge-soft-secondary"><i class="fa fa-hospital-o"></i> Khám trực tiếp tại viện</span>
-                                }
-                            </td>
-                        </tr>
-                        @if (isEmergency && !string.IsNullOrEmpty(Model.MucDoKhanCap))
-                        {
-                            <tr>
-                                <td class="text-muted">Mức độ cấp cứu:</td>
-                                <td class="text-danger font-weight-bold">Mức @Model.MucDoKhanCap</td>
-                            </tr>
-                            <tr>
-                                <td class="text-muted">Vị trí đón xe:</td>
-                                <td class="text-danger">@Model.ViTriKhanCap</td>
-                            </tr>
-                        }
-                    </table>
+                    <div class="kv"><span class="k">Ngày khám</span><span class="v">@Model.DateText</span></div>
+                    <div class="kv"><span class="k">Khung giờ hẹn</span><span class="v">@Model.TimeText</span></div>
+                    <div class="kv">
+                        <span class="k">Hình thức khám</span>
+                        <span class="v">
+                            @if (isOnline)
+                            {
+                                <text>Khám trực tuyến (Video Call)</text>
+                            }
+                            else if (isEmergency)
+                            {
+                                <text>Cấp cứu khẩn cấp</text>
+                            }
+                            else
+                            {
+                                <text>Khám trực tiếp tại viện</text>
+                            }
+                        </span>
+                    </div>
+                    @if (isEmergency && !string.IsNullOrEmpty(Model.MucDoKhanCap))
+                    {
+                        <div class="kv"><span class="k">Mức độ cấp cứu</span><span class="v">Mức @Model.MucDoKhanCap</span></div>
+                        <div class="kv"><span class="k">Vị trí đón xe</span><span class="v">@Model.ViTriKhanCap</span></div>
+                    }
 
-                    <hr />
-                    <h6 class="font-weight-bold small text-dark mb-2">Hồ sơ / Ảnh triệu chứng đính kèm:</h6>
+                    <div class="sub-title">Hồ sơ / ảnh triệu chứng đính kèm</div>
                     @if (!Model.Files.Any())
                     {
                         <p class="text-muted small mb-0">Không có file đính kèm cho ca này.</p>
@@ -370,12 +646,9 @@
                             @foreach (var f in Model.Files)
                             {
                                 <div class="col-sm-6 mb-2">
-                                    <a href="@f.Url" target="_blank" class="p-2 border rounded d-flex align-items-center text-dark text-decoration-none bg-light small">
-                                        <i class="fa fa-file-text-o text-primary mr-2" style="font-size: 20px;"></i>
-                                        <div class="text-truncate">
-                                            <div class="font-weight-bold text-truncate">@f.Loai</div>
-                                            <div class="text-muted" style="font-size:11px;">@f.Ngay</div>
-                                        </div>
+                                    <a href="@f.Url" target="_blank" class="file-row">
+                                        <div class="font-weight-bold text-truncate">@f.Loai</div>
+                                        <div class="d">@f.Ngay</div>
                                     </a>
                                 </div>
                             }
@@ -385,52 +658,42 @@
             </div>
         </div>
 
-        <!-- CỘT PHẢI: Thanh toán & Kết quả khám + Đơn thuốc -->
-        <div class="col-lg-6 mb-4">
-            <!-- Thẻ Thanh toán & Biên lai -->
+        <!-- CỘT PHẢI -->
+        <div class="col-lg-6">
+            <!-- Thanh toán -->
             <div class="detail-card">
                 <div class="detail-card-head">
-                    <span> <i class="fa fa-info-circle text-info mr-2"></i> Thanh Toán &amp; Hóa Đơn</span>
+                    <span>Thanh toán &amp; hóa đơn</span>
                     @if (Model.CanPay)
                     {
-                        <span class="badge badge-warning text-dark font-weight-bold">Chờ thanh toán</span>
+                        <span class="st">Chờ thanh toán</span>
                     }
                     else if (Model.HasPayment)
                     {
-                        <span class="badge badge-success font-weight-bold">@Model.TrangThaiGiaoDich</span>
+                        <span class="st done">@Model.TrangThaiGiaoDich</span>
                     }
                 </div>
                 <div class="detail-card-body">
                     @if (Model.HasPayment)
                     {
-                        <div class="d-flex justify-content-between align-items-center p-3 bg-light rounded mb-3">
+                        <div class="pay-box">
                             <div>
-                                <span class="text-muted small d-block">@Model.LoaiGiaoDich:</span>
-                                <h4 class="font-weight-bold text-dark mb-0">@Cv.Money(Model.Amount)</h4>
+                                <div class="lbl">@Model.LoaiGiaoDich</div>
+                                <p class="amt">@Cv.Money(Model.Amount)</p>
                             </div>
-                            <div>
-                                @if (Model.CanPay)
-                                {
-                                    <a asp-action="Pay" asp-route-id="@Model.AppointId" class="btn btn-warning font-weight-bold shadow-sm">
-                                        <i class="fa fa-qrcode mr-1"></i> Quét mã VietQR
-                                    </a>
-                                }
-                                else
-                                {
-                                    <span class="badge badge-soft-success p-2"><i class="fa fa-check-circle"></i> @Model.TrangThaiGiaoDich</span>
-                                }
-                            </div>
+                            @if (Model.CanPay)
+                            {
+                                <a asp-action="Pay" asp-route-id="@Model.AppointId" class="btn btn-primary font-weight-bold px-4" style="border-radius:10px">Quét mã VietQR</a>
+                            }
                         </div>
 
                         @if (receiptFile != null)
                         {
-                            <div class="mt-3 p-2 border rounded bg-white">
-                                <span class="small font-weight-bold text-muted d-block mb-1">Ảnh biên lai đã gửi:</span>
-                                <a href="@receiptFile.Url" target="_blank" class="d-inline-block">
-                                    <img src="@receiptFile.Url" alt="Biên lai" style="max-height: 90px; border-radius: 6px;" class="border" />
-                                    <span class="small text-primary ml-2"><i class="fa fa-search-plus"></i> Xem ảnh lớn</span>
-                                </a>
-                            </div>
+                            <div class="sub-title">Ảnh biên lai đã gửi</div>
+                            <a href="@receiptFile.Url" target="_blank" class="d-inline-flex align-items-center">
+                                <img src="@receiptFile.Url" alt="Biên lai" style="max-height: 90px; border-radius: 10px;" class="border" />
+                                <span class="small ml-3" style="color:var(--ap-blue)">Xem ảnh lớn</span>
+                            </a>
                         }
                     }
                     else
@@ -440,48 +703,41 @@
                 </div>
             </div>
 
-            <!-- Thẻ Kết quả khám & Đơn thuốc -->
+            <!-- Bệnh án & đơn thuốc -->
             <div class="detail-card">
                 <div class="detail-card-head">
-                    <span> <i class="fa fa-info-circle text-info mr-2"></i> Hồ Sơ Bệnh Án &amp; Đơn Thuốc</span>
+                    <span>Hồ sơ bệnh án &amp; đơn thuốc</span>
                     @if (Model.HasRecord)
                     {
-                        <button type="button" class="btn btn-outline-success btn-sm font-weight-bold" onclick="$('#rxModal').modal('show')">
-                            <i class="fa fa-print mr-1"></i> In đơn thuốc chuẩn
-                        </button>
+                        <button type="button" class="btn btn-outline-light btn-sm font-weight-bold" style="border-radius:8px" onclick="$('#rxModal').modal('show')">In đơn thuốc</button>
                     }
                 </div>
                 <div class="detail-card-body">
                     @if (!Model.HasRecord)
                     {
                         <div class="text-center py-4 text-muted">
-                            <i class="fa fa-stethoscope" style="font-size: 36px; opacity: .4;"></i>
-                            <p class="mt-2 mb-0 small">Bác sĩ chưa cập nhật kết quả và đơn thuốc cho ca khám này.</p>
-                            <small class="text-muted">Kết quả sẽ được hiển thị ngay sau khi buổi khám hoàn tất.</small>
+                            <p class="mb-1">Bác sĩ chưa cập nhật kết quả và đơn thuốc cho ca khám này.</p>
+                            <small>Kết quả sẽ hiển thị ngay sau khi buổi khám hoàn tất.</small>
                         </div>
                     }
                     else
                     {
-                        <div class="p-3 bg-light rounded mb-3">
-                            <div class="mb-2">
-                                <span class="text-muted small d-block">Chẩn đoán của bác sĩ:</span>
-                                <h6 class="font-weight-bold text-primary mb-0">@Model.ChanDoan</h6>
-                            </div>
+                        <div class="dx-box mb-3">
+                            <div class="lbl">Chẩn đoán của bác sĩ</div>
+                            <p class="dx">@Model.ChanDoan</p>
                             @if (!string.IsNullOrEmpty(Model.NgayTaiKham))
                             {
-                                <div class="mt-2 pt-2 border-top d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <span class="text-muted small">Hẹn tái khám vào:</span>
-                                        <b class="text-danger ml-1">@Model.NgayTaiKham</b>
+                                <div class="d-flex justify-content-between align-items-center flex-wrap mt-3 pt-3" style="border-top:1px solid #dbe6f2">
+                                    <div class="small">
+                                        <span class="text-muted">Hẹn tái khám vào:</span>
+                                        <b class="ml-1" style="color:var(--ap-navy)">@Model.NgayTaiKham</b>
                                     </div>
-                                    <a asp-controller="Doctors" asp-action="Index" class="btn btn-outline-success btn-sm py-1 px-2 font-weight-bold" style="font-size:12px;">
-                                        Đặt lịch tái khám &rarr;
-                                    </a>
+                                    <a asp-controller="Doctors" asp-action="Index" class="btn btn-outline-secondary btn-sm py-1 px-3 font-weight-bold" style="border-radius:8px; font-size:12.5px">Đặt lịch tái khám</a>
                                 </div>
                             }
                         </div>
 
-                        <h6 class="font-weight-bold small text-dark mb-2">Đơn thuốc được kê:</h6>
+                        <div class="sub-title" style="margin-top:6px">Đơn thuốc được kê</div>
                         @if (!Model.Prescriptions.Any())
                         {
                             <p class="text-muted small mb-0">Không có đơn thuốc chỉ định.</p>
@@ -489,7 +745,7 @@
                         else
                         {
                             <div class="table-responsive">
-                                <table class="table table-sm table-bordered rx-table mb-2">
+                                <table class="table table-sm table-bordered rx-table">
                                     <thead>
                                         <tr>
                                             <th>Tên thuốc</th>
@@ -502,7 +758,7 @@
                                         @foreach (var p in Model.Prescriptions)
                                         {
                                             <tr>
-                                                <td class="font-weight-bold text-dark">@p.TenThuoc</td>
+                                                <td class="font-weight-bold" style="color:var(--ap-navy)">@p.TenThuoc</td>
                                                 <td>@p.SoLuong</td>
                                                 <td>@p.LieuDung</td>
                                                 <td class="small text-muted">@p.CachDung</td>
@@ -511,11 +767,9 @@
                                     </tbody>
                                 </table>
                             </div>
-                            <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top">
-                                <span class="small text-muted"><i class="fa fa-info-circle text-info"></i> Uống thuốc đúng giờ và đủ liều</span>
-                                <button type="button" class="btn btn-outline-primary btn-sm" onclick="alert('Đã kích hoạt thông báo nhắc uống thuốc hàng ngày (08:00, 12:00, 20:00) qua hệ thống.')">
-                                    <i class="fa fa-bell-o mr-1"></i> Bật nhắc uống thuốc
-                                </button>
+                            <div class="d-flex justify-content-between align-items-center flex-wrap mt-3 pt-3" style="border-top:1px solid var(--ap-line)">
+                                <span class="small text-muted">Uống thuốc đúng giờ và đủ liều.</span>
+                                <button type="button" class="btn btn-outline-secondary btn-sm" style="border-radius:8px" onclick="alert('Đã kích hoạt thông báo nhắc uống thuốc hàng ngày (08:00, 12:00, 20:00) qua hệ thống.')">Bật nhắc uống thuốc</button>
                             </div>
                         }
                     }
@@ -526,24 +780,24 @@
 </div>
 
 <!-- ================= MODAL IN ĐƠN THUỐC CHUẨN ================= -->
-<div class="modal fade" id="rxModal" tabindex="-1" role="dialog" aria-hidden="true">
+<div class="modal fade tk-modal ap-font" id="rxModal" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
         <div class="modal-content border-0 shadow-lg">
-            <div class="modal-header bg-success text-white">
-                <h5 class="modal-title font-weight-bold"><i class="fa fa-file-text-o mr-2"></i> ĐƠN THUỐC ĐIỆN TỬ CHUẨN BỘ Y TẾ</h5>
-                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+            <div class="modal-header">
+                <h5 class="modal-title">Đơn thuốc điện tử chuẩn Bộ Y tế</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body p-4" id="printPrescription">
-                <div class="d-flex justify-content-between border-bottom pb-3 mb-3">
+                <div class="d-flex justify-content-between flex-wrap pb-3 mb-3" style="border-bottom:1px solid var(--ap-line)">
                     <div>
-                        <h5 class="font-weight-bold text-success mb-1">BỆNH VIỆN ĐA KHOA QUỐC TẾ TELEHEALTH</h5>
+                        <h5 class="font-weight-bold mb-1" style="color:var(--ap-navy)">BỆNH VIỆN ĐA KHOA QUỐC TẾ TELEHEALTH</h5>
                         <p class="small text-muted mb-0">Địa chỉ: 2 Cầu Giấy, Hà Nội - Hotline: 1900 1234</p>
                         <p class="small text-muted mb-0">Giấy phép hoạt động: 288/BYT-GPHĐ</p>
                     </div>
                     <div class="text-right">
-                        <div class="font-weight-bold text-danger">MÃ ĐƠN: #DT-@Model.AppointId.ToString("D5")</div>
+                        <div class="font-weight-bold" style="color:var(--ap-blue)">MÃ ĐƠN: #DT-@Model.AppointId.ToString("D5")</div>
                         <small class="text-muted">Ngày khám: @Model.DateText</small>
                     </div>
                 </div>
@@ -561,7 +815,7 @@
                 </div>
 
                 <table class="table table-bordered table-sm small mb-3">
-                    <thead class="bg-light">
+                    <thead style="background:#e9f0f7">
                         <tr>
                             <th style="width: 5%;">STT</th>
                             <th style="width: 40%;">Tên thuốc</th>
@@ -587,7 +841,7 @@
                     </tbody>
                 </table>
 
-                <div class="p-2 border rounded bg-light small mb-3">
+                <div class="soft-box mb-3">
                     <b>Lời dặn của bác sĩ:</b> Uống thuốc đúng liều lượng, nghỉ ngơi hợp lý, tránh thức khuya và tái khám đúng hẹn.
                 </div>
 
@@ -599,35 +853,35 @@
                     <div class="col-6 text-center">
                         <div class="small text-muted mb-4">Ngày @DateTime.Now.ToString("dd/MM/yyyy")</div>
                         <div class="font-weight-bold">Bác sĩ khám bệnh</div>
-                        <div class="text-success font-italic mt-2 mb-1" style="font-family: cursive; font-size:18px;">@Model.DoctorName</div>
+                        <div class="font-italic mt-2 mb-1" style="font-family: cursive; font-size:18px; color:var(--ap-navy)">@Model.DoctorName</div>
                         <div class="small text-muted">(Đã ký số điện tử)</div>
                     </div>
                 </div>
             </div>
-            <div class="modal-footer bg-light">
-                <button type="button" class="btn btn-success font-weight-bold" onclick="window.print()"><i class="fa fa-print mr-1"></i> In đơn thuốc</button>
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary btn-sm px-3 font-weight-bold" style="border-radius:8px" onclick="window.print()">In đơn thuốc</button>
+                <button type="button" class="btn btn-outline-secondary btn-sm px-3" style="border-radius:8px" data-dismiss="modal">Đóng</button>
             </div>
         </div>
     </div>
 </div>
 
 <!-- ================= MODAL ĐÁNH GIÁ BÁC SĨ ================= -->
-<div class="modal fade" id="rateModal" tabindex="-1" role="dialog" aria-hidden="true">
+<div class="modal fade tk-modal ap-font" id="rateModal" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content border-0 shadow-lg">
             <form asp-action="Rate" method="post">
                 @Html.AntiForgeryToken()
                 <input type="hidden" name="id" value="@Model.AppointId" />
-                <div class="modal-header bg-success text-white">
-                    <h5 class="modal-title font-weight-bold"><i class="fa fa-star mr-2"></i> ĐÁNH GIÁ DỊCH VỤ &amp; BÁC SĨ</h5>
-                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                <div class="modal-header">
+                    <h5 class="modal-title">Đánh giá dịch vụ &amp; bác sĩ</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body p-4 text-center">
-                    <h5>Đánh giá ca khám với @Model.DoctorName</h5>
-                    <div class="my-3" style="font-size: 32px; color: #ffc107; cursor: pointer;">
+                    <h6 class="font-weight-bold" style="color:var(--ap-navy)">Đánh giá ca khám với @Model.DoctorName</h6>
+                    <div class="my-3" style="font-size: 32px; color: #f2b01e; cursor: pointer;">
                         <i class="fa fa-star star-btn" data-v="1"></i>
                         <i class="fa fa-star star-btn" data-v="2"></i>
                         <i class="fa fa-star star-btn" data-v="3"></i>
@@ -640,9 +894,9 @@
                         <textarea name="comment" class="form-control" rows="3" placeholder="Bác sĩ khám thế nào? Bạn có hài lòng với phác đồ điều trị không?"></textarea>
                     </div>
                 </div>
-                <div class="modal-footer bg-light">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
-                    <button type="submit" class="btn btn-success font-weight-bold">Gửi đánh giá</button>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary btn-sm px-3" style="border-radius:8px" data-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary btn-sm px-3 font-weight-bold" style="border-radius:8px">Gửi đánh giá</button>
                 </div>
             </form>
         </div>
@@ -650,31 +904,31 @@
 </div>
 
 <!-- ================= MODAL HỦY LỊCH KHÁM ================= -->
-<div class="modal fade" id="cancelModal" tabindex="-1" role="dialog" aria-hidden="true">
+<div class="modal fade tk-modal ap-font" id="cancelModal" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content border-0 shadow-lg">
             <form asp-action="Cancel" method="post">
                 @Html.AntiForgeryToken()
                 <input type="hidden" name="id" value="@Model.AppointId" />
-                <div class="modal-header bg-danger text-white">
-                    <h5 class="modal-title font-weight-bold"><i class="fa fa-exclamation-triangle mr-2"></i> HỦY CA KHÁM BỆNH</h5>
-                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                <div class="modal-header">
+                    <h5 class="modal-title">Hủy ca khám bệnh</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body p-4">
-                    <p>Bạn có chắc muốn hủy lịch khám #TK-@Model.AppointId với <b>@Model.DoctorName</b> vào ngày <b>@Model.DateText lúc @Model.TimeText</b>?</p>
+                    <p>Bạn có chắc muốn hủy lịch khám #TK-@Model.AppointId.ToString("D5") với <b>@Model.DoctorName</b> vào ngày <b>@Model.DateText lúc @Model.TimeText</b>?</p>
                     <div class="form-group">
                         <label class="small font-weight-bold">Lý do hủy lịch:</label>
                         <textarea name="reason" class="form-control" rows="3" placeholder="Vui lòng cung cấp lý do hủy để bệnh viện cải thiện phục vụ..."></textarea>
                     </div>
-                    <div class="alert alert-warning small mb-0">
-                        <i class="fa fa-info-circle"></i> Tiền cọc đã thanh toán sẽ được xét hoàn theo quy định hoàn hủy lịch hẹn của bệnh viện.
+                    <div class="soft-box">
+                        Tiền cọc đã thanh toán sẽ được xét hoàn theo quy định hoàn hủy lịch hẹn của bệnh viện.
                     </div>
                 </div>
-                <div class="modal-footer bg-light">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Quay lại</button>
-                    <button type="submit" class="btn btn-danger font-weight-bold">Xác nhận hủy</button>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary btn-sm px-3" style="border-radius:8px" data-dismiss="modal">Quay lại</button>
+                    <button type="submit" class="btn btn-danger btn-sm px-3 font-weight-bold" style="border-radius:8px">Xác nhận hủy</button>
                 </div>
             </form>
         </div>

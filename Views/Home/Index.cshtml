@@ -1,4 +1,4 @@
-﻿@model TELEHEALTH_GROUP4_QT01.Models.ViewModels.HomeVm
+@model TELEHEALTH_GROUP4_QT01.Models.ViewModels.HomeVm
 @functions {
     public static string GetSpecIcon(string? name)
     {
@@ -59,39 +59,55 @@
         flex-grow: 1;
     }
 
-    /* Specialty Chip */
-    .spec-item-box {
-        background: #fff;
-        border: 1px solid #e9ecef;
-        border-radius: 12px;
-        padding: 18px 14px;
-        text-align: center;
-        transition: all .2s;
-        text-decoration: none !important;
-        display: block;
-        color: inherit;
-        height: 100%;
-    }
+    /* ===== Chuyên khoa ===== */
+    .sp-head { text-align: center; max-width: 640px; margin: 0 auto 26px; }
+    .sp-line { display: block; width: 48px; height: 3px; border-radius: 3px; background: #0056b3; margin: 10px auto 12px; }
 
-        .spec-item-box:hover {
-            border-color: #0056b3;
-            background: #f7fdf5;
-            transform: translateY(-3px);
-            box-shadow: 0 6px 18px rgba(112, 199, 69, 0.15);
-        }
+    .spec-item-box {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        text-align: left;
+        height: 100%;
+        padding: 18px 18px 14px;
+        background: #fff;
+        border: 1px solid #e6edf5;
+        border-radius: 16px;
+        text-decoration: none !important;
+        color: inherit;
+        overflow: hidden;
+        transition: transform .25s, box-shadow .25s, border-color .25s;
+    }
+    .spec-item-box::before {
+        content: "";
+        position: absolute; left: 0; top: 0; width: 100%; height: 3px;
+        background: linear-gradient(90deg, #0056b3, #4aa3e8);
+        transform: scaleX(0); transform-origin: left; transition: transform .3s;
+    }
+    .sp-row { margin-left: -7px; margin-right: -7px; }
+    .sp-row > [class*="col-"] { padding-left: 7px; padding-right: 7px; }
+    .spec-item-box:hover { transform: translateY(-4px); border-color: #cfe0f1; box-shadow: 0 14px 30px rgba(0,86,179,.10); }
+    .spec-item-box:hover::before { transform: scaleX(1); }
 
     .spec-icon-circle {
-        width: 52px;
-        height: 52px;
-        border-radius: 50%;
-        background: #e8f5e9;
-        color: #0056b3;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 22px;
-        margin: 0 auto 10px;
+        width: 46px; height: 46px; border-radius: 12px;
+        background: #eaf3fa; color: #0056b3;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 20px; margin-bottom: 12px;
+        transition: background .25s, color .25s;
     }
+    .spec-item-box:hover .spec-icon-circle { background: #0056b3; color: #fff; }
+    .spec-name { font-weight: 700; color: #1d2b4f; font-size: 1.02rem; margin: 0 0 6px; }
+    .spec-count { font-size: .82rem; color: #6c757d; }
+    .spec-count i { font-size: 7px; color: #28a745; vertical-align: middle; margin-right: 6px; }
+    .spec-go {
+        width: 100%; margin-top: 10px; padding-top: 10px; border-top: 1px solid #eef2f7;
+        display: flex; align-items: center; justify-content: space-between;
+        font-size: .82rem; font-weight: 600; color: #0056b3;
+    }
+    .spec-go i { transition: transform .25s; }
+    .spec-item-box:hover .spec-go i { transform: translateX(4px); }
 
     /* Steps */
     .step-circle-num {
@@ -123,6 +139,64 @@
         .feature-card:hover {
             transform: translateY(-2px);
         }
+
+    /* ===== Khối giới thiệu hệ thống ===== */
+    .hm-sec { padding: 44px 0; }
+    .hm-tight { padding: 44px 0 0; }
+    .hm-tight .section-heading { margin-bottom: 26px; }
+    .hm-tight .section-heading h2 { margin-bottom: 6px; }
+    .hm-eyebrow { color: #0056b3; font-weight: 700; font-size: .8rem; letter-spacing: 1px; text-transform: uppercase; }
+    .hm-title { color: #1d2b4f; font-weight: 800; line-height: 1.3; }
+
+    .hm-intro { display: flex; align-items: center; gap: 36px; flex-wrap: wrap; }
+    .hm-intro .pic { position: relative; flex: 1 1 420px; }
+    .hm-intro .pic img { width: 100%; border-radius: 18px; display: block; box-shadow: 0 14px 34px rgba(0,0,0,.12); }
+    .hm-intro .pic .float {
+        position: absolute; left: -14px; bottom: 28px;
+        background: #fff; border-radius: 14px; padding: 14px 20px;
+        box-shadow: 0 10px 28px rgba(0,0,0,.14);
+        display: flex; align-items: center; gap: 12px;
+    }
+    .hm-intro .pic .float i { font-size: 1.6rem; color: #0056b3; }
+    .hm-intro .pic .float b { display: block; font-size: 1.35rem; color: #1d2b4f; line-height: 1.1; }
+    .hm-intro .pic .float span { font-size: .8rem; color: #6c757d; }
+    .hm-intro .txt { flex: 1 1 420px; }
+    .hm-checks { list-style: none; padding: 0; margin: 18px 0 24px; }
+    .hm-checks li { display: flex; gap: 12px; padding: 8px 0; color: #4a5568; }
+    .hm-checks li i { color: #0056b3; margin-top: 4px; }
+    .hm-checks li b { color: #1d2b4f; }
+
+    /* ===== Khối trang thiết bị ===== */
+    .hm-fac { position: relative; border-radius: 16px; overflow: hidden; height: 100%; min-height: 260px; box-shadow: 0 10px 26px rgba(0,0,0,.10); }
+    .hm-fac img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform .5s; }
+    .hm-fac:hover img { transform: scale(1.05); }
+    .hm-fac .cap {
+        position: absolute; left: 0; right: 0; bottom: 0; padding: 60px 22px 20px; color: #fff;
+        background: linear-gradient(transparent, rgba(15,30,60,.88));
+    }
+    .hm-fac .cap h6 { color: #fff; font-weight: 700; margin-bottom: 4px; text-transform: uppercase; }
+    .hm-fac .cap p { margin: 0; font-size: .88rem; opacity: .92; }
+
+    /* ===== Khối đội ngũ cuối trang ===== */
+    .hm-team { display: flex; align-items: center; gap: 32px; flex-wrap: wrap; background: #eaf3fa; border-radius: 20px; padding: 30px; }
+    .hm-team .txt { flex: 1 1 360px; }
+    .hm-team .pic { flex: 1 1 360px; }
+    .hm-team .pic img { width: 100%; border-radius: 16px; display: block; box-shadow: 0 12px 30px rgba(0,0,0,.12); }
+    .hm-team .nums { display: flex; gap: 30px; margin: 20px 0 26px; }
+    .hm-team .nums b { display: block; font-size: 2rem; color: #0056b3; line-height: 1; }
+    .hm-team .nums span { font-size: .85rem; color: #6c757d; }
+
+    /* ===== Banner cấp cứu có ảnh nền ===== */
+    .em-banner {
+        background: linear-gradient(135deg, rgba(150,20,20,.93), rgba(220,53,69,.78)),
+                    url('/img/bg-img/hinh1.jpg') center/cover no-repeat;
+    }
+
+    @@media (max-width: 767px) {
+        .hm-sec { padding: 32px 0; }
+        .hm-intro .pic .float { left: 10px; }
+        .hm-team { padding: 24px; }
+    }
 </style>
 
 <!-- ================= HỘP TÌM KIẾM ĐẶT LỊCH NHANH TRÊN TRANG CHỦ ================= -->
@@ -168,28 +242,53 @@
     </div>
 </div>
 
-<!-- ================= CHUYÊN KHOA Y TẾ NỔI BẬT ================= -->
-<section class="section-padding-100-0">
+<!-- ================= GIỚI THIỆU HỆ THỐNG ================= -->
+<section class="hm-sec">
     <div class="container">
-        <div class="row">
-            <div class="col-12">
-                <div class="section-heading text-center">
-                    <h2>CÁC CHUYÊN KHOA Y TẾ HÀNG ĐẦU</h2>
-                    <p>Đội ngũ chuyên gia sẵn sàng hỗ trợ tư vấn trực tuyến và thăm khám trực tiếp</p>
+        <div class="hm-intro">
+            <div class="pic">
+                <img src="~/img/bg-img/hinh3.jpg" alt="Tìm bác sĩ chuyên khoa" />
+                <div class="float">
+                    <i class="fa fa-user-md"></i>
+                    <div><b>@Model.Specs.Sum(s => s.DoctorCount)</b><span>bác sĩ trên hệ thống</span></div>
                 </div>
             </div>
+            <div class="txt">
+                <div class="hm-eyebrow mb-2">Về hệ thống Telehealth</div>
+                <h2 class="hm-title mb-3">Khám bệnh thuận tiện, minh bạch, ngay cả khi không đến bệnh viện</h2>
+                <p class="text-muted mb-0">Tìm đúng bác sĩ, chọn giờ trống, thanh toán và nhận kết quả trong cùng một nơi.</p>
+                <ul class="hm-checks">
+                    <li><i class="fa fa-check-circle"></i><div><b>Bác sĩ chuyên khoa:</b> kinh nghiệm và phí khám được công khai rõ ràng.</div></li>
+                    <li><i class="fa fa-check-circle"></i><div><b>Đặt lịch linh hoạt:</b> khám trực tiếp, trực tuyến hoặc cấp cứu 24/7.</div></li>
+                    <li><i class="fa fa-check-circle"></i><div><b>Hồ sơ cá nhân:</b> lịch khám, đơn thuốc và kết quả lưu trữ an toàn.</div></li>
+                </ul>
+                <a asp-controller="Doctors" asp-action="Index" class="btn btn-medical px-4 py-2 font-weight-bold">
+                    <i class="fa fa-search mr-1"></i> Tìm bác sĩ ngay
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ================= CHUYÊN KHOA Y TẾ NỔI BẬT ================= -->
+<section class="hm-tight">
+    <div class="container">
+        <div class="sp-head">
+            <div class="hm-eyebrow mb-2">Chuyên khoa</div>
+            <h2 class="hm-title mb-0">Các chuyên khoa y tế hàng đầu</h2>
+            <span class="sp-line"></span>
+            <p class="text-muted mb-0">Đội ngũ chuyên gia sẵn sàng hỗ trợ tư vấn trực tuyến và thăm khám trực tiếp</p>
         </div>
 
-        <div class="row mb-5">
+        <div class="row sp-row justify-content-center mb-3">
             @foreach (var sp in Model.Specs)
             {
-                <div class="col-6 col-md-4 col-lg-3 mb-4">
+                <div class="col-6 col-md-4 col-lg-3 mb-3">
                     <a asp-controller="Doctors" asp-action="Index" asp-route-specId="@sp.SpecId" class="spec-item-box">
-                        <div class="spec-icon-circle">
-                            <i class="fa @GetSpecIcon(sp.Name)"></i>
-                        </div>
-                        <h6 class="font-weight-bold text-dark mb-1">@sp.Name</h6>
-                        <span class="badge badge-soft-success small">@sp.DoctorCount bác sĩ trực</span>
+                        <span class="spec-icon-circle"><i class="fa @GetSpecIcon(sp.Name)"></i></span>
+                        <h6 class="spec-name">@sp.Name</h6>
+                        <span class="spec-count"><i class="fa fa-circle"></i>@sp.DoctorCount bác sĩ đang trực</span>
+                        <span class="spec-go">Xem bác sĩ <i class="fa fa-long-arrow-right"></i></span>
                     </a>
                 </div>
             }
@@ -198,7 +297,7 @@
 </section>
 
 <!-- ================= ĐỘI NGŨ BÁC SĨ TIÊU BIỂU ================= -->
-<section class="section-padding-100-0 bg-light">
+<section class="hm-tight bg-light">
     <div class="container">
         <div class="row">
             <div class="col-12">
@@ -217,7 +316,7 @@
         <div class="row">
             @foreach (var d in Model.Doctors)
             {
-                <div class="col-sm-6 col-lg-3 mb-4">
+                <div class="col-sm-6 col-lg-3 mb-3">
                     <div class="hm-doc-card">
                         <a asp-controller="Doctors" asp-action="Details" asp-route-id="@d.DoctorId" class="d-block bg-light">
                             @await Html.PartialAsync("_DoctorAvatar", new AvatarVm
@@ -228,13 +327,11 @@
                                 Height = "260px",
                                 Radius = "0",
                                 FontSize = "3.2rem",
-                                Fit = "contain"
+                                Fit = "cover"
                             })
                         </a>
                         <div class="hm-doc-body">
                             <div class="small text-warning mb-1">
-                                <i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i>
-                                <span class="font-weight-bold text-dark ml-1">4.9</span>
                             </div>
                             <h6 class="font-weight-bold text-dark mb-1">@d.HoTen</h6>
                             <p class="text-muted small mb-1">Bác sĩ Chuyên khoa &bull; @d.TenKhoa</p>
@@ -251,7 +348,7 @@
         </div>
 
         <div class="row">
-            <div class="col-12 text-center pb-5 mt-3">
+            <div class="col-12 text-center pb-4 mt-2">
                 <a asp-controller="Doctors" asp-action="Index" class="btn alazea-btn">
                     <i class="fa fa-th-list mr-1"></i> XEM TOÀN BỘ DANH SÁCH BÁC SĨ
                 </a>
@@ -261,8 +358,8 @@
 </section>
 
 <!-- ================= BANNER CẤP CỨU KHẨN CẤP 24/7 ================= -->
-<div class="container my-5">
-    <div class="p-4 p-md-5 rounded-lg text-white shadow-lg" style="background: linear-gradient(135deg, #b71c1c, #dc3545);">
+<div class="container my-4">
+    <div class="p-4 p-md-4 rounded-lg text-white shadow-lg em-banner">
         <div class="row align-items-center">
             <div class="col-lg-8 mb-3 mb-lg-0">
                 <div class="badge badge-light text-danger font-weight-bold px-3 py-1 mb-2">
@@ -284,7 +381,7 @@
 </div>
 
 <!-- ================= HƯỚNG DẪN 5 BƯỚC KHÁM BỆNH ================= -->
-<section class="section-padding-100-0 bg-white border-top">
+<section class="hm-tight bg-white border-top">
     <div class="container">
         <div class="row">
             <div class="col-12">
@@ -295,28 +392,28 @@
             </div>
         </div>
 
-        <div class="row mb-5">
-            <div class="col-6 col-md-4 col-lg mb-4 text-center">
+        <div class="row mb-3">
+            <div class="col-6 col-md-4 col-lg mb-3 text-center">
                 <div class="step-circle-num">1</div>
                 <h6 class="font-weight-bold mb-1">Tìm bác sĩ</h6>
                 <p class="small text-muted mb-0">Lọc theo chuyên khoa, số năm kinh nghiệm và phí khám niêm yết.</p>
             </div>
-            <div class="col-6 col-md-4 col-lg mb-4 text-center">
+            <div class="col-6 col-md-4 col-lg mb-3 text-center">
                 <div class="step-circle-num">2</div>
                 <h6 class="font-weight-bold mb-1">Chọn ngày &amp; giờ</h6>
                 <p class="small text-muted mb-0">Chọn khung giờ trống tiện lợi theo thời gian rảnh của bạn.</p>
             </div>
-            <div class="col-6 col-md-4 col-lg mb-4 text-center">
+            <div class="col-6 col-md-4 col-lg mb-3 text-center">
                 <div class="step-circle-num">3</div>
                 <h6 class="font-weight-bold mb-1">Mô tả triệu chứng</h6>
                 <p class="small text-muted mb-0">Ghi rõ lý do khám và đính kèm hình ảnh hoặc kết quả xét nghiệm cũ.</p>
             </div>
-            <div class="col-6 col-md-4 col-lg mb-4 text-center">
+            <div class="col-6 col-md-4 col-lg mb-3 text-center">
                 <div class="step-circle-num">4</div>
                 <h6 class="font-weight-bold mb-1">Thanh toán VietQR</h6>
                 <p class="small text-muted mb-0">Quét mã QR chuyển khoản tự động và tải biên lai giữ chỗ tức thì.</p>
             </div>
-            <div class="col-12 col-md-4 col-lg mb-4 text-center">
+            <div class="col-12 col-md-4 col-lg mb-3 text-center">
                 <div class="step-circle-num">5</div>
                 <h6 class="font-weight-bold mb-1">Khám &amp; Kê đơn</h6>
                 <p class="small text-muted mb-0">Khám trực tuyến HD hoặc tại viện, nhận đơn thuốc điện tử chuẩn Bộ Y tế.</p>
@@ -324,7 +421,7 @@
         </div>
 
         <!-- 3 Hình thức khám tóm tắt -->
-        <div class="row pb-5">
+        <div class="row pb-4">
             <div class="col-md-4 mb-3">
                 <div class="feature-card">
                     <h6 class="font-weight-bold text-success mb-2"><i class="fa fa-hospital-o mr-1"></i> Khám trực tiếp</h6>
@@ -343,6 +440,58 @@
                     <p class="small text-muted mb-0">Phân loại Triage cấp cứu 1-3. Miễn phí đặt cọc trước, đội ngũ điều phối xe cấp cứu hỗ trợ lập tức.</p>
                 </div>
             </div>
+        </div>
+    </div>
+</section>
+
+<!-- ================= TRANG THIẾT BỊ ================= -->
+<section class="hm-sec bg-light">
+    <div class="container">
+        <div class="text-center mb-4">
+            <div class="hm-eyebrow mb-2">Cơ sở vật chất</div>
+            <h2 class="hm-title">Trang thiết bị hiện đại, chẩn đoán chính xác</h2>
+        </div>
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <div class="hm-fac">
+                    <img src="~/img/bg-img/hinh4.jpg" alt="Siêu âm tim" />
+                    <div class="cap">
+                        <h6>Siêu âm &amp; chẩn đoán hình ảnh</h6>
+                        <p>Thiết bị siêu âm hiện đại hỗ trợ bác sĩ đánh giá nhanh và rõ ràng.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-3">
+                <div class="hm-fac">
+                    <img src="~/img/bg-img/hinh5.jpg" alt="Phòng thông tim" />
+                    <div class="cap">
+                        <h6>Phòng can thiệp tim mạch</h6>
+                        <p>Không gian vô khuẩn, trang bị máy móc chuẩn quốc tế.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ================= ĐỘI NGŨ & KÊU GỌI HÀNH ĐỘNG ================= -->
+<section class="hm-sec">
+    <div class="container">
+        <div class="hm-team">
+            <div class="txt">
+                <div class="hm-eyebrow mb-2">Đội ngũ y bác sĩ</div>
+                <h2 class="hm-title mb-3">Đồng hành cùng sức khỏe của bạn</h2>
+                <p class="text-muted mb-0">Các bác sĩ thuộc nhiều chuyên khoa luôn sẵn sàng tư vấn và thăm khám theo lịch bạn chọn.</p>
+                <div class="nums">
+                    <div><b>@Model.Specs.Count()</b><span>chuyên khoa</span></div>
+                    <div><b>@Model.Specs.Sum(s => s.DoctorCount)</b><span>bác sĩ</span></div>
+                    <div><b>24/7</b><span>hỗ trợ cấp cứu</span></div>
+                </div>
+                <a asp-controller="Doctors" asp-action="Index" class="btn btn-medical px-4 py-2 font-weight-bold">
+                    <i class="fa fa-calendar-check-o mr-1"></i> Đặt lịch khám
+                </a>
+            </div>
+            <div class="pic"><img src="~/img/bg-img/hinh2.jpg" alt="Đội ngũ bác sĩ" /></div>
         </div>
     </div>
 </section>
