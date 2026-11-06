@@ -112,11 +112,15 @@ app.UseHttpsRedirection();
 app.Use(async (context, next) =>
 {
     var headers = context.Response.Headers;
-    headers["Content-Security-Policy"] = "object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'";
+    headers["Content-Security-Policy"] = "object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'";
     headers["X-Content-Type-Options"] = "nosniff";
-    headers["X-Frame-Options"] = "DENY";
+    headers["X-Frame-Options"] = "SAMEORIGIN";
     headers["Referrer-Policy"] = "strict-origin-when-cross-origin";
-    headers["Permissions-Policy"] = "camera=(self), microphone=(self), geolocation=(self)";
+    headers["Permissions-Policy"] =
+        "camera=(self \"https://meet.jit.si\"), " +
+        "microphone=(self \"https://meet.jit.si\"), " +
+        "display-capture=(self \"https://meet.jit.si\"), " +
+        "geolocation=(self)";
     await next();
 });
 

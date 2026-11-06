@@ -73,75 +73,9 @@ namespace TELEHEALTH_GROUP4_QT01.Controllers
             // ===== Răng hàm mặt =====
             new Rule(new[] { "dau rang", "sau rang", "nho rang", "nho rang khon", "rang khon", "moc rang khon", "mat rang", "tram rang", "nieng rang", "nieng", "lung lay rang", "e buot", "viem nuou",
                              "chay mau nuou", "nuou rang", "viem loi", "hoi mieng", "nhiet mieng", "loet mieng", "nha khoa", "rang ham mat", "boc rang su", "cao voi rang", "nha chu", "ham mat" },
-                     new[] { "rang ham mat", "nha khoa", "=rang", "khoa rang", "ham mat" }),
+                     new[] { "rang ham mat", "nha khoa", "=rang", "rang", "ham", "mat", "khoa rang", "ham mat" }),
 
-            // ===== Cơ xương khớp / chấn thương chỉnh hình =====
-            new Rule(new[] { "dau lung", "dau that lung", "dau co", "cung co", "dau co vai gay", "dau khop", "khop sung", "sung khop", "dau goi", "dau vai", "dau co chan", "dau chan", "dau xuong",
-                             "dau co tay", "hoi chung ong co tay", "cot song", "thoat vi dia dem", "thoai hoa", "thoai hoa khop", "gai cot song", "veo cot song", "gay xuong", "nut xuong",
-                             "bong gan", "trat khop", "chan thuong", "loang xuong", "gout", "viem khop", "viem khop dang thap", "chuot rut", "co cung", "xuong khop", "chinh hinh" },
-                     new[] { "xuong khop", "co xuong khop", "chan thuong chinh hinh", "chinh hinh", "co xuong" }),
-
-            // ===== Thần kinh =====
-            new Rule(new[] { "mat ngu", "kho ngu", "ngu khong sau", "ngu khong duoc", "dau nua dau", "migraine", "dau dau", "tuc dau", "chong mat", "hoa mat", "tien dinh", "roi loan tien dinh",
-                             "mat thang bang", "quay cuong", "te tay", "te chan", "te bi", "te ran", "te mat", "run tay", "run chan", "hay quen", "suy giam tri nho", "mat tri nho", "dong kinh",
-                             "dau day than kinh", "dau than kinh toa", "thoat vi dia dem", "liet mat", "yeu nua nguoi", "than kinh" },
-                     new[] { "than kinh", "khoa than kinh", "noi than kinh" }),
-
-            // ===== Tiêu hóa - gan mật =====
-            new Rule(new[] { "dau da day", "da day", "dau thuong vi", "dau bao tu", "trao nguoc", "o chua", "o hoi", "nong rat", "nong rat co hong", "day hoi", "day bung", "kho tieu", "an khong tieu",
-                             "tieu chay", "di ngoai", "di long", "tao bon", "non mua", "non ra mau", "buon non", "dau bung", "dau quan bung", "dau bung duoi", "vang da", "men gan", "viem gan", "benh gan",
-                             "gan nhiem mo", "xo gan", "soi mat", "viem tui mat", "tui mat", "viem tuy", "benh tri", "bi tri", "tri noi", "tri ngoai", "hau mon", "chay mau hau mon", "phan co mau",
-                             "phan den", "di cau", "ngo doc thuc pham", "roi loan tieu hoa", "viem dai trang", "hoi mieng", "an khong ngon", "tieu hoa", "noi soi da day", "noi soi dai trang" },
-                     new[] { "tieu hoa", "noi tieu hoa", "tieu hoa gan mat", "gan mat", "khoa tieu hoa" }),
-
-            // ===== Sản phụ khoa =====
-            new Rule(new[] { "co thai", "mang thai", "dang bau", "kham thai", "sieu am thai", "thai nhi", "thu thai", "que thu thai", "hiem muon", "vo sinh", "sinh con", "sinh no", "sau sinh",
-                             "mat sua", "tac tia sua", "kinh nguyet", "tre kinh", "tri hoan kinh", "rong kinh", "vong kinh", "kinh nguyet khong deu", "dau bung kinh", "ra mau bat thuong", "phu khoa",
-                             "khi hu", "ngua vung kin", "u xo tu cung", "u nang buong trung", "da nang buong trung", "buong trung", "tu cung", "cat tu cung", "san phu khoa", "san khoa", "mang thai tuan" },
-                     new[] { "san phu khoa", "san khoa", "phu khoa", "san" }),
-
-            // ===== Thận - tiết niệu - nam khoa =====
-            new Rule(new[] { "tieu buot", "tieu rat", "tieu dau", "tieu ra mau", "tieu dem", "tieu nhieu lan", "tieu khong het", "tieu khong kiem soat", "nuoc tieu duc", "nuoc tieu co bot",
-                             "soi than", "soi tiet nieu", "soi bang quang", "dau than", "dau lung vung than", "benh than", "suy than", "viem duong tiet nieu", "nhiem trung tiet nieu", "viem bang quang",
-                             "bang quang", "tien liet tuyen", "phi dai tuyen tien liet", "tiet nieu", "nieu khoa", "nam khoa", "roi loan cuong duong", "yeu sinh ly", "xuat tinh som", "cat bao quy dau" },
-                     new[] { "than tiet nieu", "tiet nieu", "nieu khoa", "nam khoa", "=than", "khoa than" }),
-
-            // ===== Nội tiết - đái tháo đường =====
-            new Rule(new[] { "tieu duong", "dai thao duong", "duong huyet", "duong huyet cao", "duong huyet thap", "khat nuoc nhieu", "tuyen giap", "cuong giap", "suy giap", "bieu co", "buou co", "be phi", "beo phi",
-                             "beo bu", "tang can", "tang can nhanh", "giam can nhanh", "sut can", "roi loan noi tiet", "noi tiet", "hoc mon", "man kinh", "tien man kinh", "day thi som" },
-                     new[] { "noi tiet", "dai thao duong", "tuyen giap", "khoa noi tiet" }),
-
-            // ===== Tâm thần - tâm lý =====
-            new Rule(new[] { "lo au", "roi loan lo au", "roi loan hoang so", "hoang so", "tram cam", "stress", "cang thang", "ap luc", "kiet suc tinh than", "burnout", "buon chan", "chan doi",
-                             "mat hung thu", "mat dong luc", "hay khoc", "cau gat", "am anh", "so hai", "roi loan cam xuc", "tam ly", "tam than", "tu ky", "adhd", "tang dong", "nghien", "suy nghi tieu cuc",
-                             "mat ngu", "kho ngu", "mat ngu keo dai" },
-                     new[] { "tam than", "tam ly", "tam than kinh", "suc khoe tam than" }),
-
-            // ===== Hô hấp =====
-            new Rule(new[] { "kho tho", "tho kho", "tho khe khe", "kho khe", "tho gap", "tho dai", "ngat tho", "tuc nguc kho tho", "ho co dom", "ho ra mau", "khac dom", "dom dac", "ho keo dai",
-                             "ho ve dem", "ho gio", "ho nhieu", "hen suyen", "suyen", "benh hen", "con hen", "viem phe quan", "phe quan", "viem phoi", "phoi", "lao phoi", "tran dich mang phoi",
-                             "ngung tho khi ngu", "ngay khi ngu", "ho hap" },
-                     new[] { "ho hap", "phoi", "noi ho hap", "khoa ho hap" }),
-
-            // ===== Truyền nhiễm =====
-            new Rule(new[] { "sot xuat huyet", "covid", "cum a", "cum b", "sot ret", "benh lao", "viem gan b", "viem gan c", "hiv", "sot ve", "tay chan mieng", "quai bi", "thuy dau", "vi rut", "nhiem trung", "nhiem khuan", "ngo doc", "lay lan", "benh truyen nhiem", "truyen nhiem" },
-                     new[] { "truyen nhiem", "nhiem" }),
-
-            // ===== Ung bướu =====
-            new Rule(new[] { "ung thu", "ung buou", "khoi u", "u lanh", "u ac", "noi hach", "hach to", "hoa tri", "xa tri", "tam soat ung thu", "sinh thiet", "u vu", "buou" },
-                     new[] { "ung buou", "ung thu", "ung bau" }),
-
-            // ===== Ngoại khoa - phẫu thuật =====
-            new Rule(new[] { "phau thuat", "mo ruot thua", "ruot thua", "viem ruot thua", "thoat vi ben", "tri noi", "benh tri", "ap xe", "u bao", "vet mo", "vet thuong", "khau vet thuong", "mo noi soi", "ngoai khoa" },
-                     new[] { "ngoai khoa", "ngoai tong quat", "ngoai" }),
-
-            // ===== Dinh dưỡng =====
-            new Rule(new[] { "dinh duong", "che do an", "an kieng", "thuc don", "giam can", "tang can", "suy dinh duong", "thieu vitamin", "thieu chat", "an uong", "thua can", "beo phi" },
-                     new[] { "dinh duong", "khoa dinh duong" }),
-
-            // ===== Phục hồi chức năng =====
-            new Rule(new[] { "phuc hoi chuc nang", "vat ly tri lieu", "tap phuc hoi", "tai bien phuc hoi", "sau dot quy", "sau mo", "di lai kho", "yeu chan", "yeu tay", "liet", "bai liet" },
-                     new[] { "phuc hoi chuc nang", "vat ly tri lieu" }),
+         
         };
 
         // Dấu hiệu nguy hiểm: không gợi ý đặt lịch mà hướng dẫn gọi cấp cứu
@@ -233,7 +167,7 @@ namespace TELEHEALTH_GROUP4_QT01.Controllers
                     .Select(s => new Suggestion
                     {
                         Name = s.Name,
-                        Url = Url.Action("Index", "Doctors", new { q = s.Name }) ?? "/Doctors",
+                        Url = Url.Action("Index", "Doctors", new { specId = s.SpecId }) ?? "/Doctors",
                         Detail = Money(s.Price)
                     }).ToList();
                 return Json(new { reply = "Giá khám cơ bản theo từng chuyên khoa (chưa gồm phụ phí nếu có):", suggestions = list });
@@ -287,7 +221,7 @@ namespace TELEHEALTH_GROUP4_QT01.Controllers
             var sugg = picked.Select(s => new Suggestion
             {
                 Name = s.Name,
-                Url = Url.Action("Index", "Doctors", new { q = s.Name }) ?? "/Doctors",
+                Url = Url.Action("Index", "Doctors", new { specId = s.SpecId }) ?? "/Doctors",
                 Detail = Detail(s.Doctors, s.Price)
             }).ToList();
 

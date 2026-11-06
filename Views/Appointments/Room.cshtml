@@ -1,8 +1,9 @@
-﻿@model TELEHEALTH_GROUP4_QT01.Models.Appointment
+@model TELEHEALTH_GROUP4_QT01.Models.Appointment
 @{
     ViewData["Title"] = $"Phòng khám trực tuyến #TK-{Model.AppointId:D5}";
     var doctor = ViewBag.Doctor as TELEHEALTH_GROUP4_QT01.Models.Doctor;
     var spec = ViewBag.Specialty as TELEHEALTH_GROUP4_QT01.Models.Specialty;
+    string patientName = ViewBag.PatientName as string ?? "Bệnh nhân";
 
     // Tên phòng: bác sĩ phải dùng đúng công thức này để vào cùng phòng
     var roomName = $"telehealth-tk-{Model.AppointId:D5}-x7k2";
@@ -65,21 +66,39 @@
 </div>
 
 @section Scripts {
-    <script src="https://meet.jit.si/external_api.js"></script>
     <script>
         (function () {
-            var api = new JitsiMeetExternalAPI("meet.jit.si", {
-                roomName: "@roomName",
-                parentNode: document.querySelector('#jitsiBox'),
-                height: 520,
-                userInfo: { displayName: "@(ViewBag.PatientName ?? "Bệnh nhân")" },
-                configOverwrite: { prejoinPageEnabled: false },
-                interfaceConfigOverwrite: { SHOW_JITSI_WATERMARK: false }
-            });
+            function startJitsi() {
+                var box = document.querySelector('#jitsiBox');
+                if (!box || box.dataset.started) return;      // tránh khởi tạo 2 lần
+                box.dataset.started = "1";
 
-            api.addListener('readyToClose', function () {
-                window.location.href = '@Url.Action("Details", new { id = Model.AppointId })';
-            });
+                var api = new JitsiMeetExternalAPI("meet.jit.si", {
+                    roomName: "@roomName",
+                    parentNode: box,
+                    height: 520,
+                    userInfo: { displayName: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(patientName)) },
+                    configOverwrite: { prejoinPageEnabled: false },
+                    interfaceConfigOverwrite: { SHOW_JITSI_WATERMARK: false }
+                });
+
+                api.addListener('readyToClose', function () {
+                    window.location.href = '@Url.Action("Details", new { id = Model.AppointId })';
+                });
+            }
+
+            if (window.JitsiMeetExternalAPI) {
+                startJitsi();                                  // thư viện đã có sẵn
+            } else {
+                var s = document.createElement('script');
+                s.src = "https://meet.jit.si/external_api.js";
+                s.onload = startJitsi;                         // chỉ chạy khi đã tải xong
+                s.onerror = function () {
+                    document.querySelector('#jitsiBox').innerHTML =
+                        '<div class="p-4 text-light">Không tải được phòng video. Vui lòng tải lại trang.</div>';
+                };
+                document.head.appendChild(s);
+            }
         })();
     </script>
 }

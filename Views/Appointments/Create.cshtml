@@ -120,7 +120,7 @@
                     <div class="text-center mb-3">
                         @if (!string.IsNullOrEmpty(Model.DoctorAvatarUrl))
                         {
-                            <img src="@Url.Content(Model.DoctorAvatarUrl)" alt="@Model.DoctorName" class="rounded-lg shadow-sm" style="width: 100%; max-height: 200px; object-fit: cover;" />
+                            <img src="@Url.Content(Model.DoctorAvatarUrl)" alt="@Model.DoctorName" class="rounded-lg shadow-sm" style="width: 100%; max-height: 300px; object-fit: contain; background: #f1f3f5;" />
                         }
                         else
                         {
