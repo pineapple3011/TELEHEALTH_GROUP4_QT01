@@ -1,0 +1,61 @@
+@model TELEHEALTH_GROUP4_QT01.Models.ViewModels.PagerVm
+@* Self-contained pager (own CSS) so it looks the same in the public layout and the Admin layout. *@
+@if (Model.TotalPages > 1)
+{
+    int start = Math.Max(1, Model.Page - 2);
+    int end = Math.Min(Model.TotalPages, Model.Page + 2);
+
+    <style>
+        .tp-pager { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; list-style: none; padding: 0; margin: 20px 0 0; }
+        .tp-pager a, .tp-pager span { display: inline-block; min-width: 38px; padding: 7px 12px; text-align: center; border: 1px solid #dee2e6; border-radius: 8px; color: #0056b3; background: #fff; text-decoration: none; font-weight: 600; }
+        .tp-pager a:hover { background: #e9f2ff; }
+        .tp-pager .active span { background: #0056b3; border-color: #0056b3; color: #fff; }
+        .tp-pager .disabled span { color: #adb5bd; background: #f8f9fa; }
+    </style>
+
+    <nav aria-label="Pagination">
+        <ul class="tp-pager">
+            @if (Model.Page > 1)
+            {
+                <li><a href="@Model.UrlFor(Model.Page - 1)" aria-label="Previous">&laquo;</a></li>
+            }
+            else
+            {
+                <li class="disabled"><span>&laquo;</span></li>
+            }
+
+            @if (start > 1)
+            {
+                <li><a href="@Model.UrlFor(1)">1</a></li>
+                if (start > 2) { <li class="disabled"><span>&hellip;</span></li> }
+            }
+
+            @for (int p = start; p <= end; p++)
+            {
+                if (p == Model.Page)
+                {
+                    <li class="active"><span aria-current="page">@p</span></li>
+                }
+                else
+                {
+                    <li><a href="@Model.UrlFor(p)">@p</a></li>
+                }
+            }
+
+            @if (end < Model.TotalPages)
+            {
+                if (end < Model.TotalPages - 1) { <li class="disabled"><span>&hellip;</span></li> }
+                <li><a href="@Model.UrlFor(Model.TotalPages)">@Model.TotalPages</a></li>
+            }
+
+            @if (Model.Page < Model.TotalPages)
+            {
+                <li><a href="@Model.UrlFor(Model.Page + 1)" aria-label="Next">&raquo;</a></li>
+            }
+            else
+            {
+                <li class="disabled"><span>&raquo;</span></li>
+            }
+        </ul>
+    </nav>
+}

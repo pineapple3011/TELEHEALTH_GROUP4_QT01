@@ -22,36 +22,45 @@ namespace TELEHEALTH_GROUP4_QT01.Controllers
         }
 
         // GET: /Doctors?q=...&specId=...&onlyAvailable=true&sort=exp
-        public async Task<IActionResult> Index(string? q, int? specId, bool onlyAvailable = false, string? sort = null)
+        public async Task<IActionResult> Index(string? q, int? specId, bool onlyAvailable = false,
+                                       string? sort = null, int page = 1)
         {
-            var specs = await _context.Specialties.ToListAsync();
-            var doctors = await _context.Doctors.ToListAsync();
+            const int PageSize = 6;
 
-            var query = doctors
-                .Where(d => specId == null || Cv.I(d.SpecId) == specId)
-                .Where(d => string.IsNullOrWhiteSpace(q) ||
-                            (d.FullName ?? "").Contains(q.Trim(), StringComparison.OrdinalIgnoreCase))
-                .Select(d => new DoctorListItem
+            var query = _context.Doctors.AsNoTracking().AsQueryable();
+            if (specId.HasValue) query = query.Where(d => d.SpecId == specId.Value);
+            if (!string.IsNullOrWhiteSpace(q))
+            {
+                var kw = q.Trim();
+                query = query.Where(d => d.FullName.Contains(kw));
+            }
+            if (onlyAvailable) query = query.Where(d => d.Current == "Available");
+
+            query = sort switch
+            {
+                "exp" => query.OrderByDescending(d => d.Exp).ThenBy(d => d.FullName),
+                "feeAsc" => query.OrderBy(d => d.Spec.BasePrice).ThenBy(d => d.FullName),
+                "feeDesc" => query.OrderByDescending(d => d.Spec.BasePrice).ThenBy(d => d.FullName),
+                "name" => query.OrderBy(d => d.FullName),
+                _ => query.OrderBy(d => d.Current == "Available" ? 0 : 1).ThenBy(d => d.FullName)
+            };
+
+            var paged = await PagedList<DoctorListItem>.CreateAsync(
+                query.Select(d => new DoctorListItem
                 {
                     DoctorId = d.DoctorId,
-                    HoTen = d.FullName ?? "",
-                    TenKhoa = specs.FirstOrDefault(s => s.SpecId == Cv.I(d.SpecId))?.SpecialtyName ?? "",
-                    KinhNghiem = Convert.ToString(d.Exp) ?? "",
-                    TrangThai = Convert.ToString(d.Current) ?? "",
+                    HoTen = d.FullName,
+                    TenKhoa = d.Spec.SpecialtyName,
+                    KinhNghiem = d.Exp.ToString(),
+                    TrangThai = d.Current,
                     AvatarUrl = d.AvatarUrl,
-                    Fee = (long)Cv.M(specs.FirstOrDefault(s => s.SpecId == Cv.I(d.SpecId))?.BasePrice)
-                })
-                .Where(x => !onlyAvailable || Cv.IsAvailable(x.TrangThai));
+                    Fee = (long)d.Spec.BasePrice
+                }), page, PageSize);
 
-            var vi = CultureInfo.GetCultureInfo("vi-VN");
-            IEnumerable<DoctorListItem> ordered = sort switch
-            {
-                "exp" => query.OrderByDescending(x => int.TryParse(x.KinhNghiem, out var n) ? n : 0),
-                "feeAsc" => query.OrderBy(x => x.Fee),
-                "feeDesc" => query.OrderByDescending(x => x.Fee),
-                "name" => query.OrderBy(x => x.HoTen, StringComparer.Create(vi, true)),
-                _ => query.OrderByDescending(x => Cv.IsAvailable(x.TrangThai))   // mặc định
-            };
+            var specs = await _context.Specialties.AsNoTracking()
+                .OrderBy(s => s.SpecialtyName)
+                .Select(s => new { s.SpecId, s.SpecialtyName, Count = s.Doctors.Count })
+                .ToListAsync();
 
             var vm = new DoctorListVm
             {
@@ -59,18 +68,21 @@ namespace TELEHEALTH_GROUP4_QT01.Controllers
                 SpecId = specId,
                 OnlyAvailable = onlyAvailable,
                 Sort = sort,
-                TotalAll = doctors.Count,
-                Doctors = ordered.ToList(),
+                TotalAll = await _context.Doctors.CountAsync(),
+                Doctors = paged.Items.ToList(),
+                Page = paged.Page,
+                TotalPages = paged.TotalPages,
+                TotalFiltered = paged.TotalItems,
                 SpecCards = specs.Select(s => new SpecCard
                 {
                     SpecId = s.SpecId,
-                    Name = s.SpecialtyName ?? "",
-                    DoctorCount = doctors.Count(d => Cv.I(d.SpecId) == s.SpecId)
+                    Name = s.SpecialtyName,
+                    DoctorCount = s.Count
                 }).ToList(),
                 Specs = specs.Select(s => new SelectListItem
                 {
                     Value = s.SpecId.ToString(),
-                    Text = s.SpecialtyName ?? "",
+                    Text = s.SpecialtyName,
                     Selected = s.SpecId == specId
                 }).ToList()
             };

@@ -19,6 +19,9 @@ namespace TELEHEALTH_GROUP4_QT01.Models.ViewModels
     {
         public string? Q { get; set; }
         public int? SpecId { get; set; }
+        public int Page { get; set; } = 1;
+        public int TotalPages { get; set; } = 1;
+        public int TotalFiltered { get; set; }
         public List<SelectListItem> Specs { get; set; } = new();
         public List<DoctorListItem> Doctors { get; set; } = new();
 
@@ -191,6 +194,10 @@ namespace TELEHEALTH_GROUP4_QT01.Models.ViewModels
         public string Address { get; set; } = "";
         public string EmergencyPhone { get; set; } = "";
 
+
+        public int Page { get; set; } = 1;
+public int TotalPages { get; set; } = 1;
+public int TotalFiltered { get; set; }
         public int Total { get; set; }
         public int Upcoming { get; set; }
         public int Completed { get; set; }

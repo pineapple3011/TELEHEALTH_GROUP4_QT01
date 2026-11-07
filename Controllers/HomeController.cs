@@ -10,11 +10,14 @@ namespace TELEHEALTH_GROUP4_QT01.Controllers
     public class HomeController : Controller
     {
         private readonly TelehealthContext _context;
-        public HomeController(TelehealthContext context)
+        private readonly ILogger<HomeController> _logger;
+
+        public HomeController(TelehealthContext context, ILogger<HomeController> logger)
         {
             _context = context;
+            _logger = logger;
         }
-        private readonly ILogger<HomeController> _logger;
+
         //=======================================
 
         public async Task<IActionResult> Index()
@@ -64,6 +67,10 @@ namespace TELEHEALTH_GROUP4_QT01.Controllers
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
+            var feature = HttpContext.Features.Get<Microsoft.AspNetCore.Diagnostics.IExceptionHandlerFeature>();
+            if (feature?.Error != null)
+                _logger.LogError(feature.Error, "Unhandled exception at {Path}", feature.Path);
+
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
     }

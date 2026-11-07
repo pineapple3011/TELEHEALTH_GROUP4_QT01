@@ -12,7 +12,13 @@ namespace TELEHEALTH_GROUP4_QT01.Areas.Admin.Controllers
     public class RevenueController : AdminBaseController
     {
         private readonly TelehealthContext _context;
-        public RevenueController(TelehealthContext context) => _context = context;
+        private readonly ILogger<RevenueController> _logger;
+
+        public RevenueController(TelehealthContext context, ILogger<RevenueController> logger)
+        {
+            _context = context;
+            _logger = logger;
+        }
 
         // GET: /Admin/Revenue?from=...&to=...   (mặc định: 6 tháng gần nhất)
         public async Task<IActionResult> Index(DateOnly? from, DateOnly? to)
@@ -78,7 +84,7 @@ namespace TELEHEALTH_GROUP4_QT01.Areas.Admin.Controllers
             p.PaymentTime = DateTime.Now;
             if (p.Appoint.Status == TrangThaiCa.ChoXacNhan) p.Appoint.Status = TrangThaiCa.DaXacNhan;
             await _context.SaveChangesAsync();
-
+            _logger.LogInformation("Admin confirmed payment {PaymentId} of appointment {AppointId}", p.PaymentId, p.AppointId);
             TempData["Msg"] = $"Đã xác nhận thanh toán cho lịch khám #{p.AppointId}.";
             return RedirectToAction(nameof(Index));
         }
@@ -92,6 +98,7 @@ namespace TELEHEALTH_GROUP4_QT01.Areas.Admin.Controllers
             {
                 p.Status = TtGiaoDich.ChoThanhToan;
                 await _context.SaveChangesAsync();
+                _logger.LogWarning("Admin rejected receipt of payment {PaymentId} (appointment {AppointId})", p.PaymentId, p.AppointId);
                 TempData["Msg"] = $"Đã từ chối biên lai của lịch khám #{p.AppointId}, bệnh nhân cần gửi lại.";
             }
             return RedirectToAction(nameof(Index));

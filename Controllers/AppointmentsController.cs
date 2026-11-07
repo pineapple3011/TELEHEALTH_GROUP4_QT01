@@ -15,15 +15,18 @@ namespace TELEHEALTH_GROUP4_QT01.Controllers
         private const long MaxCreateRequestBytes = 26 * 1024 * 1024;
         private const long MaxReceiptRequestBytes = 6 * 1024 * 1024;
 
-        private readonly TelehealthContext _context;        // đổi tên nếu DbContext của bạn khác
+        private readonly TelehealthContext _context;
         private readonly IFileStorageService _files;
-        private readonly BankOptions _bank;                 // thông tin ngân hàng đọc từ cấu hình, không gán cứng
+        private readonly BankOptions _bank;
+        private readonly ILogger<AppointmentsController> _logger;     // ← thêm dòng này
 
-        public AppointmentsController(TelehealthContext context, IFileStorageService files, IOptions<BankOptions> bank)
+        public AppointmentsController(TelehealthContext context, IFileStorageService files,
+                                      IOptions<BankOptions> bank, ILogger<AppointmentsController> logger)   // ← thêm tham số
         {
             _context = context;
             _files = files;
             _bank = bank.Value;
+            _logger = logger;                                         // ← thêm dòng này
         }
 
         // =====================================================================
@@ -192,7 +195,11 @@ namespace TELEHEALTH_GROUP4_QT01.Controllers
                 foreach (var f in uploads)
                 {
                     var err = await _files.ValidateAsync(f);
-                    if (err != null) ModelState.AddModelError("Files", err);
+                    if (err != null)
+                    {
+                        ModelState.AddModelError("Files", err);
+                        _logger.LogWarning("Symptom file rejected for patient {PatientId}: {Error}", CurrentPatientId, err);
+                    }
                 }
             }
 
@@ -247,6 +254,9 @@ namespace TELEHEALTH_GROUP4_QT01.Controllers
                 });
             }
             await _context.SaveChangesAsync();
+
+            _logger.LogInformation("Patient {PatientId} created appointment {AppointId} ({BookingType})",
+                       CurrentPatientId, ca.AppointId, ca.BookingType);
 
             if (fee > 0) return RedirectToAction(nameof(Pay), new { id = ca.AppointId });
 
@@ -325,6 +335,7 @@ namespace TELEHEALTH_GROUP4_QT01.Controllers
             var err = await _files.ValidateAsync(receipt);
             if (err != null)
             {
+                _logger.LogWarning("Receipt rejected for appointment {AppointId}: {Error}", id, err);
                 TempData["Err"] = err;
                 return RedirectToAction(nameof(Pay), new { id });
             }
@@ -339,6 +350,8 @@ namespace TELEHEALTH_GROUP4_QT01.Controllers
             });
             pay.Status = TtGiaoDich.ChoXacNhan;
             await _context.SaveChangesAsync();
+
+            _logger.LogInformation("Receipt uploaded for appointment {AppointId}, waiting for admin confirmation", id);
 
             TempData["Msg"] = "Đã gửi biên lai. Lịch hẹn sẽ được xác nhận sau khi kiểm tra thanh toán.";
             return RedirectToAction(nameof(Details), new { id });

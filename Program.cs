@@ -5,8 +5,14 @@ using Microsoft.EntityFrameworkCore;
 using TELEHEALTH_GROUP4_QT01.Models;
 using TELEHEALTH_GROUP4_QT01.Security;
 using TELEHEALTH_GROUP4_QT01.Services;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Host.UseSerilog((ctx, cfg) => cfg
+    .MinimumLevel.Information()
+    .MinimumLevel.Override("Microsoft", Serilog.Events.LogEventLevel.Warning)
+    .WriteTo.Console()
+    .WriteTo.File("logs/telehealth-.log", rollingInterval: RollingInterval.Day));
 
 // ---------------------------------------------------------------------------
 // MVC + CSRF
