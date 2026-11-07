@@ -18,10 +18,11 @@
     :root {
         --ap-navy: #1d2b4f;
         --ap-bar: #2b4c7e;
+        --ap-head-bg: #dce8f8; /* nền xanh nhạt cho tiêu đề khối */
+        --ap-head-line: #cfdcef; /* đường viền dưới tiêu đề */
         --ap-blue: #0056b3;
         --ap-line: #e6ecf2;
         --ap-muted: #6b7785;
-        /* Nếu tiêu đề trang dùng font riêng, thay inherit bằng font đó, VD: "Be Vietnam Pro", sans-serif */
         --ap-font: inherit;
     }
 
@@ -103,12 +104,26 @@
         justify-content: space-between;
         gap: 10px;
         padding: 14px 22px;
-        background: var(--ap-bar);
-        color: #fff;
+        background: var(--ap-head-bg);
+        color: var(--ap-navy);
+        border-bottom: 1px solid var(--ap-head-line);
         font-weight: 700;
         font-size: 15px;
         letter-spacing: .5px;
         text-transform: uppercase;
+    }
+
+        /* Nếu sau này có link nhỏ ở bên phải tiêu đề (giống "Danh bạ bác sĩ →") */
+        .detail-card-head a {
+            color: var(--ap-blue);
+            font-size: 12.5px;
+            font-weight: 600;
+            text-transform: none;
+            letter-spacing: 0;
+        }
+
+    .dt-banner .sub, .dt-banner .sub b {
+        color: #fff !important;
     }
 
     .detail-card-body {

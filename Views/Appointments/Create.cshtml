@@ -4,102 +4,214 @@
 }
 
 <style>
-    .booking-step-badge {
-        width: 28px;
-        height: 28px;
-        border-radius: 50%;
-        background: #0056b3;
-        color: #fff;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: 700;
-        font-size: 14px;
-        margin-right: 8px;
-    }
-    .booking-type-card {
-        border: 2px solid #e9ecef;
-        border-radius: 12px;
-        padding: 16px;
-        cursor: pointer;
-        transition: all .2s;
-        height: 100%;
-        background: #fff;
-        position: relative;
-    }
-    .booking-type-card:hover {
-        border-color: #70c745;
-        box-shadow: 0 4px 15px rgba(112, 199, 69, 0.15);
-    }
-    .booking-type-card.selected {
-        border-color: #28a745;
-        background: #f7fdf5;
-        box-shadow: 0 4px 15px rgba(40, 167, 69, 0.2);
-    }
-    .booking-type-card input[type="radio"] {
-        position: absolute;
-        top: 15px;
-        right: 15px;
+    .bk-page {
+        --bk-navy: #12295a;
+        --bk-blue: #1a78c2;
+        --bk-blue-dark: #145f9b;
+        --bk-sky: #dbe6f6;
+        --bk-sky-soft: #eef4fc;
+        --bk-line: #e2e8f2;
+        --bk-ink: #14233f;
+        --bk-muted: #6b7a90;
+        --bk-red: #d32f2f;
+        --bk-shadow: 0 1px 2px rgba(16,40,90,.05), 0 8px 24px rgba(16,40,90,.06);
     }
 
-    /* Triage Cards */
-    .triage-card {
-        border: 2px solid #dee2e6;
-        border-radius: 10px;
-        padding: 12px 14px;
-        margin-bottom: 10px;
-        cursor: pointer;
-        transition: all .2s;
-        display: flex;
-        align-items: center;
-        background: #fff;
+    /* ===== Tiêu đề trang ===== */
+    .bk-page .bk-head { margin-bottom: 24px; }
+    .bk-page .bk-back { font-size: 13.5px; font-weight: 600; color: var(--bk-blue); }
+    .bk-page .bk-back:hover { color: var(--bk-blue-dark); text-decoration: underline; }
+    .bk-page .bk-head h3 {
+        display: flex; align-items: center; gap: 12px; margin: 10px 0 6px;
+        font-size: 26px; font-weight: 700; color: var(--bk-navy);
     }
-    .triage-card:hover { transform: translateX(3px); }
-    .triage-card.triage-1 { border-color: #dc3545; }
-    .triage-card.triage-1.selected { background: #fff5f5; border-width: 3px; }
-    .triage-card.triage-2 { border-color: #ffc107; }
-    .triage-card.triage-2.selected { background: #fffdf5; border-width: 3px; }
-    .triage-card.triage-3 { border-color: #28a745; }
-    .triage-card.triage-3.selected { background: #f5fff5; border-width: 3px; }
+    .bk-page .bk-head h3 .bk-head-ico {
+        width: 42px; height: 42px; flex: none; display: inline-flex; align-items: center; justify-content: center;
+        border-radius: 12px; background: var(--bk-sky); color: var(--bk-blue); font-size: 20px;
+    }
+    .bk-page .bk-head p { margin: 0; font-size: 14px; color: var(--bk-muted); }
 
-    /* Quick symptom chips */
-    .symptom-chip {
-        display: inline-block;
-        padding: 5px 12px;
-        border-radius: 20px;
-        background: #f1f3f5;
-        color: #495057;
-        font-size: 12px;
-        font-weight: 600;
-        cursor: pointer;
-        margin: 0 6px 8px 0;
-        transition: all .15s;
-        border: 1px solid #dee2e6;
+    /* ===== Card + tiêu đề từng bước (giống card trang lịch khám) ===== */
+    .bk-page .bk-card {
+        background: #fff; border: 1px solid var(--bk-line); border-radius: 14px;
+        box-shadow: var(--bk-shadow); overflow: hidden; margin-bottom: 22px;
     }
-    .symptom-chip:hover {
-        background: #e8f5e9;
-        color: #2e7d32;
-        border-color: #81c784;
+    .bk-page .bk-card-head {
+        display: flex; align-items: center; gap: 12px; padding: 14px 22px;
+        background: var(--bk-sky); border-bottom: 1px solid #cddbf0;
+    }
+    .bk-page .bk-card-head h6 {
+        margin: 0; font-size: 13.5px; font-weight: 700; letter-spacing: .3px;
+        text-transform: uppercase; color: var(--bk-navy);
+    }
+    .bk-page .bk-step {
+        width: 28px; height: 28px; flex: none; display: inline-flex; align-items: center; justify-content: center;
+        border-radius: 50%; background: linear-gradient(135deg, #12295a, #1a78c2);
+        color: #fff; font-size: 13px; font-weight: 700;
+    }
+    .bk-page .bk-card-body { padding: 22px; }
+    .bk-page .bk-side { position: sticky; top: 90px; }
+
+    /* ===== Bác sĩ ===== */
+    .bk-page .bk-avatar-img {
+        display: block; width: 100%; max-height: 300px; object-fit: contain;
+        background: var(--bk-sky-soft); border-radius: 12px;
+    }
+    .bk-page .bk-avatar-ph {
+        width: 100%; height: 180px; display: flex; align-items: center; justify-content: center;
+        border-radius: 12px; color: #fff; font-size: 40px; font-weight: 700;
+        background: linear-gradient(135deg, #12295a, #1a78c2);
+    }
+    .bk-page .bk-doc-name { margin: 16px 0 10px; font-size: 19px; font-weight: 700; color: var(--bk-navy); }
+    .bk-page .bk-kv {
+        display: flex; justify-content: space-between; gap: 12px; padding: 9px 0;
+        border-bottom: 1px solid #edf1f7; font-size: 13.5px;
+    }
+    .bk-page .bk-kv span { color: var(--bk-muted); }
+    .bk-page .bk-kv b { color: var(--bk-ink); text-align: right; }
+    .bk-page .bk-time {
+        margin: 16px 0; padding: 14px 16px; border-radius: 12px;
+        background: var(--bk-sky-soft); border-left: 4px solid var(--bk-blue);
+    }
+    .bk-page .bk-time-label { font-size: 12.5px; color: var(--bk-muted); margin-bottom: 4px; }
+    .bk-page .bk-time-date { font-size: 16px; font-weight: 700; color: var(--bk-blue); }
+    .bk-page .bk-time-slot { margin-top: 2px; font-size: 14.5px; font-weight: 600; color: var(--bk-ink); }
+
+    /* ===== Chọn hình thức khám ===== */
+    .bk-page .booking-type-card {
+        position: relative; display: block; height: 100%; margin: 0; padding: 18px 16px;
+        background: #fff; border: 2px solid var(--bk-line); border-radius: 14px;
+        cursor: pointer; transition: border-color .2s, box-shadow .2s, background .2s;
+    }
+    .bk-page .booking-type-card:hover { border-color: #9cc3e8; box-shadow: 0 4px 16px rgba(26,120,194,.12); }
+    .bk-page .booking-type-card.selected {
+        border-color: var(--bk-blue); background: #f4f9fe; box-shadow: 0 6px 18px rgba(26,120,194,.18);
+    }
+    .bk-page .booking-type-card.bk-danger:hover { border-color: #efa6a6; box-shadow: 0 4px 16px rgba(211,47,47,.12); }
+    .bk-page .booking-type-card.bk-danger.selected { border-color: var(--bk-red); background: #fff6f6; box-shadow: 0 6px 18px rgba(211,47,47,.16); }
+    .bk-page .booking-type-card input[type="radio"] {
+        position: absolute; top: 16px; right: 16px; margin: 0; width: 18px; height: 18px; accent-color: var(--bk-blue);
+    }
+    .bk-page .booking-type-card.bk-danger input[type="radio"] { accent-color: var(--bk-red); }
+    .bk-page .bk-type-ico {
+        width: 46px; height: 46px; margin-bottom: 12px; display: inline-flex; align-items: center; justify-content: center;
+        border-radius: 12px; background: var(--bk-sky); color: var(--bk-blue); font-size: 22px;
+    }
+    .bk-page .bk-type-ico--navy { background: #e3e8f4; color: var(--bk-navy); }
+    .bk-page .bk-type-ico--danger { background: #fdeceb; color: var(--bk-red); }
+    .bk-page .booking-type-card h6 { margin: 0 0 4px; font-size: 15px; font-weight: 700; color: var(--bk-navy); }
+    .bk-page .booking-type-card.bk-danger h6 { color: var(--bk-red); }
+    .bk-page .booking-type-card p { margin: 0 0 10px; font-size: 12.5px; line-height: 1.5; color: var(--bk-muted); }
+    .bk-page .bk-pill {
+        display: inline-block; padding: 4px 11px; border-radius: 999px;
+        background: var(--bk-sky); color: var(--bk-navy); font-size: 12px; font-weight: 700;
+    }
+    .bk-page .bk-pill--danger { background: #fdeceb; color: #a82334; }
+
+    /* Khối phụ: cơ sở phòng khám / cấp cứu */
+    .bk-page .bk-note { padding: 16px; margin-bottom: 14px; border-radius: 12px; background: var(--bk-sky-soft); border: 1px solid #d3e1f3; }
+    .bk-page .bk-note label { display: block; margin-bottom: 6px; font-size: 13px; font-weight: 600; color: var(--bk-navy); }
+    .bk-page .bk-note .bk-hint { margin-top: 6px; font-size: 12.5px; color: var(--bk-muted); }
+    .bk-page .bk-emergency {
+        padding: 16px; margin-bottom: 14px; border-radius: 12px; background: #fffafa;
+        border: 1px solid #f3c6c6; border-left: 5px solid var(--bk-red);
+    }
+    .bk-page .bk-emergency-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
+    .bk-page .bk-emergency-head label { margin: 0; font-size: 14px; font-weight: 700; color: var(--bk-red); }
+
+    /* ===== Triage ===== */
+    .bk-page .triage-card {
+        --c: #6c757d; --bg: #f8f9fa;
+        display: flex; align-items: center; gap: 12px; margin: 0 0 10px; padding: 12px 14px;
+        background: #fff; border: 1px solid var(--bk-line); border-left: 6px solid var(--c); border-radius: 10px;
+        cursor: pointer; transition: background .15s, box-shadow .15s, transform .15s;
+    }
+    .bk-page .triage-card:hover { background: var(--bg); transform: translateX(3px); }
+    .bk-page .triage-card:has(input:checked) { background: var(--bg); box-shadow: 0 0 0 2px var(--c); }
+    .bk-page .triage-card input[type="radio"] { flex: none; margin: 0; width: 18px; height: 18px; accent-color: var(--c); }
+    .bk-page .triage-card b { font-size: 14px; }
+    .bk-page .triage-card .small { font-size: 12.5px; line-height: 1.45; }
+    .bk-page .triage-tag {
+        flex: none; padding: 3px 12px; border-radius: 999px; background: var(--c);
+        color: #fff; font-size: 12px; font-weight: 700;
+    }
+    .bk-page .triage-1 { --c: #d32f2f; --bg: #fdeceb; }
+    .bk-page .triage-2 { --c: #e0a100; --bg: #fff7dd; }
+    .bk-page .triage-2 .triage-tag { color: #3d2c00; }
+    .bk-page .triage-3 { --c: #1f9d68; --bg: #e6f6ee; }
+
+    /* ===== Triệu chứng + tệp ===== */
+    .bk-page .symptom-chip {
+        display: inline-block; margin: 0 6px 8px 0; padding: 5px 13px; border-radius: 999px;
+        background: var(--bk-sky-soft); color: #334a6b; border: 1px solid #d3e1f3;
+        font-size: 12.5px; font-weight: 600; cursor: pointer; user-select: none; transition: all .15s;
+    }
+    .bk-page .symptom-chip:hover { background: var(--bk-blue); border-color: var(--bk-blue); color: #fff; }
+    .bk-page .bk-label { display: block; margin-bottom: 6px; font-size: 13px; font-weight: 600; color: var(--bk-navy); }
+    .bk-page .form-control {
+        border: 1px solid #d5deeb; border-radius: 10px; color: var(--bk-ink); background: #fff;
+    }
+    .bk-page .form-control:focus { border-color: var(--bk-blue); box-shadow: 0 0 0 3px rgba(26,120,194,.16); }
+    .bk-page select.form-control, .bk-page input.form-control { min-height: 44px; }
+    .bk-page textarea.form-control { padding: 12px 14px; }
+    .bk-page .bk-file {
+        display: block; width: 100%; padding: 16px; border: 2px dashed #b9cfea; border-radius: 12px;
+        background: var(--bk-sky-soft); color: var(--bk-muted); font-size: 13.5px; cursor: pointer;
+    }
+    .bk-page .bk-file:hover { border-color: var(--bk-blue); }
+    .bk-page .bk-file-item {
+        padding: 8px 12px; border: 1px solid var(--bk-line); border-radius: 10px; background: #fff;
+        font-size: 12.5px; color: var(--bk-ink);
     }
 
-    .cost-box {
-        background: #f8fbf9;
-        border: 1px dashed #70c745;
-        border-radius: 10px;
-        padding: 16px;
+    /* ===== Chi phí ===== */
+    .bk-page .cost-box {
+        padding: 18px; margin-bottom: 16px; border-radius: 12px;
+        background: var(--bk-sky-soft); border: 1px dashed #8fb6e0;
+    }
+    .bk-page .bk-cost-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 10px; font-size: 14px; }
+    .bk-page .bk-cost-row span:first-child { color: var(--bk-muted); }
+    .bk-page .bk-cost-row b { color: var(--bk-ink); }
+    .bk-page .bk-cost-row .bk-pay-mode { color: var(--bk-blue); font-weight: 700; }
+    .bk-page .bk-cost-total { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding-top: 12px; border-top: 1px solid #cddbf0; }
+    .bk-page .bk-cost-total > span { font-size: 15px; font-weight: 700; color: var(--bk-navy); }
+    .bk-page .bk-cost-total h4 { margin: 0; font-size: 26px; font-weight: 700; color: var(--bk-blue); }
+    .bk-page .bk-agree { margin-bottom: 18px; font-size: 13px; color: var(--bk-muted); }
+    .bk-page .bk-agree input { accent-color: var(--bk-blue); }
+    .bk-page .bk-agree a { color: var(--bk-blue); font-weight: 600; }
+
+    /* ===== Nút ===== */
+    .bk-page .bk-btn {
+        display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 26px;
+        border: 1px solid var(--bk-blue); border-radius: 10px; background: var(--bk-blue); color: #fff;
+        font-size: 14.5px; font-weight: 600; line-height: 1.2; text-decoration: none; cursor: pointer;
+        box-shadow: 0 6px 16px rgba(26,120,194,.28); transition: background .15s, box-shadow .15s;
+    }
+    .bk-page .bk-btn:hover { background: var(--bk-blue-dark); border-color: var(--bk-blue-dark); color: #fff; box-shadow: 0 8px 20px rgba(26,120,194,.35); }
+    .bk-page .bk-btn--ghost { background: #fff; border-color: #c9d2df; color: #334a6b; box-shadow: none; }
+    .bk-page .bk-btn--ghost:hover { background: #fff; border-color: var(--bk-blue); color: var(--bk-blue); box-shadow: none; }
+    .bk-page .bk-btn--danger { background: var(--bk-red); border-color: var(--bk-red); box-shadow: 0 6px 16px rgba(211,47,47,.25); }
+    .bk-page .bk-btn--danger:hover { background: #b71c1c; border-color: #b71c1c; box-shadow: 0 8px 20px rgba(211,47,47,.32); }
+    .bk-page .bk-btn--sm { padding: 6px 14px; font-size: 12.5px; font-weight: 600; box-shadow: none; }
+    .bk-page .bk-btn--block { display: flex; width: 100%; }
+    .bk-page .bk-actions { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+
+    @@media (max-width: 991px) {
+        .bk-page .bk-side { position: static; }
     }
 </style>
 
-<div class="container my-4" style="min-height: 65vh;">
-    <!-- Breadcrumb & Tiêu đề -->
-    <div class="mb-4">
-        <a asp-controller="Doctors" asp-action="Details" asp-route-id="@Model.DoctorId" class="text-success small font-weight-bold">
+<div class="bk-page container my-4" style="min-height: 65vh;">
+    <!-- Tiêu đề -->
+    <div class="bk-head">
+        <a class="bk-back" asp-controller="Doctors" asp-action="Details" asp-route-id="@Model.DoctorId">
             &larr; Quay lại chọn ngày/giờ khác
         </a>
-        <h3 class="font-weight-bold text-dark mt-1">
-            <i class="fa fa-calendar-plus-o text-success mr-2"></i> Đặt Lịch Khám &amp; Mô Tả Triệu Chứng
+        <h3>
+            <span class="bk-head-ico"><i class="fa fa-calendar-plus-o"></i></span>
+            Đặt lịch khám &amp; mô tả triệu chứng
         </h3>
-        <p class="text-muted small mb-0">Hoàn tất các bước dưới đây để gửi yêu cầu đặt lịch hẹn tới bác sĩ chuyên khoa.</p>
+        <p>Hoàn tất các bước dưới đây để gửi yêu cầu đặt lịch hẹn tới bác sĩ chuyên khoa.</p>
     </div>
 
     <form asp-action="Create" method="post" enctype="multipart/form-data" id="createForm">
@@ -110,222 +222,222 @@
         <div asp-validation-summary="ModelOnly" class="alert alert-danger shadow-sm"></div>
 
         <div class="row">
-            <!-- CỘT TRÁI: Tóm tắt thông tin bác sĩ & Giờ khám đã chọn -->
+            <!-- CỘT TRÁI: Bác sĩ & giờ khám đã chọn -->
             <div class="col-lg-4 mb-4">
-                <div class="card border-0 shadow-sm rounded-lg p-3 bg-white h-100">
-                    <h6 class="font-weight-bold text-dark mb-3 border-bottom pb-2">
-                        <span class="booking-step-badge">1</span> Bác Sĩ &amp; Thời Gian
-                    </h6>
+                <div class="bk-side">
+                    <div class="bk-card" style="margin-bottom:0">
+                        <div class="bk-card-head">
+                            <span class="bk-step">1</span>
+                            <h6>Bác sĩ &amp; thời gian</h6>
+                        </div>
+                        <div class="bk-card-body">
+                            @if (!string.IsNullOrEmpty(Model.DoctorAvatarUrl))
+                            {
+                                <img src="@Url.Content(Model.DoctorAvatarUrl)" alt="@Model.DoctorName" class="bk-avatar-img" />
+                            }
+                            else
+                            {
+                                <div class="bk-avatar-ph">BS</div>
+                            }
 
-                    <div class="text-center mb-3">
-                        @if (!string.IsNullOrEmpty(Model.DoctorAvatarUrl))
-                        {
-                            <img src="@Url.Content(Model.DoctorAvatarUrl)" alt="@Model.DoctorName" class="rounded-lg shadow-sm" style="width: 100%; max-height: 300px; object-fit: contain; background: #f1f3f5;" />
-                        }
-                        else
-                        {
-                            <div class="rounded-lg shadow-sm d-flex align-items-center justify-content-center text-white font-weight-bold" style="width: 100%; height: 180px; background: linear-gradient(135deg,#70c745,#2c9d8f); font-size:40px;">
-                                BS
+                            <h5 class="bk-doc-name">@(Model.DoctorName ?? "Bác sĩ Chuyên khoa")</h5>
+                            <div class="bk-kv"><span><i class="fa fa-stethoscope"></i> Chuyên khoa</span><b>@Model.SpecName</b></div>
+                            <div class="bk-kv"><span><i class="fa fa-certificate"></i> Kinh nghiệm</span><b>@Cv.Years(Model.DoctorExp)</b></div>
+
+                            <div class="bk-time">
+                                <div class="bk-time-label">Thời gian khám đã chọn</div>
+                                <div class="bk-time-date"><i class="fa fa-calendar"></i> @Model.DateText</div>
+                                <div class="bk-time-slot"><i class="fa fa-clock-o"></i> Khung giờ: @(Model.TimeText ?? Model.Time)</div>
+                                <input type="hidden" asp-for="Time" />
+                                <span asp-validation-for="Time" class="text-danger small"></span>
                             </div>
-                        }
-                    </div>
 
-                    <h5 class="font-weight-bold text-dark mb-1">@(Model.DoctorName ?? "Bác sĩ Chuyên khoa")</h5>
-                    <p class="text-muted small mb-1"><i class="fa fa-stethoscope text-success"></i> Chuyên khoa: <b>@Model.SpecName</b></p>
-                    <p class="text-muted small mb-3"><i class="fa fa-certificate text-warning"></i> Kinh nghiệm: <b>@Cv.Years(Model.DoctorExp)</b></p>
-
-                    <div class="p-3 bg-light rounded mb-3">
-                        <div class="small text-muted mb-1">Thời gian khám đã chọn:</div>
-                        <div class="font-weight-bold text-success" style="font-size: 16px;">
-                            <i class="fa fa-calendar"></i> @Model.DateText
+                            <a asp-controller="Doctors" asp-action="Details" asp-route-id="@Model.DoctorId" class="bk-btn bk-btn--ghost bk-btn--sm bk-btn--block">
+                                <i class="fa fa-pencil"></i> Đổi ngày hoặc giờ khác
+                            </a>
                         </div>
-                        <div class="font-weight-bold text-dark mt-1" style="font-size: 15px;">
-                            <i class="fa fa-clock-o"></i> Khung giờ: @(Model.TimeText ?? Model.Time)
-                        </div>
-                        <input type="hidden" asp-for="Time" />
-                        <span asp-validation-for="Time" class="text-danger small"></span>
                     </div>
-
-                    <a asp-controller="Doctors" asp-action="Details" asp-route-id="@Model.DoctorId" class="btn btn-outline-secondary btn-sm btn-block">
-                        <i class="fa fa-pencil"></i> Đổi ngày hoặc giờ khác
-                    </a>
                 </div>
             </div>
 
-            <!-- CỘT PHẢI: Hình thức khám, Phân loại Triage, Triệu chứng & File -->
+            <!-- CỘT PHẢI -->
             <div class="col-lg-8 mb-4">
-                <div class="card border-0 shadow-sm rounded-lg p-4 bg-white mb-4">
-                    <h6 class="font-weight-bold text-dark mb-3 border-bottom pb-2">
-                        <span class="booking-step-badge">2</span> Chọn Hình Thức Khám Bệnh
-                    </h6>
-
-                    <div class="row mb-3">
-                        <!-- Khám Trực Tuyến -->
-                        <div class="col-md-4 mb-3 mb-md-0">
-                            <label class="booking-type-card d-block" id="cardOnline" for="typeOnline">
-                                <input class="form-check-input" type="radio" asp-for="HinhThuc" value="Online" id="typeOnline" onchange="updateBookingForm()" checked />
-                                <div class="text-primary mb-2" style="font-size: 24px;"><i class="fa fa-video-camera"></i></div>
-                                <h6 class="font-weight-bold text-dark mb-1">Khám Trực Tuyến</h6>
-                                <p class="text-muted small mb-2">Tư vấn Video Call HD 1-1 với bác sĩ tại nhà</p>
-                                <span class="badge badge-soft-primary small">Phí: @Cv.Money(Model.FeeOnline)</span>
-                            </label>
-                        </div>
-
-                        <!-- Khám Trực Tiếp -->
-                        <div class="col-md-4 mb-3 mb-md-0">
-                            <label class="booking-type-card d-block" id="cardOffline" for="typeOffline">
-                                <input class="form-check-input" type="radio" asp-for="HinhThuc" value="Offline" id="typeOffline" onchange="updateBookingForm()" />
-                                <div class="text-success mb-2" style="font-size: 24px;"><i class="fa fa-hospital-o"></i></div>
-                                <h6 class="font-weight-bold text-dark mb-1">Khám Trực Tiếp</h6>
-                                <p class="text-muted small mb-2">Đến khám tại phòng khám của bệnh viện</p>
-                                <span class="badge badge-soft-success small">Cọc 30%: @Cv.Money(Model.FeeOffline)</span>
-                            </label>
-                        </div>
-
-                        <!-- Cấp Cứu -->
-                        <div class="col-md-4">
-                            <label class="booking-type-card d-block" id="cardEmergency" for="typeEmergency">
-                                <input class="form-check-input" type="radio" asp-for="HinhThuc" value="Cấp cứu" id="typeEmergency" onchange="updateBookingForm()" />
-                                <div class="text-danger mb-2" style="font-size: 24px;"><i class="fa fa-ambulance"></i></div>
-                                <h6 class="font-weight-bold text-danger mb-1">Cấp Cứu</h6>
-                                <p class="text-muted small mb-2">Khẩn cấp 24/7, điều phối xe cứu thương</p>
-                                <span class="badge badge-soft-danger small">Miễn phí đặt trước</span>
-                            </label>
-                        </div>
+                <!-- BƯỚC 2: HÌNH THỨC KHÁM -->
+                <div class="bk-card">
+                    <div class="bk-card-head">
+                        <span class="bk-step">2</span>
+                        <h6>Chọn hình thức khám bệnh</h6>
                     </div>
-                    <span asp-validation-for="HinhThuc" class="text-danger small"></span>
+                    <div class="bk-card-body">
+                        <div class="row mb-3">
+                            <!-- Khám trực tuyến -->
+                            <div class="col-md-4 mb-3 mb-md-0">
+                                <label class="booking-type-card" id="cardOnline" for="typeOnline">
+                                    <input type="radio" asp-for="HinhThuc" value="Online" id="typeOnline" onchange="updateBookingForm()" checked />
+                                    <div class="bk-type-ico"><i class="fa fa-video-camera"></i></div>
+                                    <h6>Khám trực tuyến</h6>
+                                    <p>Tư vấn Video Call HD 1-1 với bác sĩ tại nhà</p>
+                                    <span class="bk-pill">Phí: @Cv.Money(Model.FeeOnline)</span>
+                                </label>
+                            </div>
 
-                    <!-- Chọn Cơ Sở Phòng Khám (Dành cho Khám Trực Tiếp) -->
-                    <div id="clinicSection" class="p-3 bg-light rounded mb-3" style="display: none;">
-                        <label class="font-weight-bold small text-dark mb-1"><i class="fa fa-map-marker text-danger"></i> Chọn cơ sở phòng khám tiếp nhận:</label>
-                        <select asp-for="ClinicId" asp-items="Model.Clinics" class="form-control">
-                            <option value="">-- Vui lòng chọn cơ sở phòng khám --</option>
-                        </select>
-                        <span asp-validation-for="ClinicId" class="text-danger small"></span>
-                        <div class="small text-muted mt-1">Khi khám trực tiếp, bạn đặt cọc 30% để bệnh viện giữ chỗ khung giờ với bác sĩ. Số tiền còn lại sẽ thanh toán tại quầy khi đến khám.</div>
-                    </div>
+                            <!-- Khám trực tiếp -->
+                            <div class="col-md-4 mb-3 mb-md-0">
+                                <label class="booking-type-card" id="cardOffline" for="typeOffline">
+                                    <input type="radio" asp-for="HinhThuc" value="Offline" id="typeOffline" onchange="updateBookingForm()" />
+                                    <div class="bk-type-ico bk-type-ico--navy"><i class="fa fa-hospital-o"></i></div>
+                                    <h6>Khám trực tiếp</h6>
+                                    <p>Đến khám tại phòng khám của bệnh viện</p>
+                                    <span class="bk-pill">Cọc 30%: @Cv.Money(Model.FeeOffline)</span>
+                                </label>
+                            </div>
 
-                    <!-- Phân Loại Cấp Cứu Triage 1 - 3 (Dành cho Cấp Cứu) -->
-                    <div id="emergencySection" class="p-3 border border-danger rounded mb-3 bg-white" style="display: none;">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <label class="font-weight-bold text-danger mb-0"><i class="fa fa-heartbeat"></i> Phân loại mức độ khẩn cấp (Triage 1-3):</label>
-                            <a href="tel:115" class="btn btn-danger btn-sm font-weight-bold"><i class="fa fa-phone"></i> Gọi 115 ngay</a>
+                            <!-- Cấp cứu -->
+                            <div class="col-md-4">
+                                <label class="booking-type-card bk-danger" id="cardEmergency" for="typeEmergency">
+                                    <input type="radio" asp-for="HinhThuc" value="Cấp cứu" id="typeEmergency" onchange="updateBookingForm()" />
+                                    <div class="bk-type-ico bk-type-ico--danger"><i class="fa fa-ambulance"></i></div>
+                                    <h6>Cấp cứu</h6>
+                                    <p>Khẩn cấp 24/7, điều phối xe cứu thương</p>
+                                    <span class="bk-pill bk-pill--danger">Miễn phí đặt trước</span>
+                                </label>
+                            </div>
+                        </div>
+                        <span asp-validation-for="HinhThuc" class="text-danger small"></span>
+
+                        <!-- Cơ sở phòng khám (khám trực tiếp) -->
+                        <div id="clinicSection" class="bk-note" style="display: none;">
+                            <label><i class="fa fa-map-marker" style="color:#d32f2f"></i> Chọn cơ sở phòng khám tiếp nhận:</label>
+                            <select asp-for="ClinicId" asp-items="Model.Clinics" class="form-control">
+                                <option value="">-- Vui lòng chọn cơ sở phòng khám --</option>
+                            </select>
+                            <span asp-validation-for="ClinicId" class="text-danger small"></span>
+                            <div class="bk-hint">Khi khám trực tiếp, bạn đặt cọc 30% để bệnh viện giữ chỗ khung giờ với bác sĩ. Số tiền còn lại sẽ thanh toán tại quầy khi đến khám.</div>
                         </div>
 
-                        <label class="triage-card triage-1" for="t1">
-                            <input type="radio" asp-for="MucDoKhanCap" value="1" id="t1" class="mr-3" />
-                            <div class="flex-grow-1">
-                                <b class="text-danger">Mức 1 - Nguy kịch (Cực kỳ khẩn cấp)</b>
-                                <div class="small text-muted">Ngừng tim, ngừng thở, mất tri giác, khó thở dữ dội, nghi ngờ đột quỵ não</div>
+                        <!-- Phân loại cấp cứu (Triage 1-3) -->
+                        <div id="emergencySection" class="bk-emergency" style="display: none;">
+                            <div class="bk-emergency-head">
+                                <label><i class="fa fa-heartbeat"></i> Phân loại mức độ khẩn cấp (Triage 1-3):</label>
+                                <a href="tel:115" class="bk-btn bk-btn--danger bk-btn--sm"><i class="fa fa-phone"></i> Gọi 115 ngay</a>
                             </div>
-                            <span class="badge badge-danger">Đỏ</span>
-                        </label>
 
-                        <label class="triage-card triage-2" for="t2">
-                            <input type="radio" asp-for="MucDoKhanCap" value="2" id="t2" class="mr-3" />
-                            <div class="flex-grow-1">
-                                <b class="text-warning text-dark">Mức 2 - Ưu tiên khẩn cấp</b>
-                                <div class="small text-muted">Đau bụng cấp dữ dội, sốt cao co giật, vết thương chảy máu, chấn thương</div>
-                            </div>
-                            <span class="badge badge-warning text-dark">Vàng</span>
-                        </label>
+                            <label class="triage-card triage-1" for="t1">
+                                <input type="radio" asp-for="MucDoKhanCap" value="1" id="t1" />
+                                <div class="flex-grow-1">
+                                    <b style="color:#d32f2f">Mức 1 - Nguy kịch (Cực kỳ khẩn cấp)</b>
+                                    <div class="small text-muted">Ngừng tim, ngừng thở, mất tri giác, khó thở dữ dội, nghi ngờ đột quỵ não</div>
+                                </div>
+                                <span class="triage-tag">Đỏ</span>
+                            </label>
 
-                        <label class="triage-card triage-3" for="t3">
-                            <input type="radio" asp-for="MucDoKhanCap" value="3" id="t3" class="mr-3" />
-                            <div class="flex-grow-1">
-                                <b class="text-success">Mức 3 - Cần xử lý sớm</b>
-                                <div class="small text-muted">Triệu chứng cấp tính nhưng dấu hiệu sinh tồn còn ổn định</div>
-                            </div>
-                            <span class="badge badge-success">Xanh lá</span>
-                        </label>
-                        <span asp-validation-for="MucDoKhanCap" class="text-danger small"></span>
+                            <label class="triage-card triage-2" for="t2">
+                                <input type="radio" asp-for="MucDoKhanCap" value="2" id="t2" />
+                                <div class="flex-grow-1">
+                                    <b style="color:#8a6100">Mức 2 - Ưu tiên khẩn cấp</b>
+                                    <div class="small text-muted">Đau bụng cấp dữ dội, sốt cao co giật, vết thương chảy máu, chấn thương</div>
+                                </div>
+                                <span class="triage-tag">Vàng</span>
+                            </label>
 
-                        <div class="mt-3">
-                            <div class="d-flex justify-content-between align-items-center mb-1">
-                                <label class="small font-weight-bold text-dark mb-0">Vị trí hiện tại của bạn để điều phối xe cứu thương:</label>
-                                <button type="button" class="btn btn-outline-primary btn-sm py-0 px-2" onclick="getLocation()" style="font-size:11px;">
-                                    <i class="fa fa-crosshairs"></i> Lấy vị trí GPS tự động
-                                </button>
+                            <label class="triage-card triage-3" for="t3">
+                                <input type="radio" asp-for="MucDoKhanCap" value="3" id="t3" />
+                                <div class="flex-grow-1">
+                                    <b style="color:#1f9d68">Mức 3 - Cần xử lý sớm</b>
+                                    <div class="small text-muted">Triệu chứng cấp tính nhưng dấu hiệu sinh tồn còn ổn định</div>
+                                </div>
+                                <span class="triage-tag">Xanh lá</span>
+                            </label>
+                            <span asp-validation-for="MucDoKhanCap" class="text-danger small"></span>
+
+                            <div class="mt-3">
+                                <div class="d-flex justify-content-between align-items-center flex-wrap mb-2" style="gap:8px">
+                                    <label class="bk-label mb-0">Vị trí hiện tại của bạn để điều phối xe cứu thương:</label>
+                                    <button type="button" class="bk-btn bk-btn--ghost bk-btn--sm" onclick="getLocation()">
+                                        <i class="fa fa-crosshairs"></i> Lấy vị trí GPS tự động
+                                    </button>
+                                </div>
+                                <input asp-for="ViTriKhanCap" id="locationInput" class="form-control" placeholder="Nhập số nhà, tên đường, phường/xã..." />
+                                <span asp-validation-for="ViTriKhanCap" class="text-danger small"></span>
                             </div>
-                            <input asp-for="ViTriKhanCap" id="locationInput" class="form-control" placeholder="Nhập số nhà, tên đường, phường/xã..." />
-                            <span asp-validation-for="ViTriKhanCap" class="text-danger small"></span>
                         </div>
                     </div>
                 </div>
 
-                <!-- BƯỚC 3: MÔ TẢ TRIỆU CHỨNG & FILE ĐÍNH KÈM -->
-                <div class="card border-0 shadow-sm rounded-lg p-4 bg-white mb-4">
-                    <h6 class="font-weight-bold text-dark mb-3 border-bottom pb-2">
-                        <span class="booking-step-badge">3</span> Mô Tả Triệu Chứng &amp; Tệp Đính Kèm
-                    </h6>
-
-                    <!-- Gợi ý triệu chứng nhanh -->
-                    <div class="mb-2">
-                        <label class="small font-weight-bold text-muted mb-1">Chọn nhanh triệu chứng thường gặp:</label>
-                        <div>
-                            <span class="symptom-chip" onclick="addSymptom('Sốt cao liên tục')">+ Sốt cao liên tục</span>
-                            <span class="symptom-chip" onclick="addSymptom('Ho khan, đau họng')">+ Ho khan, đau họng</span>
-                            <span class="symptom-chip" onclick="addSymptom('Khó thở, tức ngực')">+ Khó thở, tức ngực</span>
-                            <span class="symptom-chip" onclick="addSymptom('Đau đầu, chóng mặt')">+ Đau đầu, chóng mặt</span>
-                            <span class="symptom-chip" onclick="addSymptom('Đau bụng âm ỉ')">+ Đau bụng âm ỉ</span>
-                            <span class="symptom-chip" onclick="addSymptom('Mẩn ngứa, dị ứng da')">+ Mẩn ngứa, dị ứng da</span>
-                            <span class="symptom-chip" onclick="addSymptom('Mất ngủ kéo dài')">+ Mất ngủ kéo dài</span>
+                <!-- BƯỚC 3: TRIỆU CHỨNG & TỆP ĐÍNH KÈM -->
+                <div class="bk-card">
+                    <div class="bk-card-head">
+                        <span class="bk-step">3</span>
+                        <h6>Mô tả triệu chứng &amp; tệp đính kèm</h6>
+                    </div>
+                    <div class="bk-card-body">
+                        <div class="mb-2">
+                            <label class="bk-label">Chọn nhanh triệu chứng thường gặp:</label>
+                            <div>
+                                <span class="symptom-chip" onclick="addSymptom('Sốt cao liên tục')">+ Sốt cao liên tục</span>
+                                <span class="symptom-chip" onclick="addSymptom('Ho khan, đau họng')">+ Ho khan, đau họng</span>
+                                <span class="symptom-chip" onclick="addSymptom('Khó thở, tức ngực')">+ Khó thở, tức ngực</span>
+                                <span class="symptom-chip" onclick="addSymptom('Đau đầu, chóng mặt')">+ Đau đầu, chóng mặt</span>
+                                <span class="symptom-chip" onclick="addSymptom('Đau bụng âm ỉ')">+ Đau bụng âm ỉ</span>
+                                <span class="symptom-chip" onclick="addSymptom('Mẩn ngứa, dị ứng da')">+ Mẩn ngứa, dị ứng da</span>
+                                <span class="symptom-chip" onclick="addSymptom('Mất ngủ kéo dài')">+ Mất ngủ kéo dài</span>
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="form-group mb-3">
-                        <label class="small font-weight-bold text-dark">Lý do khám / Chi tiết tình trạng sức khỏe <span class="text-danger">*</span>:</label>
-                        <textarea asp-for="LyDo" id="lyDoArea" class="form-control" rows="4" placeholder="Mô tả cụ thể triệu chứng của bạn, bắt đầu từ khi nào, đã dùng thuốc gì chưa..."></textarea>
-                        <span asp-validation-for="LyDo" class="text-danger small"></span>
-                    </div>
+                        <div class="form-group mb-3">
+                            <label class="bk-label">Lý do khám / Chi tiết tình trạng sức khỏe <span class="text-danger">*</span></label>
+                            <textarea asp-for="LyDo" id="lyDoArea" class="form-control" rows="4" placeholder="Mô tả cụ thể triệu chứng của bạn, bắt đầu từ khi nào, đã dùng thuốc gì chưa..."></textarea>
+                            <span asp-validation-for="LyDo" class="text-danger small"></span>
+                        </div>
 
-                    <!-- Tệp đính kèm -->
-                    <div class="form-group mb-3">
-                        <label class="small font-weight-bold text-dark">
-                            <i class="fa fa-paperclip text-muted"></i> Tệp đính kèm (ảnh chụp triệu chứng, kết quả xét nghiệm, đơn thuốc cũ):
-                        </label>
-                        <input asp-for="Files" type="file" class="form-control-file border p-2 rounded" multiple accept=".jpg,.jpeg,.png,.pdf" onchange="previewFiles(this)" />
-                        <small class="text-muted d-block mt-1">Định dạng hỗ trợ: .jpg, .png, .pdf (Tối đa 5MB/tệp).</small>
-                        <div id="filePreviewList" class="mt-2 row"></div>
+                        <div class="form-group mb-0">
+                            <label class="bk-label">
+                                <i class="fa fa-paperclip text-muted"></i> Tệp đính kèm (ảnh chụp triệu chứng, kết quả xét nghiệm, đơn thuốc cũ)
+                            </label>
+                            <input asp-for="Files" type="file" class="bk-file" multiple accept=".jpg,.jpeg,.png,.pdf" onchange="previewFiles(this)" />
+                            <small class="text-muted d-block mt-2">Định dạng hỗ trợ: .jpg, .png, .pdf (Tối đa 5MB/tệp).</small>
+                            <div id="filePreviewList" class="mt-2 row"></div>
+                        </div>
                     </div>
                 </div>
 
-                <!-- BƯỚC 4: TỔNG KẾT CHI PHÍ & XÁC NHẬN -->
-                <div class="card border-0 shadow-sm rounded-lg p-4 bg-white">
-                    <h6 class="font-weight-bold text-dark mb-3 border-bottom pb-2">
-                        <span class="booking-step-badge">4</span> Dự Toán Chi Phí &amp; Xác Nhận
-                    </h6>
-
-                    <div class="cost-box mb-3">
-                        <div class="d-flex justify-content-between mb-2">
-                            <span class="text-muted">Giá niêm yết khám chuyên khoa:</span>
-                            <span class="font-weight-bold">@Cv.Money(Model.FeeOnline)</span>
-                        </div>
-                        <div class="d-flex justify-content-between mb-2" id="depositRow">
-                            <span class="text-muted" id="depositLabel">Tỷ lệ thanh toán trước:</span>
-                            <span class="text-primary font-weight-bold" id="depositValue">100% (Khám Online)</span>
-                        </div>
-                        <hr class="my-2" />
-                        <div class="d-flex justify-content-between align-items-center">
-                            <span class="font-weight-bold text-dark" style="font-size:16px;">Số tiền cần thanh toán ngay:</span>
-                            <h4 class="font-weight-bold text-success mb-0" id="totalAmount">@Cv.Money(Model.FeeOnline)</h4>
-                        </div>
+                <!-- BƯỚC 4: CHI PHÍ & XÁC NHẬN -->
+                <div class="bk-card" style="margin-bottom:0">
+                    <div class="bk-card-head">
+                        <span class="bk-step">4</span>
+                        <h6>Dự toán chi phí &amp; xác nhận</h6>
                     </div>
+                    <div class="bk-card-body">
+                        <div class="cost-box">
+                            <div class="bk-cost-row">
+                                <span>Giá niêm yết khám chuyên khoa:</span>
+                                <b>@Cv.Money(Model.FeeOnline)</b>
+                            </div>
+                            <div class="bk-cost-row" id="depositRow">
+                                <span id="depositLabel">Tỷ lệ thanh toán trước:</span>
+                                <span class="bk-pay-mode" id="depositValue">100% (Khám Online)</span>
+                            </div>
+                            <div class="bk-cost-total">
+                                <span>Số tiền cần thanh toán ngay:</span>
+                                <h4 id="totalAmount">@Cv.Money(Model.FeeOnline)</h4>
+                            </div>
+                        </div>
 
-                    <div class="form-check mb-3 small text-muted">
-                        <input class="form-check-input" type="checkbox" id="agreeTerms" checked required />
-                        <label class="form-check-label" for="agreeTerms">
-                            Tôi cam kết thông tin triệu chứng trên là hoàn toàn chính xác và đồng ý với <a href="#" class="text-success">chính sách đặt lịch y tế</a> của Telehealth.
-                        </label>
-                    </div>
+                        <div class="form-check bk-agree">
+                            <input class="form-check-input" type="checkbox" id="agreeTerms" checked required />
+                            <label class="form-check-label" for="agreeTerms">
+                                Tôi cam kết thông tin triệu chứng trên là hoàn toàn chính xác và đồng ý với <a href="#">chính sách đặt lịch y tế</a> của Telehealth.
+                            </label>
+                        </div>
 
-                    <div class="d-flex justify-content-between align-items-center">
-                        <a asp-controller="Doctors" asp-action="Index" class="btn btn-outline-secondary">
-                            &larr; Hủy &amp; Quay lại
-                        </a>
-                        <button type="submit" class="btn btn-success btn-lg px-4 font-weight-bold shadow">
-                            Tiếp tục thanh toán &rarr;
-                        </button>
+                        <div class="bk-actions">
+                            <a asp-controller="Doctors" asp-action="Index" class="bk-btn bk-btn--ghost">
+                                &larr; Hủy &amp; Quay lại
+                            </a>
+                            <button type="submit" class="bk-btn">
+                                Tiếp tục thanh toán &rarr;
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -402,7 +514,7 @@
                     var file = input.files[i];
                     var col = document.createElement('div');
                     col.className = 'col-sm-4 mb-2';
-                    col.innerHTML = '<div class="p-2 border rounded bg-light small text-truncate"><i class="fa fa-file text-success mr-1"></i> ' + file.name + ' (' + (file.size / 1024).toFixed(0) + ' KB)</div>';
+                    col.innerHTML = '<div class="bk-file-item text-truncate"><i class="fa fa-file" style="color:#1a78c2"></i> ' + file.name + ' (' + (file.size / 1024).toFixed(0) + ' KB)</div>';
                     preview.appendChild(col);
                 }
             }

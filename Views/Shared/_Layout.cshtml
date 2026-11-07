@@ -157,7 +157,7 @@
             /* Modern Badges & Buttons */
             .badge-soft-success {
                 background: #e8f5e9;
-                color: #2e7d32;
+                color: #0277bd;
                 font-weight: 600;
                 border: 1px solid #c8e6c9;
             }
@@ -297,6 +297,58 @@
                                 margin-right: 5px;
                             }
             }
+
+            /* ===== Footer: đổi từ xanh lá sang xanh blue (đồng bộ giao diện) ===== */
+            .footer-area {
+                background-image: radial-gradient(rgba(255,255,255,.07) 1px, transparent 1px),
+                                  linear-gradient(135deg, #0f2557 0%, #1a4290 60%, #1b63d6 100%) !important;
+                background-size: 16px 16px, 100% 100% !important;
+                background-color: #0f2557 !important;
+            }
+
+                .footer-area::before, .footer-area::after,
+                .footer-area .main-footer-area::before, .footer-area .main-footer-area::after {
+                    background: none !important;
+                }
+
+                .footer-area .main-footer-area, .footer-area .footer-bottom-area {
+                    background: transparent !important;
+                }
+
+                .footer-area p, .footer-area li, .footer-area .copywrite-text p {
+                    color: rgba(255,255,255,.82);
+                }
+
+                .footer-area .widget-title h5 {
+                    color: #fff;
+                    letter-spacing: .6px;
+                }
+
+                .footer-area a {
+                    color: rgba(255,255,255,.82);
+                    transition: color .2s;
+                }
+
+                    .footer-area a:hover, .footer-area a:focus {
+                        color: #9cc7ff !important;
+                    }
+
+                .footer-area .contact-information p span {
+                    color: #9cc7ff !important;
+                    font-weight: 600;
+                }
+
+                .footer-area .social-info a {
+                    color: #fff;
+                }
+
+                    .footer-area .social-info a:hover {
+                        color: #9cc7ff !important;
+                    }
+
+                .footer-area .border-line {
+                    background: rgba(255,255,255,.18) !important;
+                }
     </style>
 </head>
 

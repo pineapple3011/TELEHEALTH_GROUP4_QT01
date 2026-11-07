@@ -24,325 +24,213 @@
 }
 
 <style>
-    .dd-card {
-        border: 1px solid #e9ecef;
-        border-radius: 14px;
-        background: #fff;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+    /* ===== Bảng màu xanh blue (nhạt -> đậm), đồng bộ với trang quản trị ===== */
+    .dd-page {
+        --dd-navy: #0f2557;
+        --dd-ink: #12264d;
+        --dd-blue: #1b63d6;
+        --dd-blue-dark: #1553b8;
+        --dd-sky: #e3edfa;
+        --dd-mist: #f4f8fe;
+        --dd-line: #dbe5f3;
+        --dd-muted: #5f6f89;
+        color: var(--dd-ink);
+        font-size: 15px;
     }
 
-    .dd-profile {
-        padding: 25px;
+    .dd-back { display: inline-block; margin-bottom: 14px; font-weight: 600; color: var(--dd-blue); text-decoration: none; }
+    .dd-back:hover { color: var(--dd-navy); text-decoration: underline; }
+
+    /* ===== Banner đầu trang ===== */
+    .dd-hero {
+        display: flex; align-items: center; gap: 24px;
+        padding: 28px 32px; margin-bottom: 22px; color: #fff; border-radius: 16px;
+        background-color: var(--dd-navy);
+        background-image: radial-gradient(rgba(255,255,255,.10) 1px, transparent 1px),
+                          linear-gradient(100deg, #0f2557 0%, #1a4290 55%, #2f78dc 100%);
+        background-size: 16px 16px, 100% 100%;
+        box-shadow: 0 10px 28px rgba(15,37,87,.18);
     }
+    .dd-hero-avatar { width: 104px; height: 120px; border-radius: 16px; object-fit: cover; flex-shrink: 0; border: 3px solid rgba(255,255,255,.35); background: #1b4fa8; }
+    .dd-hero-ph { display: flex; align-items: center; justify-content: center; font-size: 38px; font-weight: 700; color: #fff; }
+    .dd-eyebrow { display: inline-block; padding: 3px 12px; margin-bottom: 8px; border-radius: 999px; background: rgba(255,255,255,.16); font-size: 12px; font-weight: 700; letter-spacing: .6px; text-transform: uppercase; }
+    .dd-hero h1 { margin: 0 0 6px; color: #fff; font-size: 30px; font-weight: 800; line-height: 1.25; }
+    .dd-hero p { margin: 0; color: rgba(255,255,255,.9); font-size: 16px; }
+    .dd-hero p b { color: #fff; }
 
-    .dd-booking {
-        padding: 25px;
+    /* ===== Khối nội dung: tiêu đề xanh nhạt, vạch xanh bên trái ===== */
+    .dd-card { background: #fff; border: 1px solid var(--dd-line); border-radius: 14px; overflow: hidden; box-shadow: 0 4px 16px rgba(15,37,87,.04); }
+    .dd-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 14px 22px; background: var(--dd-sky); border-bottom: 1px solid var(--dd-line); }
+    .dd-head h2 { margin: 0; padding-left: 12px; border-left: 4px solid var(--dd-blue); font-size: 14.5px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase; color: var(--dd-ink); line-height: 1.3; }
+    .dd-body { padding: 22px; }
+
+    .dd-kv { display: flex; justify-content: space-between; gap: 16px; padding: 12px 0; border-bottom: 1px solid #e9eff8; }
+    .dd-kv:first-child { padding-top: 0; }
+    .dd-kv:last-child { border-bottom: 0; }
+    .dd-kv .k { color: var(--dd-muted); flex-shrink: 0; }
+    .dd-kv .v { font-weight: 700; color: var(--dd-ink); text-align: right; }
+    .dd-kv .v.fee { color: var(--dd-blue); font-size: 17px; }
+
+    .dd-sub { margin: 20px 0 10px; padding-left: 10px; border-left: 3px solid var(--dd-blue); font-size: 13px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase; }
+    .dd-bio { padding: 14px 16px; border-radius: 10px; background: var(--dd-mist); color: #3d4d68; line-height: 1.65; font-size: 14.5px; }
+    .dd-hint { margin: 0 0 18px; color: var(--dd-muted); font-size: 14px; }
+
+    /* ===== Lịch chọn ngày ===== */
+    .cal-wrap { border: 1px solid var(--dd-line); border-radius: 14px; padding: 16px; background: #fff; }
+    .cal-head { display: flex; align-items: center; justify-content: space-between; padding-bottom: 12px; margin-bottom: 10px; border-bottom: 1px solid #e9eff8; font-weight: 700; font-size: 16px; color: var(--dd-ink); }
+    .cal-nav { display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; padding: 0; border: 0; border-radius: 50%; background: var(--dd-sky); color: var(--dd-blue); font-size: 22px; line-height: 1; cursor: pointer; transition: background .2s, color .2s; }
+    .cal-nav:hover:not(:disabled) { background: var(--dd-blue); color: #fff; }
+    .cal-nav:disabled { color: #b4c3dc; cursor: default; }
+    .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; text-align: center; }
+    .cal-dow { padding: 6px 0; margin-bottom: 4px; border-bottom: 1px solid #e9eff8; font-size: 12.5px; font-weight: 700; color: var(--dd-muted); }
+    .cal-cell { position: relative; height: 48px; padding: 0; border: 2px solid transparent; border-radius: 10px; background: transparent; font-size: 15px; transition: all .15s; }
+    .cal-empty { visibility: hidden; }
+    .cal-off, .cal-full { color: #b4c0d4; cursor: not-allowed; }
+    .cal-full { text-decoration: line-through; }
+    .cal-on { background: var(--dd-mist); color: var(--dd-ink); font-weight: 700; cursor: pointer; }
+    .cal-on:hover { background: var(--dd-sky); border-color: var(--dd-blue); }
+    .cal-on i { position: absolute; left: 50%; bottom: 5px; width: 6px; height: 6px; margin-left: -3px; border-radius: 50%; background: var(--dd-blue); }
+    .cal-today { box-shadow: inset 0 0 0 1px var(--dd-blue); }
+    .cal-sel, .cal-sel:hover { border-color: var(--dd-blue); background: var(--dd-blue); color: #fff !important; }
+    .cal-sel i { background: #fff !important; }
+    .cal-legend { display: flex; justify-content: space-between; align-items: center; margin-top: 14px; padding-top: 10px; border-top: 1px solid #e9eff8; font-size: 13px; color: var(--dd-muted); }
+    .cal-legend .dot { display: inline-block; width: 8px; height: 8px; margin-right: 6px; border-radius: 50%; }
+
+    /* ===== Khung giờ ===== */
+    .dd-slots-panel { height: 100%; display: flex; flex-direction: column; padding: 18px; border: 1px solid var(--dd-line); border-radius: 14px; background: var(--dd-mist); }
+    .dd-slots-panel h3 { margin: 0 0 4px; font-size: 16px; font-weight: 700; color: var(--dd-ink); }
+    .dd-slots-panel .desc { margin: 0 0 14px; font-size: 13.5px; color: var(--dd-muted); }
+    .slot-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 10px; }
+    .slot-btn { display: block; padding: 9px 4px; border: 1px solid #c3d6f3; border-radius: 8px; background: #fff; color: var(--dd-blue-dark); font-size: 14px; font-weight: 700; text-align: center; text-decoration: none !important; transition: all .2s; }
+    .slot-btn:hover { background: var(--dd-blue); border-color: var(--dd-blue); color: #fff; }
+    .slot-btn.selected { background: var(--dd-navy); border-color: var(--dd-navy); color: #fff; box-shadow: 0 4px 10px rgba(15,37,87,.25); }
+    .shift-pill { display: inline-block; margin: 0 6px 6px 0; padding: 5px 14px; border: 1px solid #c3d6f3; border-radius: 999px; background: #fff; color: #3d4d68; font-size: 13px; font-weight: 600; cursor: pointer; transition: all .15s; }
+    .shift-pill:hover { border-color: var(--dd-blue); color: var(--dd-blue); }
+    .shift-pill.active { background: var(--dd-blue); border-color: var(--dd-blue); color: #fff; }
+    .dd-shift-title { margin: 10px 0 8px; font-size: 13px; font-weight: 700; color: var(--dd-muted); }
+
+    .dd-confirm { margin-top: 14px; padding: 14px; border: 1px solid var(--dd-blue); border-radius: 10px; background: #fff; text-align: center; }
+    .dd-confirm .lbl { margin-bottom: 2px; font-size: 13px; color: var(--dd-muted); }
+    .dd-confirm .time { margin: 0 0 10px; font-size: 20px; font-weight: 800; color: var(--dd-blue-dark); }
+    .dd-btn { display: block; padding: 11px 14px; border-radius: 8px; background: var(--dd-blue); color: #fff !important; font-size: 15px; font-weight: 700; text-align: center; text-decoration: none !important; box-shadow: 0 4px 12px rgba(27,99,214,.25); transition: background .2s; }
+    .dd-btn:hover { background: var(--dd-blue-dark); }
+    .dd-btn-outline { display: inline-block; padding: 8px 20px; border: 1px solid var(--dd-blue); border-radius: 8px; background: #fff; color: var(--dd-blue) !important; font-weight: 600; text-decoration: none !important; }
+    .dd-btn-outline:hover { background: var(--dd-sky); }
+    .dd-empty { padding: 28px 20px; border: 1px dashed #b7cbec; border-radius: 12px; background: var(--dd-mist); text-align: center; color: var(--dd-muted); }
+    .dd-empty h3 { margin: 0 0 6px; font-size: 17px; font-weight: 700; color: var(--dd-ink); }
+
+    @@media (max-width: 767px) {
+        .dd-hero { flex-direction: column; align-items: flex-start; padding: 22px 20px; }
+        .dd-hero h1 { font-size: 24px; }
     }
-
-    /* Calendar Styling */
-    .cal-wrap {
-        border: 1px solid #dfe3e8;
-        border-radius: 16px;
-        padding: 16px;
-        background: #fff;
-    }
-
-    .cal-head {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        font-weight: 700;
-        font-size: 16px;
-        color: #1a2f23;
-        padding-bottom: 12px;
-        border-bottom: 1px solid #f1f3f5;
-        margin-bottom: 10px;
-    }
-
-    .cal-nav {
-        border: 0;
-        background: #f1f3f5;
-        font-size: 20px;
-        line-height: 1;
-        width: 36px;
-        height: 36px;
-        border-radius: 50%;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: background .2s;
-    }
-
-        .cal-nav:hover:not(:disabled) {
-            background: #0056b3;
-            color: #fff;
-        }
-
-        .cal-nav:disabled {
-            color: #c3c8ce;
-            cursor: default;
-        }
-
-    .cal-grid {
-        display: grid;
-        grid-template-columns: repeat(7, 1fr);
-        gap: 5px;
-        text-align: center;
-    }
-
-    .cal-dow {
-        font-size: 12px;
-        font-weight: 700;
-        color: #6c757d;
-        padding: 6px 0;
-        border-bottom: 1px solid #eceff2;
-        margin-bottom: 4px;
-    }
-
-    .cal-cell {
-        position: relative;
-        height: 48px;
-        border: 2px solid transparent;
-        border-radius: 10px;
-        background: transparent;
-        font-size: 14px;
-        padding: 0;
-        transition: all .15s;
-    }
-
-    .cal-empty {
-        visibility: hidden;
-    }
-
-    .cal-off, .cal-full {
-        color: #b5bbc2;
-        cursor: not-allowed;
-    }
-
-    .cal-full {
-        text-decoration: line-through;
-    }
-
-    .cal-on {
-        color: #212529;
-        font-weight: 700;
-        cursor: pointer;
-        background: #fdfdfd;
-    }
-
-        .cal-on:hover {
-            background: #e8f5e9;
-            border-color: #2c9d8f;
-        }
-
-        .cal-on i {
-            position: absolute;
-            left: 50%;
-            bottom: 5px;
-            width: 6px;
-            height: 6px;
-            margin-left: -3px;
-            border-radius: 50%;
-            background: #0056b3;
-        }
-
-    .cal-today {
-        box-shadow: inset 0 0 0 1px #2c9d8f;
-    }
-
-    .cal-sel, .cal-sel:hover {
-        border-color: #0056b3;
-        background: #0056b3;
-        color: #fff !important;
-    }
-
-        .cal-sel i {
-            background: #fff !important;
-        }
-
-    /* Slots */
-    .slot-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
-        gap: 10px;
-    }
-
-    .slot-btn {
-        border: 1px solid #c8e6c9;
-        background: #f7fdf5;
-        color: #0056b3;
-        font-weight: 700;
-        font-size: 13px;
-        border-radius: 8px;
-        padding: 8px 4px;
-        text-align: center;
-        transition: all .2s;
-        text-decoration: none !important;
-        display: block;
-    }
-
-        .slot-btn:hover {
-            background: #2c9d8f;
-            color: #fff;
-            border-color: #0056b3;
-            transform: scale(1.04);
-        }
-
-        .slot-btn.selected {
-            background: #1a2f23;
-            color: #fff;
-            border-color: #1a2f23;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-        }
-
-    /* Shift filter pills */
-    .shift-pill {
-        border: 1px solid #dee2e6;
-        border-radius: 20px;
-        padding: 4px 12px;
-        font-size: 12px;
-        font-weight: 600;
-        color: #495057;
-        background: #fff;
-        cursor: pointer;
-        margin-right: 6px;
-        transition: all .15s;
-    }
-
-        .shift-pill.active {
-            background: #0056b3;
-            color: #fff;
-            border-color: #2c9d8f;
-        }
 </style>
 
-<div class="container my-4" style="min-height: 65vh;">
-    <!-- Breadcrumb -->
-    <div class="mb-3">
-        <a asp-action="Index" class="btn btn-link pl-0 text-success font-weight-bold">
-            <i class="fa fa-arrow-left mr-1"></i> Quay lại danh sách bác sĩ
-        </a>
+<div class="container my-4 dd-page" style="min-height: 65vh;">
+    <a asp-action="Index" class="dd-back">&larr; Quay lại danh sách bác sĩ</a>
+
+    <!-- Banner bác sĩ -->
+    <div class="dd-hero">
+        @if (!string.IsNullOrEmpty(Model.AvatarUrl))
+        {
+            <img src="@Url.Content(Model.AvatarUrl)" alt="@Model.HoTen" class="dd-hero-avatar" />
+        }
+        else
+        {
+            <div class="dd-hero-avatar dd-hero-ph">BS</div>
+        }
+        <div>
+            <span class="dd-eyebrow">Hồ sơ bác sĩ</span>
+            <h1>@Model.HoTen</h1>
+            <p>Chuyên khoa: <b>@Model.TenKhoa</b></p>
+        </div>
     </div>
 
     <div class="row">
-        <!-- CỘT TRÁI: THÔNG TIN HỒ SƠ BÁC SĨ -->
+        <!-- CỘT TRÁI: THÔNG TIN BÁC SĨ -->
         <div class="col-lg-4 mb-4">
-            <div class="dd-card dd-profile h-100">
-                <div class="text-center mb-3">
-                    @if (!string.IsNullOrEmpty(Model.AvatarUrl))
+            <div class="dd-card h-100">
+                <div class="dd-head"><h2>Thông tin bác sĩ</h2></div>
+                <div class="dd-body">
+                    <div class="dd-kv"><span class="k">Chuyên khoa</span><span class="v">@Model.TenKhoa</span></div>
+                    <div class="dd-kv"><span class="k">Kinh nghiệm</span><span class="v">@Cv.Years(Model.KinhNghiem)</span></div>
+                    <div class="dd-kv"><span class="k">Phí khám cơ bản</span><span class="v fee">@Cv.Money(Model.Fee)</span></div>
+
+                    @if (!string.IsNullOrWhiteSpace(Model.MoTa))
                     {
-                        <img src="@Url.Content(Model.AvatarUrl)" alt="@Model.HoTen" class="rounded-lg shadow-sm" style="width: 160px; height: 180px; object-fit: cover;" />
-                    }
-                    else
-                    {
-                        <div class="rounded-lg shadow-sm mx-auto d-flex align-items-center justify-content-center text-white font-weight-bold" style="width: 150px; height: 170px; background: linear-gradient(135deg,#70c745,#2c9d8f); font-size:48px;">
-                            BS
-                        </div>
+                        <div class="dd-sub">Giới thiệu</div>
+                        <div class="dd-bio">@Model.MoTa</div>
                     }
                 </div>
-
-                <div class="text-center mb-3">
-                    <h4 class="font-weight-bold text-dark mb-2">@Model.HoTen</h4>
-                    <p class="text-success font-weight-bold small mb-2"><i class="fa fa-stethoscope"></i> Chuyên khoa: @Model.TenKhoa</p>
-                </div>
-
-                <div class="p-3 bg-light rounded mb-3 small">
-                    <div class="d-flex justify-content-between mb-2">
-                        <span class="text-muted">Kinh nghiệm chuyên môn:</span>
-                        <b>@Cv.Years(Model.KinhNghiem)</b>
-                    </div>
-                    <div class="d-flex justify-content-between pt-2 border-top">
-                        <span class="text-muted">Phí khám cơ bản:</span>
-                        <b class="text-success" style="font-size:15px;">@Cv.Money(Model.Fee)</b>
-                    </div>
-                </div>
-
-                @if (!string.IsNullOrWhiteSpace(Model.MoTa))
-                {
-                    <div class="small text-muted mb-3">
-                        <i class="fa fa-quote-left text-success mr-1"></i> @Model.MoTa
-                    </div>
-                }
             </div>
         </div>
 
         <!-- CỘT PHẢI: CHỌN NGÀY VÀ KHUNG GIỜ KHÁM -->
         <div class="col-lg-8 mb-4">
-            <div class="dd-card dd-booking h-100">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <div>
-                        <h4 class="font-weight-bold text-dark mb-1">
-                            <i class="fa fa-calendar-check-o text-success mr-2"></i> Chọn Lịch Làm Việc &amp; Đặt Giờ
-                        </h4>
-                        <p class="text-muted small mb-0">Chọn ngày trên lịch, sau đó bấm vào khung giờ trống bạn muốn khám.</p>
-                    </div>
+            <div class="dd-card h-100">
+                <div class="dd-head"><h2>Chọn lịch làm việc &amp; đặt giờ</h2></div>
+                <div class="dd-body">
+                    <p class="dd-hint">Chọn ngày trên lịch, sau đó bấm vào khung giờ trống bạn muốn khám.</p>
+
+                    @if (!Model.Days.Any())
+                    {
+                        <div class="dd-empty">
+                            <h3>Bác sĩ chưa có lịch làm việc trong những ngày tới</h3>
+                            <p class="mb-3">Vui lòng quay lại sau hoặc xem các bác sĩ khác cùng chuyên khoa.</p>
+                            <a asp-action="Index" class="dd-btn-outline">Xem bác sĩ khác</a>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="row">
+                            <!-- Lịch tháng chọn ngày -->
+                            <div class="col-md-7 mb-4 mb-md-0">
+                                <div class="cal-wrap" id="cal">
+                                    <div class="cal-head">
+                                        <button type="button" class="cal-nav" id="calPrev" aria-label="Tháng trước">&#8249;</button>
+                                        <span id="calTitle"></span>
+                                        <button type="button" class="cal-nav" id="calNext" aria-label="Tháng sau">&#8250;</button>
+                                    </div>
+                                    <div class="cal-grid" id="calDow">
+                                        <div class="cal-dow">T2</div><div class="cal-dow">T3</div><div class="cal-dow">T4</div>
+                                        <div class="cal-dow">T5</div><div class="cal-dow">T6</div><div class="cal-dow">T7</div>
+                                        <div class="cal-dow">CN</div>
+                                    </div>
+                                    <div class="cal-grid" id="calGrid"></div>
+                                    <div class="cal-legend">
+                                        <span><span class="dot" style="background:#1b63d6;"></span>Có lịch trống</span>
+                                        <span><span class="dot" style="background:#d3dbe8;"></span>Hết chỗ / Nghỉ</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Khung giờ khám của ngày đã chọn -->
+                            <div class="col-md-5">
+                                <div class="dd-slots-panel">
+                                    <h3 id="selectedDateTitle">Khung giờ ngày:</h3>
+                                    <p class="desc" id="selectedDateDesc">Chọn 1 ngày để xem giờ trống</p>
+
+                                    <!-- Bộ lọc ca làm việc -->
+                                    <div class="mb-2" id="shiftFilterGroup">
+                                        <span class="shift-pill active" onclick="filterShift('all', this)">Tất cả</span>
+                                        <span class="shift-pill" onclick="filterShift('morning', this)">Sáng</span>
+                                        <span class="shift-pill" onclick="filterShift('afternoon', this)">Chiều</span>
+                                        <span class="shift-pill" onclick="filterShift('evening', this)">Tối</span>
+                                    </div>
+
+                                    <!-- Danh sách khung giờ -->
+                                    <div id="slotsContainer" class="flex-grow-1" style="max-height: 250px; overflow-y: auto;"></div>
+
+                                    <!-- Xác nhận giờ đã chọn -->
+                                    <div id="confirmBookingBox" class="dd-confirm" style="display: none;">
+                                        <div class="lbl">Khung giờ bạn đang chọn:</div>
+                                        <h5 class="time" id="selectedSlotText">09:30</h5>
+                                        <a href="#" id="btnBookSlot" class="dd-btn">Tiến hành đặt lịch khám &rarr;</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
                 </div>
-
-                @if (!Model.Days.Any())
-                {
-                    <div class="alert alert-info p-4 text-center my-4">
-                        <i class="fa fa-calendar-o" style="font-size: 40px;"></i>
-                        <h6 class="font-weight-bold mt-2">Bác sĩ chưa có lịch làm việc trong những ngày tới</h6>
-                        <p class="small text-muted mb-3">Vui lòng quay lại sau hoặc xem các bác sĩ khác cùng chuyên khoa.</p>
-                        <a asp-action="Index" class="btn btn-outline-success btn-sm">Xem bác sĩ khác</a>
-                    </div>
-                }
-                else
-                {
-                    <div class="row">
-                        <!-- Lịch Tháng Chọn Ngày -->
-                        <div class="col-md-7 mb-4">
-                            <div class="cal-wrap" id="cal">
-                                <div class="cal-head">
-                                    <button type="button" class="cal-nav" id="calPrev" aria-label="Tháng trước">&#8249;</button>
-                                    <span id="calTitle"></span>
-                                    <button type="button" class="cal-nav" id="calNext" aria-label="Tháng sau">&#8250;</button>
-                                </div>
-                                <div class="cal-grid" id="calDow">
-                                    <div class="cal-dow">T2</div><div class="cal-dow">T3</div><div class="cal-dow">T4</div>
-                                    <div class="cal-dow">T5</div><div class="cal-dow">T6</div><div class="cal-dow">T7</div>
-                                    <div class="cal-dow">CN</div>
-                                </div>
-                                <div class="cal-grid" id="calGrid"></div>
-                                <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top small text-muted">
-                                    <span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#28a745;" class="mr-1"></span> Có lịch trống</span>
-                                    <span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#dee2e6;" class="mr-1"></span> Hết chỗ / Nghỉ</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Khung Giờ Khám Của Ngày Đã Chọn -->
-                        <div class="col-md-5 mb-4">
-                            <div class="p-3 bg-light rounded h-100 d-flex flex-column">
-                                <h6 class="font-weight-bold text-dark mb-1" id="selectedDateTitle">
-                                    <i class="fa fa-clock-o text-success mr-1"></i> Khung giờ ngày:
-                                </h6>
-                                <p class="text-muted small mb-3" id="selectedDateDesc">Chọn 1 ngày để xem giờ trống</p>
-
-                                <!-- Bộ lọc Ca làm việc -->
-                                <div class="mb-3 d-flex flex-wrap" id="shiftFilterGroup">
-                                    <span class="shift-pill active" onclick="filterShift('all', this)">Tất cả</span>
-                                    <span class="shift-pill" onclick="filterShift('morning', this)">Sáng</span>
-                                    <span class="shift-pill" onclick="filterShift('afternoon', this)">Chiều</span>
-                                    <span class="shift-pill" onclick="filterShift('evening', this)">Tối</span>
-                                </div>
-
-                                <!-- Danh sách khung giờ -->
-                                <div id="slotsContainer" class="flex-grow-1" style="max-height: 250px; overflow-y: auto;"></div>
-
-                                <!-- Bảng xác nhận giờ đã chọn -->
-                                <div id="confirmBookingBox" class="mt-3 p-3 bg-white border border-success rounded text-center" style="display: none;">
-                                    <div class="small text-muted mb-1">Khung giờ bạn đang chọn:</div>
-                                    <h5 class="font-weight-bold text-success mb-2" id="selectedSlotText">09:30</h5>
-                                    <a href="#" id="btnBookSlot" class="btn btn-success btn-sm btn-block font-weight-bold shadow-sm">
-                                        Tiến hành đặt lịch khám &rarr;
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                }
             </div>
         </div>
     </div>
@@ -458,7 +346,7 @@
 
                 if (filteredSlots.length > 0) {
                     var shiftHeader = document.createElement('div');
-                    shiftHeader.className = 'small font-weight-bold text-muted mt-2 mb-2';
+                    shiftHeader.className = 'dd-shift-title';
                     shiftHeader.innerText = (shift.shift || 'Ca khám') + ' (' + shift.range + '):';
                     container.appendChild(shiftHeader);
 
@@ -484,7 +372,7 @@
             });
 
             if (totalSlotsCount === 0) {
-                container.innerHTML = '<div class="alert alert-warning small text-center my-3">Không có khung giờ nào trống trong ca này. Vui lòng chọn ca hoặc ngày khác.</div>';
+                container.innerHTML = '<div class="dd-empty my-3">Không có khung giờ nào trống trong ca này. Vui lòng chọn ca hoặc ngày khác.</div>';
             }
         }
 

@@ -6,25 +6,200 @@
     <meta name="robots" content="noindex" />
     <title>@ViewData["Title"] - TELEHEALTH</title>
     <link rel="icon" href="~/favicon.ico" />
-    <link rel="stylesheet" href="~/css/auth.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" />
+    @* Toàn bộ giao diện đăng nhập/đăng ký nằm trong khối <style> dưới đây, nên KHÔNG còn nạp auth.css (có thể xoá file đó). *@
+
+    <style>
+        :root {
+            --au-navy: #12295a;
+            --au-blue: #1a6ed8;
+            --au-blue-dark: #1558b0;
+            --au-sky: #dbe6f6;
+            --au-sky-soft: #eef4fc;
+            --au-link: #5ab0ff;
+            --au-ink: #14233f;
+            --au-text: #3b4a63;
+            --au-muted: #6b7a90;
+            --au-line: #d5deeb;
+            --au-err: #d32f2f;
+            --au-ok: #0f9d7a;
+        }
+        * { box-sizing: border-box; }
+
+        .auth-body {
+            margin: 0; min-height: 100vh; padding: 32px 20px;
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'Be Vietnam Pro', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            font-size: 14px; line-height: 1.55; color: var(--au-text); -webkit-font-smoothing: antialiased;
+            background:
+                radial-gradient(circle at 12% 8%, rgba(90,176,255,.28), transparent 38%),
+                radial-gradient(rgba(255,255,255,.07) 1.5px, transparent 1.7px) 0 0 / 24px 24px,
+                linear-gradient(135deg, #0b1836 0%, #12295a 50%, #1f5fae 100%);
+            background-attachment: fixed;
+        }
+
+        .auth-page {
+            width: 100%; max-width: 1120px; overflow: hidden;
+            background: #fff; border-radius: 18px;
+            box-shadow: 0 30px 70px rgba(5, 15, 45, .45);
+        }
+
+        /* ===== Banner đầu trang (giống banner trang bác sĩ / bệnh nhân) ===== */
+        .auth-hero {
+            color: #fff;
+            background:
+                radial-gradient(circle at 92% 20%, rgba(90,176,255,.38), transparent 42%),
+                radial-gradient(rgba(255,255,255,.13) 1.5px, transparent 1.7px) 0 0 / 22px 22px,
+                linear-gradient(110deg, #0d1b3d 0%, #173a78 55%, #1f5fae 100%);
+        }
+        .auth-nav {
+            display: flex; align-items: center; justify-content: space-between; gap: 16px;
+            padding: 20px 44px 0;
+        }
+        .auth-brand {
+            display: inline-flex; align-items: center; gap: 10px;
+            color: #fff; font-size: 16px; font-weight: 700; letter-spacing: .08em; text-decoration: none;
+        }
+        .auth-brand:hover { color: #fff; }
+        .auth-links { display: flex; align-items: center; gap: 28px; }
+        .auth-links a { color: rgba(255,255,255,.9); font-size: 14px; font-weight: 500; text-decoration: none; }
+        .auth-links a:hover { color: var(--au-link); }
+        .auth-links a:last-child {
+            padding: 7px 16px; border: 1px solid rgba(255,255,255,.55); border-radius: 8px;
+            background: rgba(255,255,255,.1);
+        }
+        .auth-links a:last-child:hover { background: rgba(255,255,255,.22); color: #fff; border-color: #fff; }
+
+        .auth-hero-title { padding: 30px 44px 34px; }
+        .auth-hero-title h1 { margin: 0 0 6px; font-size: 28px; font-weight: 700; color: #fff; letter-spacing: -.2px; }
+        .auth-crumb { font-size: 12.5px; color: rgba(255,255,255,.85); }
+        .auth-crumb a { color: inherit; text-decoration: none; }
+        .auth-crumb a:hover { text-decoration: underline; }
+        .auth-crumb i { font-style: normal; margin: 0 8px; opacity: .6; }
+
+        /* ===== Vùng chính ===== */
+        .auth-main { display: grid; grid-template-columns: minmax(320px, 46%) 1fr; }
+        .auth-form-col { padding: 40px 48px 44px; }
+        .auth-art-col {
+            position: relative; display: flex; align-items: center; justify-content: center;
+            padding: 32px; border-left: 1px solid #e3eaf5;
+            background: linear-gradient(160deg, #f4f8fe 0%, #e2ebf8 100%);
+        }
+        .auth-art-col::before {
+            content: ""; position: absolute; width: 70%; aspect-ratio: 1; border-radius: 50%;
+            background: radial-gradient(circle, rgba(26,110,216,.12), transparent 70%);
+        }
+        .auth-art-blob { position: relative; width: 100%; max-width: 520px; }
+        .auth-art-blob img { display: block; width: 100%; height: auto; }
+
+        .auth-heading {
+            margin: 0 0 26px; font-size: 20px; line-height: 1.5; font-weight: 600; color: var(--au-navy);
+        }
+
+        /* ===== Form ===== */
+        .auth-field { margin-bottom: 18px; }
+        .auth-field label { display: block; margin-bottom: 6px; font-size: 12.5px; font-weight: 600; color: var(--au-navy); }
+        .auth-field input:not([type=checkbox]):not([type=radio]),
+        .auth-field select {
+            display: block; width: 100%; min-height: 44px; padding: 10px 14px;
+            border: 1px solid var(--au-line); border-radius: 10px; background: #f9fbfe;
+            font-family: inherit; font-size: 14px; color: var(--au-ink); outline: none;
+            transition: border-color .15s, box-shadow .15s, background .15s;
+        }
+        .auth-field input[type=checkbox], .auth-field input[type=radio] { width: auto; accent-color: var(--au-blue); }
+        .auth-field input::placeholder { color: #a3afc2; font-size: 13px; }
+        .auth-field input:focus, .auth-field select:focus {
+            background: #fff; border-color: var(--au-blue); box-shadow: 0 0 0 3px rgba(26,110,216,.15);
+        }
+        .auth-field .input-validation-error { border-color: var(--au-err); }
+        .auth-field .hint { margin-top: 5px; font-size: 12px; color: var(--au-muted); }
+
+        .auth-error, .field-validation-error { display: block; margin-top: 5px; font-size: 12.5px; color: var(--au-err); }
+        .field-validation-valid { display: none; }
+
+        .auth-alert { margin-bottom: 18px; padding: 11px 16px; border: 1px solid; border-radius: 10px; font-size: 13.5px; line-height: 1.5; }
+        .auth-alert--error, .validation-summary-errors { background: #fdeceb; color: #9b1c1c; border-color: #f5c2c2; }
+        .validation-summary-errors { margin-bottom: 18px; padding: 11px 16px; border: 1px solid #f5c2c2; border-radius: 10px; font-size: 13.5px; }
+        .validation-summary-errors ul { margin: 0; padding-left: 18px; }
+        .auth-alert--ok { background: #e6f6f1; color: #0b6b52; border-color: #b6e3d4; }
+
+        .auth-btn {
+            display: block; width: 100%; margin-top: 8px; padding: 12px 24px;
+            border: 0; border-radius: 10px; background: var(--au-blue); color: #fff;
+            font-family: inherit; font-size: 14px; font-weight: 600; text-align: center; text-decoration: none; cursor: pointer;
+            box-shadow: 0 6px 16px rgba(26,110,216,.28); transition: background .15s, box-shadow .15s, transform .05s;
+        }
+        .auth-btn:hover { background: var(--au-blue-dark); color: #fff; box-shadow: 0 8px 20px rgba(26,110,216,.35); }
+        .auth-btn:active { transform: translateY(1px); }
+        .auth-btn:focus-visible { outline: 3px solid rgba(26,110,216,.35); outline-offset: 2px; }
+
+        .auth-switch { margin: 22px 0 0; font-size: 13px; color: var(--au-muted); }
+        .auth-switch a { color: var(--au-blue); font-weight: 600; text-decoration: none; }
+        .auth-switch a:hover { text-decoration: underline; }
+
+        /* ===== Trang đăng ký: form rộng hơn, 2 cột ===== */
+        .auth-main--register { grid-template-columns: minmax(400px, 58%) 1fr; }
+        .auth-main--register .auth-heading { font-size: 19px; margin-bottom: 20px; }
+        .auth-grid { display: grid; grid-template-columns: 1fr 1fr; column-gap: 22px; }
+        .auth-grid .auth-field--full { grid-column: 1 / -1; }
+
+        /* ===== Trang quyền truy cập bị từ chối ===== */
+        .auth-center { text-align: left; }
+        .auth-center p { margin: 0 0 22px; font-size: 14px; line-height: 1.65; }
+
+        /* ===== Chân trang ===== */
+        .auth-foot { padding: 16px 44px; border-top: 1px solid #edf1f7; font-size: 12.5px; color: var(--au-muted); background: #fff; }
+
+        /* ===== Responsive ===== */
+        @@media (max-width: 860px) {
+            .auth-body { padding: 0; align-items: stretch; }
+            .auth-page { border-radius: 0; box-shadow: none; }
+            .auth-nav { padding: 18px 22px 0; }
+            .auth-links { gap: 14px; }
+            .auth-links a:not(:last-child) { display: none; }
+            .auth-hero-title { padding: 24px 22px 26px; }
+            .auth-hero-title h1 { font-size: 24px; }
+            .auth-main, .auth-main--register { grid-template-columns: 1fr; }
+            .auth-art-col { display: none; }
+            .auth-form-col { padding: 28px 22px 32px; }
+            .auth-grid { grid-template-columns: 1fr; }
+            .auth-foot { padding: 14px 22px; }
+        }
+    </style>
 </head>
 <body class="auth-body">
     <div class="auth-page">
 
-        <header class="auth-nav">
-            <a class="auth-brand" asp-controller="Home" asp-action="Index">
-                <svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true">
-                    <rect width="30" height="30" rx="8" fill="#4169ff" />
-                    <rect x="12.5" y="6" width="5" height="18" rx="1.5" fill="#fff" />
-                    <rect x="6" y="12.5" width="18" height="5" rx="1.5" fill="#fff" />
-                </svg>
-                <span>TELEHEALTH</span>
-            </a>
-            <nav class="auth-links">
-                <a asp-controller="Home" asp-action="Index">Trang chủ</a>
-                <a asp-controller="Doctors" asp-action="Index">Tìm bác sĩ</a>
-                <a asp-controller="Account" asp-action="Register">Tài khoản mới</a>
-            </nav>
+        <header class="auth-hero">
+            <div class="auth-nav">
+                <a class="auth-brand" asp-controller="Home" asp-action="Index">
+                    <svg width="32" height="32" viewBox="0 0 30 30" aria-hidden="true">
+                        <defs>
+                            <linearGradient id="authLogoGrad" x1="0" y1="0" x2="1" y2="1">
+                                <stop offset="0" stop-color="#3f8fe0" />
+                                <stop offset="1" stop-color="#1a6ed8" />
+                            </linearGradient>
+                        </defs>
+                        <rect width="30" height="30" rx="8" fill="url(#authLogoGrad)" />
+                        <rect x="12.5" y="6" width="5" height="18" rx="1.5" fill="#fff" />
+                        <rect x="6" y="12.5" width="18" height="5" rx="1.5" fill="#fff" />
+                    </svg>
+                    <span>TELEHEALTH</span>
+                </a>
+                <nav class="auth-links">
+                    <a asp-controller="Home" asp-action="Index">Trang chủ</a>
+                    <a asp-controller="Doctors" asp-action="Index">Tìm bác sĩ</a>
+                    <a asp-controller="Account" asp-action="Register">Tài khoản mới</a>
+                </nav>
+            </div>
+            <div class="auth-hero-title">
+                <h1>@ViewData["Title"]</h1>
+                <div class="auth-crumb">
+                    <a asp-controller="Home" asp-action="Index">Trang chủ</a><i>/</i><span>@ViewData["Title"]</span>
+                </div>
+            </div>
         </header>
 
         <div class="auth-main @(ViewData["MainClass"] as string)">
