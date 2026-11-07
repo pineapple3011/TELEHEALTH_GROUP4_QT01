@@ -18,6 +18,18 @@ builder.Services.AddControllersWithViews(options =>
     options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
 });
 
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(c =>
+{
+    // Chỉ đưa /api/... vào tài liệu, bỏ qua các trang MVC thường (tránh lỗi và rối)
+    c.DocInclusionPredicate((_, api) =>
+        api.RelativePath?.StartsWith("api/", StringComparison.OrdinalIgnoreCase) == true);
+
+    // Tùy chọn: hiển thị phần mô tả /// <summary> trong Swagger (xem Bước 5)
+    var xml = Path.Combine(AppContext.BaseDirectory, $"{typeof(Program).Assembly.GetName().Name}.xml");
+    if (File.Exists(xml)) c.IncludeXmlComments(xml);
+});
+
 builder.Services.AddAntiforgery(options =>
 {
     options.Cookie.Name = "Telehealth.Antiforgery";
@@ -123,6 +135,12 @@ app.Use(async (context, next) =>
         "geolocation=(self)";
     await next();
 });
+
+if (app.Environment.IsDevelopment() || app.Configuration.GetValue<bool>("Swagger:Enabled"))
+{
+    app.UseSwagger();
+    app.UseSwaggerUI(o => o.DocumentTitle = "Telehealth API");
+}
 
 app.UseRouting();
 

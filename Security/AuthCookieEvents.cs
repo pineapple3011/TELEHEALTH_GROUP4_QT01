@@ -28,6 +28,26 @@ namespace TELEHEALTH_GROUP4_QT01.Security
             _cache = cache;
         }
 
+        public override Task RedirectToLogin(RedirectContext<CookieAuthenticationOptions> context)
+        {
+            if (context.Request.Path.StartsWithSegments("/api"))
+            {
+                context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                return Task.CompletedTask;
+            }
+            return base.RedirectToLogin(context);
+        }
+
+        public override Task RedirectToAccessDenied(RedirectContext<CookieAuthenticationOptions> context)
+        {
+            if (context.Request.Path.StartsWithSegments("/api"))
+            {
+                context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                return Task.CompletedTask;
+            }
+            return base.RedirectToAccessDenied(context);
+        }
+
         public override async Task ValidatePrincipal(CookieValidatePrincipalContext context)
         {
             var principal = context.Principal;
