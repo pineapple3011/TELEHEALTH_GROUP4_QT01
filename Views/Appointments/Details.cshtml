@@ -453,7 +453,6 @@
         <a asp-action="Index" class="btn btn-link pl-0 font-weight-bold" style="color:var(--ap-blue)">&larr; Quay lại danh sách lịch khám</a>
         <div class="mt-2 mt-md-0">
             <button type="button" class="btn btn-outline-secondary btn-sm mr-2" style="border-radius:8px" onclick="window.print()">In hồ sơ</button>
-            <button type="button" class="btn btn-outline-secondary btn-sm mr-2" style="border-radius:8px" onclick="downloadIcs()">Thêm vào Calendar</button>
             @if (canCancel)
             {
                 <button type="button" class="btn btn-outline-danger btn-sm" style="border-radius:8px" onclick="$('#cancelModal').modal('show')">Hủy ca khám</button>
@@ -504,12 +503,7 @@
                         Vào phòng khám video
                     </a>
                 }
-                else if (isCompleted)
-                {
-                    <button type="button" class="btn btn-outline-light font-weight-bold px-4" style="border-radius:12px" onclick="$('#rateModal').modal('show')">
-                        Đánh giá bác sĩ
-                    </button>
-                }
+                
             </div>
         </div>
     </div>
@@ -869,42 +863,6 @@
     </div>
 </div>
 
-<!-- ================= MODAL ĐÁNH GIÁ BÁC SĨ ================= -->
-<div class="modal fade tk-modal ap-font" id="rateModal" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content border-0 shadow-lg">
-            <form asp-action="Rate" method="post">
-                @Html.AntiForgeryToken()
-                <input type="hidden" name="id" value="@Model.AppointId" />
-                <div class="modal-header">
-                    <h5 class="modal-title">Đánh giá dịch vụ &amp; bác sĩ</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body p-4 text-center">
-                    <h6 class="font-weight-bold" style="color:var(--ap-navy)">Đánh giá ca khám với @Model.DoctorName</h6>
-                    <div class="my-3" style="font-size: 32px; color: #f2b01e; cursor: pointer;">
-                        <i class="fa fa-star star-btn" data-v="1"></i>
-                        <i class="fa fa-star star-btn" data-v="2"></i>
-                        <i class="fa fa-star star-btn" data-v="3"></i>
-                        <i class="fa fa-star star-btn" data-v="4"></i>
-                        <i class="fa fa-star star-btn" data-v="5"></i>
-                    </div>
-                    <input type="hidden" name="rating" id="ratingInput" value="5" />
-                    <div class="form-group text-left">
-                        <label class="small font-weight-bold">Nhận xét của bạn (tùy chọn):</label>
-                        <textarea name="comment" class="form-control" rows="3" placeholder="Bác sĩ khám thế nào? Bạn có hài lòng với phác đồ điều trị không?"></textarea>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary btn-sm px-3" style="border-radius:8px" data-dismiss="modal">Hủy</button>
-                    <button type="submit" class="btn btn-primary btn-sm px-3 font-weight-bold" style="border-radius:8px">Gửi đánh giá</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
 
 <!-- ================= MODAL HỦY LỊCH KHÁM ================= -->
 <div class="modal fade tk-modal ap-font" id="cancelModal" tabindex="-1" role="dialog" aria-hidden="true">
@@ -938,34 +896,3 @@
     </div>
 </div>
 
-@section Scripts {
-    <script>
-        function downloadIcs() {
-            var icsData = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Telehealth//Patient Portal//VI\nBEGIN:VEVENT\n" +
-                "SUMMARY:Lich Kham Benh voi @Model.DoctorName\n" +
-                "DESCRIPTION:Chuyen khoa @Model.SpecName. Hinh thuc: @Model.HinhThuc\n" +
-                "LOCATION:Telehealth\n" +
-                "STATUS:CONFIRMED\nEND:VEVENT\nEND:VCALENDAR";
-            var blob = new Blob([icsData], { type: 'text/calendar;charset=utf-8;' });
-            var link = document.createElement('a');
-            link.href = window.URL.createObjectURL(blob);
-            link.setAttribute('download', 'LichKham_@(Model.AppointId).ics');
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
-
-        $('.star-btn').click(function() {
-            var v = parseInt($(this).data('v'));
-            $('#ratingInput').val(v);
-            $('.star-btn').each(function() {
-                var cur = parseInt($(this).data('v'));
-                if (cur <= v) {
-                    $(this).removeClass('fa-star-o').addClass('fa-star');
-                } else {
-                    $(this).removeClass('fa-star').addClass('fa-star-o');
-                }
-            });
-        });
-    </script>
-}
