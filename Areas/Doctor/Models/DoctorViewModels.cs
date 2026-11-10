@@ -134,6 +134,10 @@ public class AppointmentRowVm
     public bool IsConfirmed => Status == "Đã xác nhận";
     public bool IsCompleted => Status == "Hoàn thành";
     public bool IsCancelled => Status == "Đã hủy";
+
+    // Vào phòng online: ca Online đã xác nhận + admin đã duyệt thanh toán
+    public string? RoomBlockedReason => global::TELEHEALTH_GROUP4_QT01.Helpers.PhongOnline.LyDoChan(BookingType, Status, PaymentStatus);
+    public bool CanEnterRoom => RoomBlockedReason == null;
 }
 
 public class DayPageVm

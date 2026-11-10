@@ -56,14 +56,11 @@ public class AppointmentsController : DoctorBaseController
     {
         var appt = Db.GetAppointment(DoctorId, id);
         if (appt == null) return NotFound();
-        if (appt.BookingType != "Online")
+        // Chỉ vào phòng khi ca Online đã xác nhận VÀ admin đã duyệt thanh toán
+        var blocked = appt.RoomBlockedReason;
+        if (blocked != null)
         {
-            Fail("Ca khám này không phải hình thức trực tuyến.");
-            return RedirectToAction(nameof(Details), new { id });
-        }
-        if (!appt.IsConfirmed)
-        {
-            Fail(appt.IsPending ? "Hãy xác nhận ca khám trước khi vào phòng." : "Phòng chỉ mở cho ca đã xác nhận.");
+            Fail(blocked);
             return RedirectToAction(nameof(Details), new { id });
         }
         return View(appt);

@@ -385,7 +385,14 @@
                                 {
                                     if (r.BookingType == "Online")
                                     {
-                                        <a asp-action="Room" asp-route-id="@r.AppointId" class="btn btn-sm btn-outline-primary"><i class="fa fa-video-camera"></i> Vào phòng</a>
+                                        if (r.CanEnterRoom)
+                                        {
+                                            <a asp-action="Room" asp-route-id="@r.AppointId" class="btn btn-sm btn-outline-primary"><i class="fa fa-video-camera"></i> Vào phòng</a>
+                                        }
+                                        else
+                                        {
+                                            <button type="button" class="btn btn-sm btn-outline-secondary" disabled title="@r.RoomBlockedReason" style="cursor:not-allowed"><i class="fa fa-video-camera"></i> Chờ admin duyệt</button>
+                                        }
                                     }
                                     <a asp-controller="Consultations" asp-action="Exam" asp-route-id="@r.AppointId" class="btn btn-sm btn-primary">Khám bệnh</a>
                                 }

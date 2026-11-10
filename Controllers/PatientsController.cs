@@ -36,15 +36,26 @@ namespace TELEHEALTH_GROUP4_QT01.Controllers
             bool IsOpen(Appointment c) =>
                 c.Status != TrangThaiCa.DaHuy && c.Status != TrangThaiCa.HoanThanh && Cv.D(c.AppointmentDate) >= today;
 
-            AppointmentRow ToRow(Appointment c) => new AppointmentRow
+            // Trạng thái giao dịch mới nhất của từng ca, để biết admin đã duyệt thanh toán chưa
+            var payStatus = (await _context.Payments.Where(g => myIds.Contains(g.AppointId)).ToListAsync())
+                .GroupBy(g => g.AppointId)
+                .ToDictionary(g => g.Key, g => g.OrderByDescending(x => x.PaymentId).First().Status);
+
+            AppointmentRow ToRow(Appointment c)
             {
-                AppointId = c.AppointId,
-                DateText = Cv.F(c.AppointmentDate, "dd/MM/yyyy"),
-                TimeText = Cv.F(c.AppointmentTime, "HH:mm"),
-                DoctorName = doctors.GetValueOrDefault(Cv.I(c.DoctorId), ""),
-                HinhThuc = c.BookingType ?? "",
-                TrangThai = c.Status ?? ""
-            };
+                var reason = PhongOnline.LyDoChan(c.BookingType, c.Status, payStatus.GetValueOrDefault(c.AppointId));
+                return new AppointmentRow
+                {
+                    AppointId = c.AppointId,
+                    DateText = Cv.F(c.AppointmentDate, "dd/MM/yyyy"),
+                    TimeText = Cv.F(c.AppointmentTime, "HH:mm"),
+                    DoctorName = doctors.GetValueOrDefault(Cv.I(c.DoctorId), ""),
+                    HinhThuc = c.BookingType ?? "",
+                    TrangThai = c.Status ?? "",
+                    CanJoinRoom = reason == null,
+                    RoomBlockedReason = reason
+                };
+            }
 
             var upcoming = list.Where(IsOpen)
                 .OrderBy(c => Cv.D(c.AppointmentDate)).ThenBy(c => Cv.T(c.AppointmentTime))

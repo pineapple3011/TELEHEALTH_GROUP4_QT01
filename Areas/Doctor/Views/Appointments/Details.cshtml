@@ -248,7 +248,14 @@
             }
             @if (a.IsConfirmed && a.BookingType == "Online")
             {
-                <a asp-action="Room" asp-route-id="@a.AppointId" class="btn btn-outline-primary btn-sm px-3 ml-1"><i class="fa fa-video-camera"></i> Vào phòng khám online</a>
+                if (a.CanEnterRoom)
+                {
+                    <a asp-action="Room" asp-route-id="@a.AppointId" class="btn btn-outline-primary btn-sm px-3 ml-1"><i class="fa fa-video-camera"></i> Vào phòng khám online</a>
+                }
+                else
+                {
+                    <button type="button" class="btn btn-outline-secondary btn-sm px-3 ml-1" disabled title="@a.RoomBlockedReason" style="cursor:not-allowed"><i class="fa fa-video-camera"></i> Chờ admin duyệt thanh toán</button>
+                }
             }
             @if (a.IsConfirmed)
             {

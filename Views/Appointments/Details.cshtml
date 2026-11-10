@@ -6,7 +6,7 @@
     var isCompleted = Model.TrangThai == "Hoàn thành";
     var isCancelled = Model.TrangThai == "Đã hủy";
     var canCancel = (Model.TrangThai == "Chờ xác nhận" || Model.TrangThai == "Đã xác nhận");
-    var canJoinOnline = isOnline && !isCancelled;
+    var canJoinOnline = Model.CanJoinRoom;
     var receiptFile = Model.Files.FirstOrDefault(f => f.Loai != null && (f.Loai.Contains("Biên lai") || f.Loai.Contains("receipt")));
 
     var statusText = isCompleted ? "Đã khám xong" : Model.TrangThai;
@@ -502,6 +502,13 @@
                     <a asp-action="Room" asp-route-id="@Model.AppointId" class="btn btn-light btn-lg font-weight-bold px-4" style="border-radius:12px; color:var(--ap-blue)">
                         Vào phòng khám video
                     </a>
+                }
+                else if (isOnline && !isCancelled && !isCompleted)
+                {
+                    <button type="button" class="btn btn-light btn-lg font-weight-bold px-4" disabled title="@Model.RoomBlockedReason" style="border-radius:12px; color:var(--ap-muted); cursor:not-allowed">
+                        Chờ duyệt thanh toán
+                    </button>
+                    <div class="small mt-2" style="color:rgba(255,255,255,.85)">@Model.RoomBlockedReason</div>
                 }
                 
             </div>

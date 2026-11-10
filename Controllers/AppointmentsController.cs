@@ -36,17 +36,24 @@ namespace TELEHEALTH_GROUP4_QT01.Controllers
         {
             var list = await _context.Appointments.Where(c => c.PatientId == CurrentPatientId).ToListAsync();
             var doctors = (await _context.Doctors.ToListAsync()).ToDictionary(d => d.DoctorId, d => d.FullName ?? "");
+            var payStatus = await LatestPaymentStatusAsync(list.Select(c => c.AppointId));
 
             var rows = list
                 .OrderByDescending(c => Cv.D(c.AppointmentDate)).ThenByDescending(c => Cv.T(c.AppointmentTime))
-                .Select(c => new AppointmentRow
+                .Select(c =>
                 {
-                    AppointId = c.AppointId,
-                    DateText = Cv.F(c.AppointmentDate, "dd/MM/yyyy"),
-                    TimeText = Cv.F(c.AppointmentTime, "HH:mm"),
-                    DoctorName = doctors.GetValueOrDefault(Cv.I(c.DoctorId), ""),
-                    HinhThuc = c.BookingType ?? "",
-                    TrangThai = c.Status ?? ""
+                    var reason = PhongOnline.LyDoChan(c.BookingType, c.Status, payStatus.GetValueOrDefault(c.AppointId));
+                    return new AppointmentRow
+                    {
+                        AppointId = c.AppointId,
+                        DateText = Cv.F(c.AppointmentDate, "dd/MM/yyyy"),
+                        TimeText = Cv.F(c.AppointmentTime, "HH:mm"),
+                        DoctorName = doctors.GetValueOrDefault(Cv.I(c.DoctorId), ""),
+                        HinhThuc = c.BookingType ?? "",
+                        TrangThai = c.Status ?? "",
+                        CanJoinRoom = reason == null,
+                        RoomBlockedReason = reason
+                    };
                 })
                 .ToList();
 
@@ -111,6 +118,8 @@ namespace TELEHEALTH_GROUP4_QT01.Controllers
                 Amount = Cv.M(pay?.Amount),
                 TrangThaiGiaoDich = pay?.Status ?? "",
                 CanPay = pay != null && pay.Status == TtGiaoDich.ChoThanhToan,
+                CanJoinRoom = PhongOnline.DuocVao(ca.BookingType, ca.Status, pay?.Status),
+                RoomBlockedReason = PhongOnline.LyDoChan(ca.BookingType, ca.Status, pay?.Status),
                 HasRecord = record != null,
                 // Cột chẩn đoán trong ERD ghi "Diagnonis"; thử cả hai cách viết để tránh lỗi biên dịch
                 ChanDoan = Cv.Prop(record, "Diagnosis", "Diagnonis"),
@@ -365,8 +374,15 @@ namespace TELEHEALTH_GROUP4_QT01.Controllers
             var ca = await GetOwnedAsync(id);
             if (ca == null) return NotFound();
 
-            if (ca.BookingType != HinhThucKham.Online || ca.Status == "Đã hủy")
+            // Chỉ cho vào phòng khi ca Online đã xác nhận VÀ admin đã duyệt thanh toán
+            var payStatus = (await LatestPaymentStatusAsync(new[] { id })).GetValueOrDefault(id);
+            var blocked = PhongOnline.LyDoChan(ca.BookingType, ca.Status, payStatus);
+            if (blocked != null)
+            {
+                _logger.LogWarning("Patient {PatientId} blocked from room of appointment {AppointId}: {Reason}", CurrentPatientId, id, blocked);
+                TempData["Err"] = blocked;
                 return RedirectToAction(nameof(Details), new { id });
+            }
 
             var doctor = await _context.Doctors.FindAsync(Cv.I(ca.DoctorId));
             var spec = doctor == null ? null : await _context.Specialties.FindAsync(Cv.I(doctor.SpecId));
@@ -403,6 +419,15 @@ namespace TELEHEALTH_GROUP4_QT01.Controllers
         // =====================================================================
         // HÀM PHỤ
         // =====================================================================
+        // Trạng thái giao dịch mới nhất của từng ca (ca không có giao dịch thì không có key)
+        private async Task<Dictionary<int, string>> LatestPaymentStatusAsync(IEnumerable<int> appointIds)
+        {
+            var ids = appointIds.ToList();
+            var pays = await _context.Payments.Where(p => ids.Contains(p.AppointId)).ToListAsync();
+            return pays.GroupBy(p => p.AppointId)
+                       .ToDictionary(g => g.Key, g => g.OrderByDescending(p => p.PaymentId).First().Status);
+        }
+
         private async Task<Appointment?> GetOwnedAsync(int id)
         {
             var ca = await _context.Appointments.FindAsync(id);

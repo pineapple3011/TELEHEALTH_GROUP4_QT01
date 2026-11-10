@@ -97,6 +97,10 @@ namespace TELEHEALTH_GROUP4_QT01.Models.ViewModels
         public string DoctorName { get; set; } = "";
         public string HinhThuc { get; set; } = "";
         public string TrangThai { get; set; } = "";
+
+        // Quyền vào phòng khám online (đã tính cả việc admin duyệt thanh toán)
+        public bool CanJoinRoom { get; set; }
+        public string? RoomBlockedReason { get; set; }
     }
 
     public class FileLine
@@ -132,6 +136,9 @@ namespace TELEHEALTH_GROUP4_QT01.Models.ViewModels
         public decimal Amount { get; set; }
         public string TrangThaiGiaoDich { get; set; } = "";
         public bool CanPay { get; set; }
+
+        public bool CanJoinRoom { get; set; }
+        public string? RoomBlockedReason { get; set; }
 
         public bool HasRecord { get; set; }
         public string ChanDoan { get; set; } = "";

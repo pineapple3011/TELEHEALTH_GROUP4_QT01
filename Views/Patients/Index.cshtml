@@ -517,9 +517,13 @@
                                                     {
                                                         <a asp-controller="Appointments" asp-action="Pay" asp-route-id="@r.AppointId" class="btn btn-primary btn-sm">Trả phí</a>
                                                     }
-                                                    else if (r.HinhThuc == "Online" && (r.TrangThai == "Đã xác nhận" || r.TrangThai == "Sắp diễn ra"))
+                                                    else if (r.CanJoinRoom)
                                                     {
                                                         <a asp-controller="Appointments" asp-action="Room" asp-route-id="@r.AppointId" class="btn btn-primary btn-sm">Vào khám</a>
+                                                    }
+                                                    else if (r.HinhThuc == "Online" && r.TrangThai != "Đã hủy" && r.TrangThai != "Hoàn thành")
+                                                    {
+                                                        <button type="button" class="btn btn-secondary btn-sm" disabled title="@r.RoomBlockedReason" style="cursor:not-allowed">Chờ duyệt thanh toán</button>
                                                     }
                                                     <a asp-controller="Appointments" asp-action="Details" asp-route-id="@r.AppointId" class="btn btn-outline-secondary btn-sm">Chi tiết</a>
                                                 </td>

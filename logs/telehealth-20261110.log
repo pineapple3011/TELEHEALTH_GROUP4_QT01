@@ -1,0 +1,41 @@
+2026-11-10 07:27:10.903 +07:00 [INF] AccountId=17 (Role=Admin) đăng nhập thành công
+2026-11-10 07:28:06.468 +07:00 [INF] AccountId=18 (Role=Patient) đăng nhập thành công
+2026-11-10 07:28:20.359 +07:00 [WRN] Unable to configure Browser Link script injection on the response. 
+2026-11-10 07:28:28.935 +07:00 [WRN] Unable to configure Browser Link script injection on the response. 
+2026-11-10 07:28:30.922 +07:00 [WRN] Unable to configure Browser Link script injection on the response. 
+2026-11-10 07:28:33.442 +07:00 [WRN] Unable to configure Browser Link script injection on the response. 
+2026-11-10 07:28:34.750 +07:00 [WRN] Unable to configure Browser Link script injection on the response. 
+2026-11-10 07:29:12.474 +07:00 [INF] AccountId=16 (Role=Doctor) đăng nhập thành công
+2026-11-10 07:29:39.126 +07:00 [INF] AccountId=18 (Role=Patient) đăng nhập thành công
+2026-11-10 07:29:44.895 +07:00 [WRN] Unable to configure Browser Link script injection on the response. 
+2026-11-10 07:29:49.381 +07:00 [WRN] Unable to configure Browser Link script injection on the response. 
+2026-11-10 07:30:10.006 +07:00 [INF] Patient 6 created appointment 22 (Online)
+2026-11-10 07:30:24.850 +07:00 [INF] Receipt uploaded for appointment 22, waiting for admin confirmation
+2026-11-10 07:30:39.148 +07:00 [INF] AccountId=17 (Role=Admin) đăng nhập thành công
+2026-11-10 07:30:49.807 +07:00 [INF] Admin confirmed payment 17 of appointment 22
+2026-11-10 07:30:57.713 +07:00 [INF] AccountId=18 (Role=Patient) đăng nhập thành công
+2026-11-10 07:32:17.506 +07:00 [WRN] Tài khoản AccountId=18 bị khoá tạm do đăng nhập sai nhiều lần
+2026-11-10 07:32:39.361 +07:00 [WRN] Tài khoản AccountId=16 bị khoá tạm do đăng nhập sai nhiều lần
+2026-11-10 07:33:02.670 +07:00 [INF] AccountId=12 (Role=Patient) đăng nhập thành công
+2026-11-10 07:33:22.452 +07:00 [WRN] Unable to configure Browser Link script injection on the response. 
+2026-11-10 07:33:23.977 +07:00 [WRN] Unable to configure Browser Link script injection on the response. 
+2026-11-10 07:33:29.777 +07:00 [WRN] Unable to configure Browser Link script injection on the response. 
+2026-11-10 07:33:59.590 +07:00 [INF] Patient 1 created appointment 23 (Online)
+2026-11-10 07:34:09.757 +07:00 [INF] Receipt uploaded for appointment 23, waiting for admin confirmation
+2026-11-10 07:34:32.388 +07:00 [INF] AccountId=17 (Role=Admin) đăng nhập thành công
+2026-11-10 07:34:55.006 +07:00 [WRN] Unable to configure Browser Link script injection on the response. 
+2026-11-10 07:34:55.132 +07:00 [WRN] Unable to configure Browser Link script injection on the response. 
+2026-11-10 07:34:56.874 +07:00 [WRN] Unable to configure Browser Link script injection on the response. 
+2026-11-10 07:35:21.624 +07:00 [INF] Admin confirmed payment 18 of appointment 23
+2026-11-10 07:35:32.874 +07:00 [INF] AccountId=7 (Role=Doctor) đăng nhập thành công
+2026-11-10 13:03:22.787 +07:00 [INF] AccountId=18 (Role=Patient) đăng nhập thành công
+2026-11-10 13:04:06.807 +07:00 [INF] AccountId=7 (Role=Doctor) đăng nhập thành công
+2026-11-10 13:04:23.642 +07:00 [INF] AccountId=18 (Role=Patient) đăng nhập thành công
+2026-11-10 13:04:30.236 +07:00 [WRN] Unable to configure Browser Link script injection on the response. 
+2026-11-10 13:04:36.683 +07:00 [WRN] Unable to configure Browser Link script injection on the response. 
+2026-11-10 13:04:49.138 +07:00 [INF] Patient 6 created appointment 24 (Online)
+2026-11-10 13:04:55.175 +07:00 [INF] Receipt uploaded for appointment 24, waiting for admin confirmation
+2026-11-10 13:07:15.137 +07:00 [INF] AccountId=18 (Role=Patient) đăng nhập thành công
+2026-11-10 13:07:28.702 +07:00 [INF] AccountId=17 (Role=Admin) đăng nhập thành công
+2026-11-10 13:09:04.344 +07:00 [INF] Admin confirmed payment 19 of appointment 24
+2026-11-10 13:09:24.984 +07:00 [WRN] Unable to configure Browser Link script injection on the response. 

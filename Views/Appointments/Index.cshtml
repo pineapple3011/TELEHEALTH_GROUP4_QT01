@@ -525,7 +525,8 @@
                             var isCompleted = r.TrangThai == "Hoàn thành";
                             var isCancelled = r.TrangThai == "Đã hủy";
                             var canCancel = (r.TrangThai == "Chờ xác nhận" || r.TrangThai == "Đã xác nhận");
-                            var canJoinOnline = isOnline && !isCancelled;
+                            var canJoinOnline = r.CanJoinRoom;
+                            var waitingRoom = isOnline && !isCancelled && !isCompleted && !r.CanJoinRoom;
 
                             var dataStatus = isCancelled ? "cancelled" : (isCompleted ? "completed" : (r.TrangThai == "Chờ xác nhận" ? "pending" : "upcoming"));
 
@@ -573,6 +574,10 @@
                                     @if (canJoinOnline)
                                     {
                                         <a asp-action="Room" asp-route-id="@r.AppointId" class="btn btn-primary btn-sm">Vào phòng khám</a>
+                                    }
+                                    else if (waitingRoom)
+                                    {
+                                        <button type="button" class="btn btn-secondary btn-sm" disabled title="@r.RoomBlockedReason" style="cursor:not-allowed">Chờ duyệt thanh toán</button>
                                     }
                                     <a asp-action="Details" asp-route-id="@r.AppointId" class="btn btn-outline-secondary btn-sm">Chi tiết</a>
                                     <button type="button" class="btn btn-outline-secondary btn-sm" onclick="openPrintModal('@r.AppointId', '@r.DoctorName', '@r.DateText', '@r.TimeText', '@r.HinhThuc')">In phiếu</button>
