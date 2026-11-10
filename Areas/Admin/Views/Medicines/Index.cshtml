@@ -1,0 +1,57 @@
+@model MedicineListVm
+@{ ViewData["Title"] = "Danh mục thuốc"; }
+
+<div class="ad-top">
+    <div>
+        <h1>Danh mục thuốc</h1>
+        <p>Thuốc mới nhập về cần được thêm vào đây thì bác sĩ mới chọn được khi kê đơn.</p>
+    </div>
+    <a class="ad-btn" asp-action="Create">Thêm thuốc</a>
+</div>
+
+<div class="ad-card" style="margin-bottom:16px">
+    <div class="bd">
+        <form method="get" class="ad-inline">
+            <input type="text" name="q" value="@Model.Q" class="form-control form-control-sm" style="width:280px;display:inline-block" placeholder="Tìm theo tên thuốc hoặc hoạt chất" aria-label="Tìm thuốc" />
+            <button type="submit" class="ad-btn ghost sm">Tìm</button>
+            @if (!string.IsNullOrWhiteSpace(Model.Q))
+            {
+                <a class="ad-btn ghost sm" asp-action="Index">Xóa lọc</a>
+            }
+        </form>
+    </div>
+</div>
+
+<div class="ad-card">
+    <div class="bd flush ad-scroll">
+        @if (Model.Items.Count == 0)
+        {
+            <div class="ad-empty">@(string.IsNullOrWhiteSpace(Model.Q) ? "Chưa có thuốc nào trong hệ thống." : "Không tìm thấy thuốc phù hợp.")</div>
+        }
+        else
+        {
+            <table class="ad-table">
+                <thead><tr><th>Tên thuốc</th><th>Thành phần</th><th>Hướng dẫn sử dụng</th><th class="num">Giá (đ)</th><th class="num">Đã kê</th><th></th></tr></thead>
+                <tbody>
+                @foreach (var m in Model.Items)
+                {
+                    <tr>
+                        <td>@m.Name</td>
+                        <td>@(string.IsNullOrWhiteSpace(m.Ingredient) ? "-" : m.Ingredient)</td>
+                        <td>@(string.IsNullOrWhiteSpace(m.Hds) ? "-" : m.Hds)</td>
+                        <td class="num">@m.Price.ToString("N0")</td>
+                        <td class="num">@m.UsedCount</td>
+                        <td class="act">
+                            <a class="ad-btn ghost sm" asp-action="Edit" asp-route-id="@m.MedicineId">Sửa</a>
+                            <form asp-action="Delete" asp-route-id="@m.MedicineId" method="post" class="ad-inline"
+                                  data-confirm="Xóa thuốc &quot;@m.Name&quot;?">
+                                <button type="submit" class="ad-btn danger sm">Xóa</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>

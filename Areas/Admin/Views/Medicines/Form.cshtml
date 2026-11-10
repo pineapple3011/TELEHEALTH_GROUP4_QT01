@@ -1,0 +1,37 @@
+@model MedicineFormVm
+@{ ViewData["Title"] = Model.IsNew ? "Thêm thuốc" : "Sửa thuốc"; }
+
+<div class="ad-top">
+    <div><h1>@(Model.IsNew ? "Thêm thuốc mới" : "Sửa thuốc")</h1></div>
+    <a class="ad-btn ghost" asp-action="Index">Quay lại danh sách</a>
+</div>
+
+<div class="ad-card ad-form ad-form-narrow">
+    <div class="bd">
+        <form asp-action="@(Model.IsNew ? "Create" : "Edit")" method="post">
+            <input type="hidden" asp-for="MedicineId" />
+            <div class="form-group">
+                <label asp-for="MedicineName"></label>
+                <input asp-for="MedicineName" class="form-control" />
+                <span asp-validation-for="MedicineName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Ingredient"></label>
+                <textarea asp-for="Ingredient" rows="2" class="form-control"></textarea>
+                <span asp-validation-for="Ingredient" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Hds"></label>
+                <input asp-for="Hds" class="form-control" placeholder="Ví dụ: Uống sau ăn, ngày 2 lần" />
+                <span asp-validation-for="Hds" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Price"></label>
+                <input asp-for="Price" type="number" min="0" step="any" class="form-control" style="max-width:240px" />
+                <span asp-validation-for="Price" class="text-danger"></span>
+            </div>
+            <button type="submit" class="ad-btn">@(Model.IsNew ? "Thêm thuốc" : "Lưu thay đổi")</button>
+            <a class="ad-btn ghost" asp-action="Index">Hủy</a>
+        </form>
+    </div>
+</div>

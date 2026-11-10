@@ -250,6 +250,46 @@ namespace TELEHEALTH_GROUP4_QT01.Areas.Admin.Models
         public bool IsNew => SpecId == 0;
     }
 
+    // ===== Danh mục thuốc =====
+    public class MedicineRowVm
+    {
+        public int MedicineId { get; set; }
+        public string Name { get; set; } = "";
+        public string? Ingredient { get; set; }
+        public string? Hds { get; set; }
+        public decimal Price { get; set; }
+        public int UsedCount { get; set; }   // số lần đã được kê trong đơn thuốc
+    }
+
+    public class MedicineListVm
+    {
+        public string? Q { get; set; }
+        public List<MedicineRowVm> Items { get; set; } = new();
+    }
+
+    public class MedicineFormVm
+    {
+        public int MedicineId { get; set; }
+
+        [Required(ErrorMessage = "Vui lòng nhập tên thuốc"), StringLength(150)]
+        [Display(Name = "Tên thuốc")]
+        public string MedicineName { get; set; } = "";
+
+        [StringLength(500)]
+        [Display(Name = "Thành phần / hoạt chất")]
+        public string? Ingredient { get; set; }
+
+        [StringLength(255)]
+        [Display(Name = "Hướng dẫn sử dụng")]
+        public string? Hds { get; set; }
+
+        [Range(0, 1000000000, ErrorMessage = "Giá không hợp lệ")]
+        [Display(Name = "Giá (đ)")]
+        public decimal Price { get; set; }
+
+        public bool IsNew => MedicineId == 0;
+    }
+
     public class ClinicRowVm
     {
         public int ClinicId { get; set; }
